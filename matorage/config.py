@@ -31,7 +31,7 @@ from matorage.utils import auto_attr_check
 
 @auto_attr_check
 class MTRConfig(object):
-    r""" Storage configuration classes.
+    r""" Storage connector configuration classes.
         Handles a few parameters configuration for backend storage, hdf5 and etc.
 
         Args:
