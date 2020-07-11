@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from matorage.utils import auto_attr_check
-from matorage.config import MTRConfig
+from matorage.data.config import MRTDataConfig
 
 @auto_attr_check
 class DataSaver(object):
@@ -55,13 +55,10 @@ class DataSaver(object):
         Example::
 
     """
-    config = MTRConfig
+    config = MRTDataConfig
 
     def __init__(self, config):
         self.config = config
 
     def __call__(self):
-        pass
-
-    def _check_args(self):
         pass
