@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from matorage.utils import auto_attr_check
-from matorage.data.config import MRTDataConfig
+from matorage.utils import auto_attr_check, _tf_available, _torch_available
+from matorage.data.config import DataConfig
 
 @auto_attr_check
 class DataSaver(object):
@@ -55,10 +55,16 @@ class DataSaver(object):
         Example::
 
     """
-    config = MRTDataConfig
+    config = DataConfig
 
     def __init__(self, config):
         self.config = config
 
-    def __call__(self):
-        pass
+    def __call__(self, array):
+        """
+        **`array` must be `numpy.ndarray` type with (B, *) shape **
+
+        Returns:
+            :None
+        """
+        assert isinstance()

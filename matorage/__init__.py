@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from matorage.config import MTRConfig
+from matorage.data.config import DataConfig
 
 __all__ = [
-    'MTRConfig'
+    'DataConfig'
 ]
