@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from matorage.utils import auto_attr_check
+from matorage.config import MTRConfig
+
+@auto_attr_check
 class DataSaver(object):
     r""" Dataset saver classes.
         Although it plays a similar role as `[torch.utils.data.DataLoader](https://pytorch.org/docs/stable/data.html)`
@@ -24,7 +28,7 @@ class DataSaver(object):
 
         To make the above procedure easier to understand, the following is written in the pseudo-code.
             ```python
-            file is opened
+            file is opened, if file already exist, there will be append mode.
             for data(shape : 100 x 784) in multiprocessing(dataset(shape : 60000 x 784))
                 if OBJECT_SIZE <= file size
                     file is closed
@@ -45,15 +49,16 @@ class DataSaver(object):
             MinIO is a thread safety, but during multiprocessing, you must create a new MinIO Class object for each process.
 
         Args:
-            MTRConfig (:obj:`matorage.config.MTRConfig`, `require`):
+            config (:obj:`matorage.config.MTRConfig`, `require`):
                 S3 object storage endpoint.
 
         Example::
 
     """
+    config = MTRConfig
 
-    def __init__(self, MTRConfig):
-        self.MTRConfig = MTRConfig
+    def __init__(self, config):
+        self.config = config
 
     def __call__(self):
         pass
