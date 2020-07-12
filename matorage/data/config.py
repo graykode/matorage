@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import copy
+import json
 import tables
+from minio import Minio
 
 from matorage.utils import auto_attr_check
 from matorage.config import MTRConfig
@@ -96,15 +98,20 @@ class DataConfig(MTRConfig):
         Returns:
             :obj: `None`:
         """
-        self._check_bucket(bucket_name=self.bucket_name)
+        self._check_bucket()
 
         if isinstance(self.attributes, DataAttribute):
             self.attributes = [self.attributes]
 
+        attribute_names = set()
         for attribute in self.attributes:
             if len(attribute.shape) < 2:
-                raise ValueError("Shape is 1 dimension. shape should be (Batch, *)")
-            assert isinstance(attribute.type, tables.atom.Atom)
+                raise AssertionError("Shape is 1 dimension. shape should be (Batch, *)")
+            assert isinstance(attribute.type(), tables.atom.Atom)
+            if attribute.name in attribute_names:
+                raise KeyError("{} is already exist in {}".format(attribute.name, attribute_names))
+            else:
+                attribute_names.add(attribute.name)
 
         if self.compressor['level'] < 0  or 9 < self.compressor['level']:
             raise ValueError("Compressor level is {} must be 0-9 interger".format(self.compressor['level']))
@@ -112,14 +119,21 @@ class DataConfig(MTRConfig):
             raise ValueError("compressor mode {} is not valid. select in "
                              "zlib, lzo, bzip2, blosc".format(self.compressor['lib']))
 
-    def _check_bucket(self, bucket_name):
+    def _check_bucket(self):
         """
-        Check bucket name is exist.
+        Check bucket name is exist. If not exist, create new bucket
 
         Returns:
             :obj: `None`:
         """
-        pass
+        minioClient = Minio(self.endpoint,
+                            access_key=self.access_key,
+                            secret_key=self.secret_key,
+                            secure=self.secure)
+        if not minioClient.bucket_exists(self.bucket_name):
+            minioClient.make_bucket(self.bucket_name)
+        else:
+            raise ValueError("{} {} is already exist!".format(self.dataset_name, self.additional))
 
     def _hashmap_transfer(self):
         """
@@ -128,7 +142,8 @@ class DataConfig(MTRConfig):
         Returns:
             :obj: `str`:
         """
-        pass
+        key = self.dataset_name + json.dumps(self.additional)
+        return str(hash(key) % 10**16)
 
     def _to_dict(self):
         """
