@@ -12,7 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from matorage.utils import auto_attr_check, _tf_available, _torch_available
+import os
+import uuid
+import tables as tb
+import numpy as np
+from functools import reduce
+
+from matorage.utils import auto_attr_check, is_tf_available, is_torch_available
 from matorage.data.config import DataConfig
 
 @auto_attr_check
@@ -59,6 +65,11 @@ class DataSaver(object):
 
     def __init__(self, config):
         self.config = config
+        self._driver = self._set_driver(config)
+
+        self._current = tb.open_file(self._get_name(), 'a')
+
+        self.filter = tb.Filters(**config.compressor)
 
     def __call__(self, array):
         """
@@ -67,4 +78,32 @@ class DataSaver(object):
         Returns:
             :None
         """
-        assert isinstance()
+        if is_tf_available() and not isinstance(array, np.ndarray):
+            import tensorflow as tf
+            assert isinstance(array, tf.python.framework.ops.EagerTensor), \
+                "array type is not `numpy.ndarray` nor `EagerTensor`"
+        if is_torch_available() and not isinstance(array, np.ndarray):
+            import torch
+            assert isinstance(array, torch.Tensor), \
+                "array type is not `numpy.ndarray` nor `torch.Tensor`"
+
+        assert isinstance(array, np.ndarray), "array type is not `numpy.ndarray`"
+
+        # This resape is made into a (B, *) shape.
+        # Shape is lowered to two contiguous dimensions, enabling IO operations to operate very quickly.
+        # https://www.slideshare.net/HDFEOS/caching-and-buffering-in-hdf5#25
+        array = array.reshape(-1, reduce(lambda x, y: x * y, array.shape[1:]))
+
+    def _get_name(self, length=16):
+        return "{}.h5".format(uuid.uuid4().hex[:length])
+
+    def _set_driver(self, config):
+        if config.inmemory:
+            return 'H5FD_CORE'
+        else:
+            if os.name == "posix":
+                return 'H5FD_SEC2'
+            elif os.name == "nt":
+                return 'H5FD_WINDOWS'
+            else:
+                raise ValueError("{} OS not supported!".format(os.name))
