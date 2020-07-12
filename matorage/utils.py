@@ -53,6 +53,12 @@ try:
 except (ImportError, AssertionError):
     _tf_available = False  # pylint: disable=invalid-name
 
+def is_torch_available():
+    return _torch_available
+
+def is_tf_available():
+    return _tf_available
+
 def getter_setter_gen(name, type_):
     """
     For a class decorator that could automate this with a minimum of lines.
