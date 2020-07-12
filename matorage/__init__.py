@@ -13,7 +13,41 @@
 # limitations under the License.
 
 from matorage.data.config import DataConfig
+from matorage.data.attribute import DataAttribute
+from matorage.data.saver import DataSaver
 
 __all__ = [
-    'DataConfig'
+    'DataConfig',
+    'DataAttribute',
+    'DataSaver'
 ]
+
+"""
+    We are following the same data type method as Pytables.
+    http://www.pytables.org/usersguide/libref/declarative_classes.html?highlight=int8atom#atom-sub-classes
+"""
+import tables
+
+StringAtom = tables.StringAtom
+BoolAtom = tables.BoolAtom
+
+IntAtom = tables.IntAtom
+Int8Atom = tables.Int8Atom
+Int16Atom = tables.Int16Atom
+Int32Atom = tables.Int32Atom
+Int64Atom = tables.Int64Atom
+
+UIntAtom = tables.UIntAtom
+UInt8Atom = tables.UInt8Atom
+UInt16Atom = tables.UInt16Atom
+UInt32Atom = tables.UInt32Atom
+UInt64Atom = tables.UInt64Atom
+
+FloatAtom = tables.FloatAtom
+Float32Atom = tables.Float32Atom
+Float64Atom = tables.Float64Atom
+
+ComplexAtom = tables.ComplexAtom
+Time32Atom = tables.Time32Atom
+Time64Atom = tables.Time64Atom
+EnumAtom = tables.EnumAtom
