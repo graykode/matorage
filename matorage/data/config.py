@@ -76,7 +76,7 @@ class DataConfig(MTRConfig):
 
         self.dataset_name = kwargs.pop("dataset_name", None)
         self.additional = kwargs.pop("additional", {})
-        self.attributes = kwargs.pop("attribute", None)
+        self.attributes = kwargs.pop("attributes", None)
         self.compressor = kwargs.pop("compressor", {
             "level" : 0,
             "lib" : "zlip"
