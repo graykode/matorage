@@ -69,6 +69,7 @@ class DataSaver(object):
         self.config = config
         self.filter = tb.Filters(**config.compressor)
 
+        self._filelist = []
         self._file, self._earray = self._get_newfile()
 
         self._lock = False
@@ -191,7 +192,7 @@ class DataSaver(object):
             size += array.nbytes
         return size
 
-    def _get_name(self, length=16):
+    def _create_name(self, length=16):
         return "{}.h5".format(uuid.uuid4().hex[:length])
 
     def _get_newfile(self):
@@ -207,8 +208,10 @@ class DataSaver(object):
         """
         _driver, _driver_core_backing_store = self._set_driver(self.config)
 
+        new_name = self._create_name()
+        self._filelist.append(new_name)
         file = tb.open_file(
-            self._get_name(), 'a',
+            new_name, 'a',
             driver=_driver,
             driver_core_backing_store=_driver_core_backing_store
         )
@@ -241,3 +244,7 @@ class DataSaver(object):
                 return 'H5FD_WINDOWS', True
             else:
                 raise ValueError("{} OS not supported!".format(os.name))
+
+    @property
+    def get_namelist(self):
+        return self._filelist
