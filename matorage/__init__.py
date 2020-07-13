@@ -16,18 +16,12 @@ from matorage.data.config import DataConfig
 from matorage.data.attribute import DataAttribute
 from matorage.data.saver import DataSaver
 
-__all__ = [
-    'DataConfig',
-    'DataAttribute',
-    'DataSaver'
-]
+import tables
 
 """
     We are following the same data type method as Pytables.
     http://www.pytables.org/usersguide/libref/declarative_classes.html?highlight=int8atom#atom-sub-classes
 """
-import tables
-
 StringAtom = tables.StringAtom
 BoolAtom = tables.BoolAtom
 
@@ -51,3 +45,33 @@ ComplexAtom = tables.ComplexAtom
 Time32Atom = tables.Time32Atom
 Time64Atom = tables.Time64Atom
 EnumAtom = tables.EnumAtom
+
+__all__ = [
+    'DataConfig',
+    'DataAttribute',
+    'DataSaver',
+
+    'StringAtom',
+    'BoolAtom',
+
+    'IntAtom',
+    'Int8Atom',
+    'Int16Atom',
+    'Int32Atom',
+    'Int64Atom',
+
+    'UIntAtom',
+    'UInt8Atom',
+    'UInt16Atom',
+    'UInt32Atom',
+    'UInt64Atom',
+
+    'FloatAtom',
+    'Float32Atom',
+    'Float64Atom',
+
+    'ComplexAtom',
+    'Time32Atom',
+    'Time64Atom',
+    'EnumAtom'
+]
