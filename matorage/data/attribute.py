@@ -20,10 +20,12 @@ from matorage.utils import auto_attr_check
 class DataAttribute(object):
 
     name = str
-    type = tables.atom.Atom
     shape = tuple
 
     def __init__(self, name, type, shape):
         self.name = name
         self.type = type
-        self.shape = shape
+        if isinstance(shape, int):
+            self.shape = (shape,)
+        else:
+            self.shape = shape

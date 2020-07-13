@@ -16,6 +16,7 @@ import os
 import uuid
 import tables as tb
 import numpy as np
+from time import sleep
 from functools import reduce
 
 from matorage.utils import auto_attr_check, is_tf_available, is_torch_available
@@ -29,14 +30,14 @@ class DataSaver(object):
         it will work like a `consumer-producer pattern` with the logic in the following order.
             1. We know that 60000/100=600 data will be produced because 60000 data is divided into 100.
             2. The data that builds up in production is appended to a file of unique names.
-            3. If the file size exceeds 'OBJECT_SIZE', it is uploaded to MinIO with deleted in local and the new file is written.
+            3. If the file size exceeds 'MIN_MIN_OBJECT_SIZE', it is uploaded to MinIO with deleted in local and the new file is written.
         Step3 occurs asynchronously. Therefore, while step3 is in progress, step1 and 2 are in progress.
 
         To make the above procedure easier to understand, the following is written in the pseudo-code.
             ```python
             file is opened, if file already exist, there will be append mode.
             for data(shape : 100 x 784) in multiprocessing(dataset(shape : 60000 x 784))
-                if OBJECT_SIZE <= file size
+                if MIN_MIN_OBJECT_SIZE <= file size
                     file is closed
                     lock other processes until new_file is opened
                     new_file is opened
@@ -46,7 +47,7 @@ class DataSaver(object):
                     file.append(data)
             file is closed
             ```
-        In order to prevent multiple processes entering into the 'OBJECT_SIZE E= file size' during multiprocessing,
+        In order to prevent multiple processes entering into the 'MIN_OBJECT_SIZE E= file size' during multiprocessing,
         other processes must be locked for a while until a new file is created.
 
         Note:
@@ -64,46 +65,182 @@ class DataSaver(object):
     config = DataConfig
 
     def __init__(self, config):
+
         self.config = config
-        self._driver = self._set_driver(config)
-
-        self._current = tb.open_file(self._get_name(), 'a')
-
         self.filter = tb.Filters(**config.compressor)
 
-    def __call__(self, array):
+        self._file, self._earray = self._get_newfile()
+
+        self._lock = False
+
+    def _append_all(self):
         """
-        **`array` must be `numpy.ndarray` type with (B, *) shape **
+        append all array in `name` node.
+        datas is `dict` type. key is `str`, value is `numpy.ndarray`
+        **`value` is `numpy.ndarray` type with (B, *) shape, B means batch size**
+        example:
+            {
+                'image' : np.random.rand(16, 28, 28),
+                'target' : np.random.rand(16)
+            }
 
         Returns:
             :None
         """
-        if is_tf_available() and not isinstance(array, np.ndarray):
-            import tensorflow as tf
-            assert isinstance(array, tf.python.framework.ops.EagerTensor), \
-                "array type is not `numpy.ndarray` nor `EagerTensor`"
-        if is_torch_available() and not isinstance(array, np.ndarray):
-            import torch
-            assert isinstance(array, torch.Tensor), \
-                "array type is not `numpy.ndarray` nor `torch.Tensor`"
+        array_size = self._get_array_size()
+        if self.config.max_object_size < array_size:
+            raise ValueError("appended array_size is {} large than max_object_size {}".format(
+                array_size, self.config.max_object_size
+            ))
 
-        assert isinstance(array, np.ndarray), "array type is not `numpy.ndarray`"
+        if self.config.min_object_size < self._file.get_filesize():
+            # If ProcessA and B approach this part at the same time,
+            # there may be a trace condition that creates different files.
+            while self._lock:
+                sleep(0.005)
 
-        # This resape is made into a (B, *) shape.
-        # Shape is lowered to two contiguous dimensions, enabling IO operations to operate very quickly.
-        # https://www.slideshare.net/HDFEOS/caching-and-buffering-in-hdf5#25
-        array = array.reshape(-1, reduce(lambda x, y: x * y, array.shape[1:]))
+            if not self._lock:
+                # atomic working
+                self._lock = True
+                self._file.close()
+                self._file, self._earray = self._get_newfile()
+                self._lock = False
+
+            for name, array in self._datas.items():
+                self._earray[name].append(array)
+
+        else:
+            for name, array in self._datas.items():
+                self._earray[name].append(array)
+
+    def _check_attr_name(self, name):
+        """
+        check attribute names is exist
+
+        Returns:
+            :None
+        """
+        if name not in self._earray.keys():
+            raise KeyError("attribute name {} is not exist!".format(name))
+
+    def _check_datas(self):
+        """
+        Check data dictionary
+
+        Returns:
+            :None
+        """
+        for name, array in self._data.items():
+            if len(array.shape) < 2:
+                raise AssertionError("Shape is 1 dimension. shape of {} should be (Batch, *)".format(name))
+
+        if not isinstance(self._datas, dict):
+            raise TypeError("datas shoud be dict type.", self.__call__.__doc__)
+
+        bzs = 0
+        for name, array in self._datas.items():
+            self._check_attr_name(name=name)
+
+            if is_tf_available() and not isinstance(array, np.ndarray):
+                import tensorflow as tf
+                assert isinstance(array, tf.python.framework.ops.EagerTensor), \
+                    "array type is not `numpy.ndarray` nor `EagerTensor`"
+            if is_torch_available() and not isinstance(array, np.ndarray):
+                import torch
+                assert isinstance(array, torch.Tensor), \
+                    "array type is not `numpy.ndarray` nor `torch.Tensor`"
+
+            assert isinstance(array, np.ndarray), "array type is not `numpy.ndarray`"
+
+            if bzs:
+                if bzs != array.shape[0]:
+                    raise ValueError("each datas array batch sizes are not same.")
+            else:
+                bzs = array.shape[0]
+
+            # This resape is made into a (B, *) shape.
+            # Shape is lowered to two contiguous dimensions, enabling IO operations to operate very quickly.
+            # https://www.slideshare.net/HDFEOS/caching-and-buffering-in-hdf5#25
+            self._datas[name] = array.reshape(-1, reduce(lambda x, y: x * y, array.shape[1:]))
+
+    def __call__(self, datas):
+        """
+        datas is `dict` type. key is `str`, value is `numpy.ndarray`
+        **`value` is `numpy.ndarray` type with (B, *) shape, B means batch size**
+        example:
+            {
+                'image' : np.random.rand(16, 28, 28),
+                'target' : np.random.rand(16)
+            }
+
+        Returns:
+            :None
+        """
+        self._data = datas
+
+        self._check_datas()
+
+        self._append_all()
+
+    def _get_array_size(self):
+        """
+        Get size of all array .
+
+        Returns:
+            :obj:`datas size(bytes)`
+        """
+        size = 0
+        for name, array in self._datas.items():
+            size += array.nbyte
+        return size
 
     def _get_name(self, length=16):
         return "{}.h5".format(uuid.uuid4().hex[:length])
 
+    def _get_newfile(self):
+        """
+        Get new file inode and it's attribute
+
+        Returns:
+            :obj:`tuple(tables.File, dict)`
+            second item is pytable's attribute
+            {
+                'name1' : tables.EArray, 'name2' : tables.EArray
+            }
+        """
+        _driver, _driver_core_backing_store = self._set_driver(self.config)
+
+        file = tb.open_file(
+            self._get_name(), 'a',
+            driver=_driver,
+            driver_core_backing_store=_driver_core_backing_store
+        )
+
+        # create expandable array
+        earray = {}
+        for _earray in self.config.attributes:
+            earray[_earray.name] = file.create_earray(
+                file.root, _earray.name,
+                _earray.type(),
+                shape=tuple([0]) + _earray.shape,
+                filters=self.filter
+            )
+
+        return (file, earray)
+
     def _set_driver(self, config):
+        """
+        Setting HDF5 driver type
+
+        Returns:
+            :obj:`str` : HDF5 driver type string
+        """
         if config.inmemory:
-            return 'H5FD_CORE'
+            return 'H5FD_CORE', False
         else:
             if os.name == "posix":
-                return 'H5FD_SEC2'
+                return 'H5FD_SEC2', True
             elif os.name == "nt":
-                return 'H5FD_WINDOWS'
+                return 'H5FD_WINDOWS', True
             else:
                 raise ValueError("{} OS not supported!".format(os.name))

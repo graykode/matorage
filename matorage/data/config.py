@@ -62,6 +62,11 @@ class DataConfig(MTRConfig):
                 Data compressor option, it same with [pytable's Filter](http://www.pytables.org/usersguide/libref/helper_classes.html#tables.Filters)
 
     """
+    # Requirement Arguments
+    endpoint = str
+    access_key = str
+    secret_key = str
+
     dataset_name = str
     additional = dict
     attributes = tuple
@@ -79,14 +84,14 @@ class DataConfig(MTRConfig):
         self.attributes = kwargs.pop("attributes", None)
         self.compressor = kwargs.pop("compressor", {
             "level" : 0,
-            "lib" : "zlip"
+            "lib" : "zlib"
         })
         self.bucket_name = self._hashmap_transfer()
 
         self._check_all()
 
         self._metadata = _DataMetadata(**self.__dict__)
-        self._mapper = _DataMetadata(
+        self._mapper = _DataMapper(
             dataset_name=self.dataset_name,
             bucket_name=self.bucket_name
         )
@@ -98,15 +103,14 @@ class DataConfig(MTRConfig):
         Returns:
             :obj: `None`:
         """
-        self._check_bucket()
 
+        if isinstance(self.attributes, list):
+            self.attributes = tuple(self.attributes)
         if isinstance(self.attributes, DataAttribute):
-            self.attributes = (self.attributes)
+            self.attributes = (self.attributes,)
 
         attribute_names = set()
         for attribute in self.attributes:
-            if len(attribute.shape) < 2:
-                raise AssertionError("Shape is 1 dimension. shape should be (Batch, *)")
             assert isinstance(attribute.type(), tables.atom.Atom)
             if attribute.name in attribute_names:
                 raise KeyError("{} is already exist in {}".format(attribute.name, attribute_names))
@@ -118,6 +122,8 @@ class DataConfig(MTRConfig):
         if self.compressor['lib'] not in ('zlib', 'lzo', 'bzip2', 'blosc'):
             raise ValueError("compressor mode {} is not valid. select in "
                              "zlib, lzo, bzip2, blosc".format(self.compressor['lib']))
+
+        self._check_bucket()
 
     def _check_bucket(self):
         """
