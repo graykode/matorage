@@ -140,3 +140,4 @@ cython_debug/
 .idea
 *cy.c
 test.py
+*.h5
