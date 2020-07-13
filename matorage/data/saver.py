@@ -248,3 +248,6 @@ class DataSaver(object):
     @property
     def get_namelist(self):
         return self._filelist
+
+    def disconnect(self):
+        self._file.close()
