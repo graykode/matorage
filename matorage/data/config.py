@@ -83,8 +83,8 @@ class DataConfig(MTRConfig):
         self.additional = kwargs.pop("additional", {})
         self.attributes = kwargs.pop("attributes", None)
         self.compressor = kwargs.pop("compressor", {
-            "level" : 0,
-            "lib" : "zlib"
+            "complevel" : 0,
+            "complib" : "zlib"
         })
         self.bucket_name = self._hashmap_transfer()
 
@@ -117,9 +117,9 @@ class DataConfig(MTRConfig):
             else:
                 attribute_names.add(attribute.name)
 
-        if self.compressor['level'] < 0  or 9 < self.compressor['level']:
+        if self.compressor['complevel'] < 0  or 9 < self.compressor['complevel']:
             raise ValueError("Compressor level is {} must be 0-9 interger".format(self.compressor['level']))
-        if self.compressor['lib'] not in ('zlib', 'lzo', 'bzip2', 'blosc'):
+        if self.compressor['complib'] not in ('zlib', 'lzo', 'bzip2', 'blosc'):
             raise ValueError("compressor mode {} is not valid. select in "
                              "zlib, lzo, bzip2, blosc".format(self.compressor['lib']))
 
