@@ -95,7 +95,7 @@ class DataSaver(object):
 
         if self.config.min_object_size < self._file.get_filesize():
             # If ProcessA and B approach this part at the same time,
-            # there may be a trace condition that creates different files.
+            # there may be a race condition that creates different files.
             while self._lock:
                 sleep(0.005)
 
