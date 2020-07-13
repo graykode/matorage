@@ -12,20 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import tables
-
-from matorage.utils import auto_attr_check
-
-@auto_attr_check
 class DataAttribute(object):
 
-    name = str
-    shape = tuple
-
     def __init__(self, name, type, shape):
+        assert isinstance(name, str)
+
         self.name = name
         self.type = type
         if isinstance(shape, int):
             self.shape = (shape,)
         else:
             self.shape = shape
+
+        assert isinstance(self.shape, tuple)
