@@ -27,9 +27,6 @@ _KB = 1024
 _MB = 1024 * _KB
 """The size of a Megabyte in bytes"""
 
-from matorage.utils import auto_attr_check
-
-@auto_attr_check
 class MTRConfig(object):
     r""" Storage connector configuration classes.
         Handles a few parameters configuration for backend storage, hdf5 and etc.
@@ -65,11 +62,6 @@ class MTRConfig(object):
                     If default option(False), then `HDF5_SEC2` driver will be used on posix OS(or `HDF5_WINDOWS` in Windows).
 
     """
-
-    # Requirement Arguments
-    endpoint = str
-    access_key = str
-    secret_key = str
 
     def __init__(self, **kwargs):
 
