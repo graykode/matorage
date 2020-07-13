@@ -130,9 +130,6 @@ class DataSaver(object):
         Returns:
             :None
         """
-        for name, array in self._data.items():
-            if len(array.shape) < 2:
-                raise AssertionError("Shape is 1 dimension. shape of {} should be (Batch, *)".format(name))
 
         if not isinstance(self._datas, dict):
             raise TypeError("datas shoud be dict type.", self.__call__.__doc__)
@@ -142,13 +139,9 @@ class DataSaver(object):
             self._check_attr_name(name=name)
 
             if is_tf_available() and not isinstance(array, np.ndarray):
-                import tensorflow as tf
-                assert isinstance(array, tf.python.framework.ops.EagerTensor), \
-                    "array type is not `numpy.ndarray` nor `EagerTensor`"
+                array = array.numpy()
             if is_torch_available() and not isinstance(array, np.ndarray):
-                import torch
-                assert isinstance(array, torch.Tensor), \
-                    "array type is not `numpy.ndarray` nor `torch.Tensor`"
+                array = array.numpy()
 
             assert isinstance(array, np.ndarray), "array type is not `numpy.ndarray`"
 
@@ -161,6 +154,10 @@ class DataSaver(object):
             # This resape is made into a (B, *) shape.
             # Shape is lowered to two contiguous dimensions, enabling IO operations to operate very quickly.
             # https://www.slideshare.net/HDFEOS/caching-and-buffering-in-hdf5#25
+            if len(array.shape) == 1:
+                # this array is ground truth
+                array = array.reshape(-1, 1)
+
             self._datas[name] = array.reshape(-1, reduce(lambda x, y: x * y, array.shape[1:]))
 
     def __call__(self, datas):
@@ -176,7 +173,7 @@ class DataSaver(object):
         Returns:
             :None
         """
-        self._data = datas
+        self._datas = datas
 
         self._check_datas()
 
@@ -191,7 +188,7 @@ class DataSaver(object):
         """
         size = 0
         for name, array in self._datas.items():
-            size += array.nbyte
+            size += array.nbytes
         return size
 
     def _get_name(self, length=16):
