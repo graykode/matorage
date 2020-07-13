@@ -64,7 +64,7 @@ class DataConfig(MTRConfig):
     """
     dataset_name = str
     additional = dict
-    attributes = list
+    attributes = tuple
     filter = dict
     bucket_name = str
 
