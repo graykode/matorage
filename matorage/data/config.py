@@ -47,16 +47,16 @@ class DataConfig(MTRConfig):
                             ...
                         }
                     ```
-            attributes (:obj:`list`, `require`):
+            attributes (:obj:`tuple`, `require`):
                 DataAttribute type of list for data attributes
                 example
-                    `attributes = [DataAttribute('image', np.int8, (28 * 28))]`
+                    `attributes = DataAttribute('image', matorage.UInt8Atom, (28 * 28))`
                     or
                     ```python
-                    attributes = [
-                        DataAttribute('image', np.int8, (28 * 28)),
-                        DataAttribute('target', np.int8, (1))
-                    ]
+                    attributes = (
+                        DataAttribute('image', matorage.UInt8Atom, (28 * 28)),
+                        DataAttribute('target', matorage.UInt8Atom, (1))
+                    )
                     ```
             compressor (:obj:`dict`, `optional`, defaults to `{"level" : 0, "lib" : "zlip"}`):
                 Data compressor option, it same with [pytable's Filter](http://www.pytables.org/usersguide/libref/helper_classes.html#tables.Filters)
@@ -101,7 +101,7 @@ class DataConfig(MTRConfig):
         self._check_bucket()
 
         if isinstance(self.attributes, DataAttribute):
-            self.attributes = [self.attributes]
+            self.attributes = (self.attributes)
 
         attribute_names = set()
         for attribute in self.attributes:
