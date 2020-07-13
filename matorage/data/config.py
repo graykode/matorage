@@ -16,6 +16,7 @@ import copy
 import json
 import tables
 from minio import Minio
+from functools import reduce
 
 from matorage.utils import auto_attr_check
 from matorage.config import MTRConfig
@@ -117,6 +118,10 @@ class DataConfig(MTRConfig):
             else:
                 attribute_names.add(attribute.name)
 
+        # To convert `self.attributes`'s shape to be flatten
+        self.original_attributes = copy.deepcopy(self.attributes)
+        self._convert_type_flatten()
+
         if self.compressor['complevel'] < 0  or 9 < self.compressor['complevel']:
             raise ValueError("Compressor level is {} must be 0-9 interger".format(self.compressor['level']))
         if self.compressor['complib'] not in ('zlib', 'lzo', 'bzip2', 'blosc'):
@@ -140,6 +145,10 @@ class DataConfig(MTRConfig):
             minioClient.make_bucket(self.bucket_name)
         else:
             raise ValueError("{} {} is already exist!".format(self.dataset_name, self.additional))
+
+    def _convert_type_flatten(self):
+        for attribute in self.attributes:
+            attribute.shape = (reduce(lambda x, y: x * y, attribute.shape),)
 
     def _hashmap_transfer(self):
         """
