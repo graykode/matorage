@@ -45,8 +45,10 @@ class MTRConfig(object):
                     Secret key for the object storage endpoint. (Optional if you need anonymous access).
                 secure (:obj:`bool`, `optional`, defaults to `False`):
                     Set this value to True to enable secure (HTTPS) access. (Optional defaults to False unlike the original MinIO).
-                object_size (:obj:`int`, `optional`, defaults to `10 * 1024 * 1024`):
-                    The smallest size of object storage stored as an actual object.
+                min_object_size (:obj:`int`, `optional`, defaults to `10 * 1024 * 1024`):
+                    The minimum size of object storage stored as an actual object.
+                max_object_size (:obj:`int`, `optional`, defaults to `100 * 1024 * 1024`):
+                    The maximum size of object storage stored as an actual object.
                 multipart_upload_size (:obj:`int`, `optional`, defaults to `10 * 1024 * 1024`):
                     size of the incompletely uploaded object.
                     You can sync files faster with multipart upload in MinIO.
@@ -76,7 +78,8 @@ class MTRConfig(object):
         self.access_key = kwargs.pop("access_key", None)
         self.secret_key = kwargs.pop("secret_key", None)
         self.secure = kwargs.pop("secure", False)
-        self.object_size = kwargs.pop("object_size", 10 * _MB)
+        self.min_object_size = kwargs.pop("min_object_size", 10 * _MB)
+        self.max_object_size = kwargs.pop("max_object_size", 100 * _MB)
 
         # HDF5 configuration
         self.inmemory = kwargs.pop("inmemory", False)
@@ -102,3 +105,16 @@ class MTRConfig(object):
             :obj:`string`: String containing all the attributes that make up this configuration instance in JSON format.
         """
         return json.dumps(self._to_dict(), indent=4, sort_keys=True) + "\n"
+
+    def to_json_file(self, json_file_path, use_diff=True):
+        """
+        Save this instance to a json file.
+
+        Args:
+            json_file_path (:obj:`string`):
+                Path to the JSON file in which this configuration instance's parameters will be saved.
+            use_diff (:obj:`bool`):
+                If set to True, only the difference between the config instance and the default PretrainedConfig() is serialized to JSON file.
+        """
+        with open(json_file_path, "w", encoding="utf-8") as writer:
+            writer.write(self._to_json_string(use_diff=use_diff))
