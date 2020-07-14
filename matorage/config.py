@@ -1,9 +1,4 @@
 
-# Original Code
-# https://github.com/huggingface/transformers/blob/master/src/transformers/configuration_utils.py
-# See https://github.com/graykode/matorage/blob/0.1.0/NOTICE
-# modified by TaeHwan Jung(@graykode)
-
 # Copyright 2020-present Tae Hwan Jung
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");

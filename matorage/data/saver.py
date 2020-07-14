@@ -228,6 +228,10 @@ class DataSaver(object):
     def _create_name(self, length=16):
         return tempfile.mktemp("{}.h5".format(uuid.uuid4().hex[:length]))
 
+    def _exit(self):
+        self._file.close()
+        self._disconnected = True
+
     def _get_newfile(self):
         """
         Get new file inode and it's attribute
@@ -278,16 +282,9 @@ class DataSaver(object):
             else:
                 raise ValueError("{} OS not supported!".format(os.name))
 
-    async def _upload_object(self):
-        pass
-
     @property
     def get_namelist(self):
         return self._filelist
-
-    def _exit(self):
-        self._file.close()
-        self._disconnected = True
 
     def disconnect(self):
         self._file.close()
