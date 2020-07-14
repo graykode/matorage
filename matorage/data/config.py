@@ -71,11 +71,10 @@ class DataConfig(MTRConfig):
     dataset_name = str
     additional = dict
     attributes = tuple
-    filter = dict
+    compressor = dict
     bucket_name = str
 
     _metadata = _DataMetadata
-    _mapper = _DataMapper
 
     def __init__(self, **kwargs):
         super(DataConfig, self).__init__(**kwargs)
@@ -91,7 +90,7 @@ class DataConfig(MTRConfig):
 
         self._check_all()
 
-        self._metadata = _DataMetadata(**self.__dict__)
+        self.metadata = _DataMetadata(**self.__dict__)
 
     def _check_all(self):
         """
