@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
-
+from matorage.serialize import Serialize
 from matorage.utils import auto_attr_check
 
 @auto_attr_check
-class _DataMetadata(object):
+class _DataMetadata(Serialize):
     r""" Metadata of dataset configuration classes.
         Handles a few parameters configuration for only dataset.
         This class is stored together in the MinIO in json format.
@@ -34,13 +33,3 @@ class _DataMetadata(object):
 
     def __len__(self):
         return len(self.datas)
-
-    @property
-    def to_dict(self):
-        """
-        Serializes this instance to a Python dictionary.
-
-        Returns:
-            :obj:`Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
-        """
-        return copy.deepcopy(self.__dict__)

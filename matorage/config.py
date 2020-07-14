@@ -18,16 +18,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-import copy
-
 _KB = 1024
 """The size of a Kilobyte in bytes"""
 
 _MB = 1024 * _KB
 """The size of a Megabyte in bytes"""
 
-class MTRConfig(object):
+from matorage.serialize import Serialize
+
+class MTRConfig(Serialize):
     r""" Storage connector configuration classes.
         Handles a few parameters configuration for backend storage, hdf5 and etc.
 
@@ -81,38 +80,3 @@ class MTRConfig(object):
 
         # HDF5 configuration
         self.inmemory = kwargs.pop("inmemory", False)
-
-    def __repr__(self):
-        return "{} {}".format(self.__class__.__name__, self._to_json_string())
-
-    def _to_dict(self):
-        """
-        Serializes this instance to a Python dictionary.
-
-        Returns:
-            :obj:`Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
-        """
-        output = copy.deepcopy(self.__dict__)
-        return output
-
-    def _to_json_string(self):
-        """
-        Serializes this instance to a JSON string.
-
-        Returns:
-            :obj:`string`: String containing all the attributes that make up this configuration instance in JSON format.
-        """
-        return json.dumps(self._to_dict(), indent=4, sort_keys=True) + "\n"
-
-    def to_json_file(self, json_file_path, use_diff=True):
-        """
-        Save this instance to a json file.
-
-        Args:
-            json_file_path (:obj:`string`):
-                Path to the JSON file in which this configuration instance's parameters will be saved.
-            use_diff (:obj:`bool`):
-                If set to True, only the difference between the config instance and the default PretrainedConfig() is serialized to JSON file.
-        """
-        with open(json_file_path, "w", encoding="utf-8") as writer:
-            writer.write(self._to_json_string(use_diff=use_diff))
