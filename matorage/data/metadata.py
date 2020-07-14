@@ -13,9 +13,7 @@
 # limitations under the License.
 
 from matorage.serialize import Serialize
-from matorage.utils import auto_attr_check
 
-@auto_attr_check
 class _DataMetadata(Serialize):
     r""" Metadata of dataset configuration classes.
         Handles a few parameters configuration for only dataset.
@@ -26,7 +24,6 @@ class _DataMetadata(Serialize):
             **`DataConfig` must be mapped with only one `_DataMetadata`.**
 
     """
-    datas = dict
 
     def __init__(self, **kwargs):
         self.datas = kwargs

@@ -15,10 +15,8 @@
 import os
 from minio import ResponseError
 
-from matorage.utils import auto_attr_check
 from matorage.connector import MRTConnector
 
-@auto_attr_check
 class DataUploader(MRTConnector):
     r""" File Storage uploader class with multi thread.
         MinIO is thread-safety, according to document.
