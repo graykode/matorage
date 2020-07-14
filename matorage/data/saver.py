@@ -15,13 +15,16 @@
 import os
 import uuid
 import atexit
+import tempfile
 import tables as tb
 import numpy as np
 from time import sleep
 from functools import reduce
+from minio import Minio
 
 from matorage.utils import auto_attr_check, is_tf_available, is_torch_available
 from matorage.data.config import DataConfig
+from matorage.data.uploader import DataUploader
 
 @auto_attr_check
 class DataSaver(object):
@@ -76,6 +79,18 @@ class DataSaver(object):
         self._lock = False
         self._disconnected = False
 
+        self._client = Minio(
+            endpoint=self.config.endpoint,
+            access_key=self.config.access_key,
+            secret_key=self.config.secret_key,
+            secure=self.config.secure,
+        )
+        self._uploader = DataUploader(
+            client=self._client,
+            bucket=self.config.bucket_name,
+            num_worker_threads=self.config.num_worker_threads
+        )
+
         atexit.register(self.disconnect)
 
     def _append_all(self):
@@ -113,6 +128,9 @@ class DataSaver(object):
                 # atomic working
                 self._lock = True
                 self._file.close()
+
+                self._uploader.set_queue(self._file.filename)
+
                 self._file, self._earray = self._get_newfile()
                 self._lock = False
 
@@ -206,7 +224,7 @@ class DataSaver(object):
         return size
 
     def _create_name(self, length=16):
-        return "{}.h5".format(uuid.uuid4().hex[:length])
+        return tempfile.mktemp("{}.h5".format(uuid.uuid4().hex[:length]))
 
     def _get_newfile(self):
         """
@@ -267,6 +285,8 @@ class DataSaver(object):
 
     def disconnect(self):
         self._file.close()
+        self._uploader.set_queue(self._file.filename)
+        self._uploader.join_queue()
 
     @property
     def get_disconnected(self):
