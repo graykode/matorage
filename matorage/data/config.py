@@ -120,7 +120,7 @@ class DataConfig(MTRConfig):
                 attribute_names.add(attribute.name)
 
         # To convert `self.attributes`'s shape to be flatten
-        self.original_attributes = copy.deepcopy(self.attributes)
+        self.flatten_attributes = copy.deepcopy(self.attributes)
         self._convert_type_flatten()
 
         if self.compressor['complevel'] < 0  or 9 < self.compressor['complevel']:
@@ -146,7 +146,7 @@ class DataConfig(MTRConfig):
             minioClient.make_bucket(self.bucket_name)
 
     def _convert_type_flatten(self):
-        for attribute in self.attributes:
+        for attribute in self.flatten_attributes:
             attribute.shape = (reduce(lambda x, y: x * y, attribute.shape),)
 
     def _hashmap_transfer(self):
@@ -159,7 +159,7 @@ class DataConfig(MTRConfig):
         key = self.dataset_name + json.dumps(self.additional)
         return hashlib.md5(key.encode('utf-8')).hexdigest()
 
-    def _to_dict(self):
+    def to_dict(self):
         """
         Serializes this instance to a Python dictionary.
 
@@ -168,12 +168,10 @@ class DataConfig(MTRConfig):
         """
         output = copy.deepcopy(self.__dict__)
 
-        if hasattr(self.__class__, "dataset_name"):
-            output["dataset_name"] = self.__class__.dataset_name
-
-        if "metadata" in output:
-            output["metadata"] = self._metadata.to_dict()
-
+        if hasattr(output, '_metadata'):
+            pass
+        if hasattr(output, '_mapper'):
+            pass
         return output
 
     @property

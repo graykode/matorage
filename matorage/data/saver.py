@@ -255,7 +255,7 @@ class DataSaver(object):
 
         # create expandable array
         earray = {}
-        for _earray in self.config.attributes:
+        for _earray in self.config.flatten_attributes:
             earray[_earray.name] = file.create_earray(
                 file.root, _earray.name,
                 _earray.type(),
