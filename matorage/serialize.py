@@ -23,10 +23,9 @@ import json
 
 class Serialize(object):
 
-    def __repr__(self):
-        return "{} {}".format(self.__class__.__name__, self._to_json_string())
+    # def __repr__(self):
+    #     return "{} {}".format(self.__class__.__name__, self.to_json_string())
 
-    @property
     def to_dict(self):
         """
         Serializes this instance to a Python dictionary.
@@ -36,7 +35,6 @@ class Serialize(object):
         """
         return copy.deepcopy(self.__dict__)
 
-    @property
     def to_json_file(self, json_file_path, use_diff=True):
         """
         Save this instance to a json file.
@@ -50,7 +48,7 @@ class Serialize(object):
         with open(json_file_path, "w", encoding="utf-8") as writer:
             writer.write(self.to_json_string(use_diff=use_diff))
 
-    def _to_json_string(self):
+    def to_json_string(self):
         """
         Serializes this instance to a JSON string.
 
