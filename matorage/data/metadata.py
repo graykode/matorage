@@ -62,6 +62,10 @@ class _DataMetadata(Serialize):
             output["attributes"] = [
                 _attribute.to_dict() for _attribute in self.attributes
             ]
+        if hasattr(self.__class__, "flatten_attributes"):
+            output["flatten_attributes"] = [
+                _attribute.to_dict() for _attribute in self.flatten_attributes
+            ]
         if hasattr(self.__class__, "indexer"):
             output["indexer"] = self.indexer.to_dict()
         return output
