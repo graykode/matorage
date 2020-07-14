@@ -76,11 +76,11 @@ def auto_attr_check(cls):
     """
     For a class decorator that could automate this with a minimum of lines.
     https://stackoverflow.com/questions/9305751/how-to-force-ensure-class-attributes-are-a-specific-type
+
+    Note: ** This class decoder should only attach to the class used directly by the user. **
     """
-    new_dct = {}
     for key, value in cls.__dict__.items():
         if isinstance(value, type):
-            value = getter_setter_gen(key, value)
-        new_dct[key] = value
+            getter_setter_gen(key, value)
     # Creates a new class, using the modified dictionary as the class dict:
-    return type(cls)(cls.__name__, cls.__bases__, new_dct)
+    return cls

@@ -14,6 +14,7 @@
 
 from matorage.utils import auto_attr_check
 
+@auto_attr_check
 class _DataMapper(object):
     r""" Data indices mapper of dataset configuration classes.
         Handles a few parameters configuration for only dataset.
@@ -31,6 +32,9 @@ class _DataMapper(object):
                 As the page table in the OS, this class helps to map from the absolute index to the relative index.
 
     """
+    dataset_name = str
+    _bucket_name = str
+    _indices_mapper = dict
 
     def __init__(self, dataset_name, bucket_name):
         self._dataset_name = dataset_name
