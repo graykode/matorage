@@ -15,6 +15,7 @@
 import copy
 import json
 import tables
+import hashlib
 from minio import Minio
 from functools import reduce
 
@@ -143,8 +144,6 @@ class DataConfig(MTRConfig):
                             secure=self.secure)
         if not minioClient.bucket_exists(self.bucket_name):
             minioClient.make_bucket(self.bucket_name)
-        else:
-            raise ValueError("{} {} is already exist!".format(self.dataset_name, self.additional))
 
     def _convert_type_flatten(self):
         for attribute in self.attributes:
@@ -158,7 +157,7 @@ class DataConfig(MTRConfig):
             :obj: `str`:
         """
         key = self.dataset_name + json.dumps(self.additional)
-        return str(hash(key) % 10**16)
+        return hashlib.md5(key.encode('utf-8')).hexdigest()
 
     def _to_dict(self):
         """
