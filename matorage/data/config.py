@@ -48,7 +48,7 @@ class DataConfig(MTRConfig):
                             ...
                         }
                     ```
-            attributes (:obj:`tuple`, `require`):
+            attributes (:obj:`list`, `require`):
                 DataAttribute type of list for data attributes
                 example
                     `attributes = DataAttribute('image', matorage.UInt8Atom, (28 * 28))`
@@ -70,7 +70,7 @@ class DataConfig(MTRConfig):
 
     dataset_name = str
     additional = dict
-    attributes = tuple
+    attributes = list
     compressor = dict
     bucket_name = str
 
@@ -100,10 +100,10 @@ class DataConfig(MTRConfig):
             :obj: `None`:
         """
 
-        if isinstance(self.attributes, list):
-            self.attributes = tuple(self.attributes)
+        if isinstance(self.attributes, tuple):
+            self.attributes = list(self.attributes)
         if isinstance(self.attributes, DataAttribute):
-            self.attributes = (self.attributes,)
+            self.attributes = [self.attributes]
 
         attribute_names = set()
         for attribute in self.attributes:
@@ -162,3 +162,6 @@ class DataConfig(MTRConfig):
         """
         output = copy.deepcopy(self.__dict__)
         return output
+
+    def from_json(self):
+        raise NotImplementedError
