@@ -91,7 +91,7 @@ class DataSaver(object):
             num_worker_threads=self.config.num_worker_threads
         )
 
-        atexit.register(self.disconnect)
+        atexit.register(self._exit)
 
     def _append_all(self):
         """
@@ -205,6 +205,8 @@ class DataSaver(object):
         Returns:
             :None
         """
+        self._disconnected = False
+
         self._datas = datas
 
         self._check_datas()
@@ -282,6 +284,10 @@ class DataSaver(object):
     @property
     def get_namelist(self):
         return self._filelist
+
+    def _exit(self):
+        self._file.close()
+        self._disconnected = True
 
     def disconnect(self):
         self._file.close()
