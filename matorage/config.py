@@ -54,6 +54,8 @@ class MTRConfig(object):
                     efficiently regardless of Python's Global Interpreter Lock(GIL).
                 multipart_upload_size (:obj:`int`, `optional`, defaults to `5 * 1024 * 1024`):
                     size of the incompletely uploaded object.
+                num_worker_threads :obj:`int`, `optional`, defaults to `4`):
+                    number of backend storage worker to upload or download.
 
             HDF5 Options
                 inmemory (:obj:`bool`, `optional`, defaults to `False`):
@@ -75,6 +77,7 @@ class MTRConfig(object):
         self.min_object_size = kwargs.pop("min_object_size", 10 * _MB)
         self.max_object_size = kwargs.pop("max_object_size", 100 * _MB)
         self.multipart_upload_size = kwargs.pop("multipart_upload_size", 5 * _MB)
+        self.num_worker_threads = kwargs.pop("num_worker_threads", 4)
 
         # HDF5 configuration
         self.inmemory = kwargs.pop("inmemory", False)
