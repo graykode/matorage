@@ -52,6 +52,8 @@ class MTRConfig(object):
                     (https://github.com/minio/minio-py/blob/master/minio/api.py#L1795)
                     This is because MinIO clients use multi-threading, which improves IO speed more
                     efficiently regardless of Python's Global Interpreter Lock(GIL).
+                multipart_upload_size (:obj:`int`, `optional`, defaults to `5 * 1024 * 1024`):
+                    size of the incompletely uploaded object.
 
             HDF5 Options
                 inmemory (:obj:`bool`, `optional`, defaults to `False`):
@@ -72,6 +74,7 @@ class MTRConfig(object):
         self.secure = kwargs.pop("secure", False)
         self.min_object_size = kwargs.pop("min_object_size", 10 * _MB)
         self.max_object_size = kwargs.pop("max_object_size", 100 * _MB)
+        self.multipart_upload_size = kwargs.pop("multipart_upload_size", 5 * _MB)
 
         # HDF5 configuration
         self.inmemory = kwargs.pop("inmemory", False)
