@@ -74,7 +74,7 @@ class DataConfig(MTRConfig):
     compressor = dict
     bucket_name = str
 
-    _metadata = _DataMetadata
+    metadata = _DataMetadata
 
     def __init__(self, **kwargs):
         super(DataConfig, self).__init__(**kwargs)
@@ -161,6 +161,10 @@ class DataConfig(MTRConfig):
             :obj:`Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
         """
         output = copy.deepcopy(self.__dict__)
+
+        if hasattr(self.__class__, "metadata"):
+            output["metadata"] = self.metadata.to_dict()
+
         return output
 
     def from_json(self):

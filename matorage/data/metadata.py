@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
+
+from matorage.utils import auto_attr_check
 from matorage.serialize import Serialize
 from matorage.data.indexer import _DataIndexer
 
+@auto_attr_check
 class _DataMetadata(Serialize):
     r""" Metadata of dataset configuration classes.
         Handles a few parameters configuration for only dataset.
@@ -25,17 +29,23 @@ class _DataMetadata(Serialize):
             **`DataConfig` must be mapped with only one `_DataMetadata`.**
 
     """
+    dataset_name = str
+    additional = dict
+    attributes = tuple
+    compressor = dict
+    bucket_name = str
+    indexer = _DataIndexer
 
     def __init__(self, **kwargs):
-        self.dataset_name = kwargs['dataset_name']
-        self.additional = kwargs['additional']
-        self.filter = kwargs['filter']
-        self.attributes = kwargs['attributes']
+        self.dataset_name = kwargs.pop("dataset_name", None)
+        self.additional = kwargs.pop("additional", {})
+        self.attributes = kwargs.pop("attributes", None)
+        self.compressor = kwargs.pop("compressor", {
+            "complevel": 0,
+            "complib": "zlib"
+        })
 
-        self.indexer = _DataIndexer(
-            dataset_name=self.dataset_name,
-            bucket_name=self.bucket_name
-        )
+        self.indexer = _DataIndexer()
 
     def __len__(self):
         return len(self.datas)
@@ -47,4 +57,11 @@ class _DataMetadata(Serialize):
         Returns:
             :obj:`Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
         """
-        pass
+        output = copy.deepcopy(self.__dict__)
+        if hasattr(self.__class__, "attributes"):
+            output["attributes"] = [
+                _attribute.to_dict() for _attribute in self.attributes
+            ]
+        if hasattr(self.__class__, "indexer"):
+            output["indexer"] = self.indexer.to_dict()
+        return output
