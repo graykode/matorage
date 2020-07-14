@@ -22,7 +22,6 @@ from functools import reduce
 from matorage.utils import auto_attr_check
 from matorage.config import MTRConfig
 
-from matorage.data.mapper import _DataMapper
 from matorage.data.metadata import _DataMetadata
 from matorage.data.attribute import DataAttribute
 
@@ -93,10 +92,6 @@ class DataConfig(MTRConfig):
         self._check_all()
 
         self._metadata = _DataMetadata(**self.__dict__)
-        self._mapper = _DataMapper(
-            dataset_name=self.dataset_name,
-            bucket_name=self.bucket_name
-        )
 
     def _check_all(self):
         """
@@ -167,17 +162,4 @@ class DataConfig(MTRConfig):
             :obj:`Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
         """
         output = copy.deepcopy(self.__dict__)
-
-        if hasattr(output, '_metadata'):
-            pass
-        if hasattr(output, '_mapper'):
-            pass
         return output
-
-    @property
-    def get_mapper(self):
-        return self._mapper
-
-    @get_mapper.setter
-    def set_mapper(self, mapper):
-        self._mapper(mapper)

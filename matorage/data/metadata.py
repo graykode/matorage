@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from matorage.serialize import Serialize
+from matorage.data.indexer import _DataIndexer
 
 class _DataMetadata(Serialize):
     r""" Metadata of dataset configuration classes.
@@ -26,7 +27,24 @@ class _DataMetadata(Serialize):
     """
 
     def __init__(self, **kwargs):
-        self.datas = kwargs
+        self.dataset_name = kwargs['dataset_name']
+        self.additional = kwargs['additional']
+        self.filter = kwargs['filter']
+        self.attributes = kwargs['attributes']
+
+        self.indexer = _DataIndexer(
+            dataset_name=self.dataset_name,
+            bucket_name=self.bucket_name
+        )
 
     def __len__(self):
         return len(self.datas)
+
+    def to_dict(self):
+        """
+        Serializes this instance to a Python dictionary.
+
+        Returns:
+            :obj:`Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
+        """
+        pass

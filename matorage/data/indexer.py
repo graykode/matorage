@@ -15,13 +15,13 @@
 from matorage.utils import auto_attr_check
 
 @auto_attr_check
-class _DataMapper(object):
-    r""" Data indices mapper of dataset configuration classes.
+class _DataIndexer(object):
+    r""" Data indexer of dataset configuration classes.
         Handles a few parameters configuration for only dataset.
 
         Note:
             This class is recommended not to be used in the code of the user.
-            **`DataConfig` must be mapped with only one `_DataMapper`.**
+            **`_DataMetadata` must be mapped with only one `_DataMapper`.**
 
             INDEX_MAPPER
                 When multiple atomical objects are also divided into one data,
