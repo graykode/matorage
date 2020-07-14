@@ -14,6 +14,7 @@
 
 import os
 import uuid
+import asyncio
 import tables as tb
 import numpy as np
 from time import sleep
@@ -89,6 +90,11 @@ class DataSaver(object):
             :None
         """
         array_size = self._get_array_size()
+        if self.config.max_object_size <= array_size:
+            raise ValueError("a once updated size({}) of data have to lower than {}".format(
+                array_size, self.config.max_object_size
+            ))
+
         if self.config.max_object_size < array_size:
             raise ValueError("appended array_size is {} large than max_object_size {}".format(
                 array_size, self.config.max_object_size
@@ -171,6 +177,10 @@ class DataSaver(object):
                 'target' : np.random.rand(16)
             }
 
+        Note:
+            ** we suppose that a once appened size of datas is lower than `max_object_size` **
+            file size will be closed and uploaded if bigger than `min_object_size`
+
         Returns:
             :None
         """
@@ -244,6 +254,9 @@ class DataSaver(object):
                 return 'H5FD_WINDOWS', True
             else:
                 raise ValueError("{} OS not supported!".format(os.name))
+
+    async def _upload_object(self):
+        pass
 
     @property
     def get_namelist(self):
