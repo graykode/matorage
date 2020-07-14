@@ -14,7 +14,7 @@
 
 import os
 import uuid
-import asyncio
+import atexit
 import tables as tb
 import numpy as np
 from time import sleep
@@ -74,6 +74,9 @@ class DataSaver(object):
         self._file, self._earray = self._get_newfile()
 
         self._lock = False
+        self._disconnected = False
+
+        atexit.register(self.disconnect)
 
     def _append_all(self):
         """
@@ -264,3 +267,7 @@ class DataSaver(object):
 
     def disconnect(self):
         self._file.close()
+
+    @property
+    def get_disconnected(self):
+        return self._disconnected
