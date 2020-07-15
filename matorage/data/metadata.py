@@ -16,7 +16,6 @@ import copy
 
 from matorage.utils import auto_attr_check
 from matorage.serialize import Serialize
-from matorage.data.indexer import _DataIndexer
 
 @auto_attr_check
 class _DataMetadata(Serialize):
@@ -28,13 +27,22 @@ class _DataMetadata(Serialize):
             This class is recommended not to be used in the code of the user.
             **`DataConfig` must be mapped with only one `_DataMetadata`.**
 
+        About indexer's work
+                When multiple atomic objects are also divided into one data,
+                it is difficult to bring data into absolute index numbers.
+                For example, suppose that 60000 datasets were divided into 600 objects, 100 each.
+                Also, it is assumed that all data has been stored sequentially.
+                If we want access to the 15011th data index, we need access to the 11th data from the 150th object file.
+                (100 * 150 + 11)
+                As the page table in the OS, this class helps to map from the absolute index to the relative index.
+
     """
     dataset_name = str
     additional = dict
     attributes = tuple
     compressor = dict
     bucket_name = str
-    indexer = _DataIndexer
+    indexer = dict
 
     def __init__(self, **kwargs):
         self.dataset_name = kwargs.pop("dataset_name", None)
@@ -45,10 +53,7 @@ class _DataMetadata(Serialize):
             "complib": "zlib"
         })
 
-        self.indexer = _DataIndexer()
-
-    def __len__(self):
-        return len(self.datas)
+        self.indexer = {}
 
     def to_dict(self):
         """
@@ -66,6 +71,4 @@ class _DataMetadata(Serialize):
             output["flatten_attributes"] = [
                 _attribute.to_dict() for _attribute in self.flatten_attributes
             ]
-        if hasattr(self.__class__, "indexer"):
-            output["indexer"] = self.indexer.to_dict()
         return output
