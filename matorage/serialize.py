@@ -35,18 +35,16 @@ class Serialize(object):
         """
         return copy.deepcopy(self.__dict__)
 
-    def to_json_file(self, json_file_path, use_diff=True):
+    def to_json_file(self, json_file_path):
         """
         Save this instance to a json file.
 
         Args:
             json_file_path (:obj:`string`):
                 Path to the JSON file in which this configuration instance's parameters will be saved.
-            use_diff (:obj:`bool`):
-                If set to True, only the difference between the config instance and the default PretrainedConfig() is serialized to JSON file.
         """
         with open(json_file_path, "w", encoding="utf-8") as writer:
-            writer.write(self.to_json_string(use_diff=use_diff))
+            writer.write(self.to_json_string())
 
     def to_json_string(self):
         """
