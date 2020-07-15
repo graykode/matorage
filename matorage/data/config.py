@@ -160,12 +160,10 @@ class DataConfig(MTRConfig):
         Returns:
             :obj:`Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
         """
-        output = copy.deepcopy(self.__dict__)
+        output = dict()
 
+        output["config"] = copy.deepcopy(self.__class__.__base__().__dict__)
         if hasattr(self.__class__, "metadata"):
             output["metadata"] = self.metadata.to_dict()
 
         return output
-
-    def from_json(self):
-        raise NotImplementedError

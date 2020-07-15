@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
+
 from tables.atom import Atom
 from matorage.utils import auto_attr_check
 from matorage.serialize import Serialize
@@ -31,3 +33,15 @@ class DataAttribute(Serialize):
             self.shape = (shape,)
         else:
             self.shape = shape
+
+    def to_dict(self):
+        """
+        Serializes this instance to a Python dictionary.
+
+        Returns:
+            :obj:`Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
+        """
+        output = copy.deepcopy(self.__dict__)
+        if hasattr(self.__class__, "type"):
+            output["type"] = self.type.type
+        return output
