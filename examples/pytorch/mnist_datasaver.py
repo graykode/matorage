@@ -54,19 +54,3 @@ if __name__ == '__main__':
             'target' : target
         })
     data_saver.disconnect()
-
-    # checking with read
-    import tables
-
-    n_data = 0
-    for _file in data_saver.get_namelist:
-        file = tables.open_file(_file, 'r')
-        n_data += len(file.root.image)
-
-        print('=======')
-        print(file)
-        print(file.root.image)
-        print(file.root.target)
-        file.close()
-
-    print(n_data)
