@@ -25,25 +25,20 @@ class DataUploader(MRTConnector):
         Although Python Global Interpreter Lock(GIL), multi thread can benefit greatly from file IO.
     """
 
-    def _create_name(self, length=16):
-        return "{}.h5".format(uuid.uuid4().hex[:length])
+    def do_job(self, fileitem, filename):
 
-    def do_job(self, fileitem):
-
+        if isinstance(filename, str):
+            minio_key = os.path.basename(filename)
         try:
             if not self._inmemory:
-                minio_key = os.path.basename(fileitem)
-                filename = fileitem
                 self._client.fput_object(
-                    self._bucket, minio_key, filename
+                    self._bucket, minio_key, fileitem
                 )
-                os.remove(filename)
+                os.remove(fileitem)
             else:
-                minio_key = self._create_name()
                 fileimage = io.BytesIO(fileitem)
                 self._client.put_object(
                     self._bucket, minio_key, fileimage, len(fileitem),
                 )
         except ResponseError as err:
             print(err)
-        return f"{minio_key} is uploaded"

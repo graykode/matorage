@@ -42,12 +42,23 @@ class MRTConnector(object):
 
     def _worker(self):
         while True:
-            fileitem = self._queue.get()
-            self.do_job(fileitem)
+            _fileitem, _filename = self._queue.get()
+            self.do_job(_fileitem, _filename)
             self._queue.task_done()
 
-    def set_queue(self, item):
-        self._queue.put(item)
+    def set_queue(self, fileitem, filename):
+        """
+        Set queue of storage connector.
+        `fileitem` : file bytes image or filename in local storage.
+        `filename` : physical existed filename at backend storage(or will be uploaded).
+
+        Note:
+            if `config.inmemory` mode is `False`, fileitem and filename is same.
+
+        Returns:
+            :None
+        """
+        self._queue.put((fileitem, filename, ))
 
     def join_queue(self):
         self._queue.join()

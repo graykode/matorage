@@ -217,9 +217,9 @@ class DataSaver(object):
     def _file_closing(self):
         if not self.config.inmemory:
             self._file.close()
-            self._uploader.set_queue(self._file.filename)
+            self._uploader.set_queue(self._file.filename, self._filename)
         else:
-            self._uploader.set_queue(self._file.get_file_image())
+            self._uploader.set_queue(self._file.get_file_image(), self._filename)
             self._file.close()
 
     def _create_name(self, length=16):
@@ -254,10 +254,10 @@ class DataSaver(object):
         """
         _driver, _driver_core_backing_store = self._set_driver()
 
-        new_name = self._create_name()
-        self._filelist.append(new_name)
+        self._filename = self._create_name()
+        self._filelist.append(self._filename)
         file = tb.open_file(
-            new_name, 'a',
+            self._filename, 'a',
             driver=_driver,
             driver_core_backing_store=_driver_core_backing_store
         )
