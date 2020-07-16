@@ -84,7 +84,8 @@ class DataConfig(MTRConfig):
         Returns:
             :obj: `None`:
         """
-
+        if self.attributes is None:
+            raise ValueError("attributes is empty")
         if isinstance(self.attributes, tuple):
             self.attributes = list(self.attributes)
         if isinstance(self.attributes, DataAttribute):
@@ -135,6 +136,8 @@ class DataConfig(MTRConfig):
         Returns:
             :obj: `str`:
         """
+        if not isinstance(self.dataset_name, str):
+            raise ValueError("dataset_name {} is empty or not str type".format(self.dataset_name))
         if not isinstance(self.additional, dict):
             raise TypeError("additional is not dict type")
 
