@@ -61,15 +61,12 @@ class DataConfig(MTRConfig):
 
     """
     # Requirement Arguments
-    endpoint = str
-    access_key = str
-    secret_key = str
 
-    dataset_name = str
-    additional = dict
-    attributes = list
-    compressor = dict
-    bucket_name = str
+    dataset_name: str
+    additional: dict
+    attributes: list
+    compressor: dict
+    bucket_name: str
 
     metadata = _DataMetadata
 

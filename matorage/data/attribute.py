@@ -19,10 +19,6 @@ from matorage.serialize import Serialize
 
 class DataAttribute(Serialize):
 
-    name = str
-    type = Atom
-    shape = tuple
-
     def __init__(self, name, type, shape):
 
         self.name = name

@@ -66,7 +66,6 @@ class DataSaver(object):
         Example::
 
     """
-    config = DataConfig
 
     def __init__(self, config):
 

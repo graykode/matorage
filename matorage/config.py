@@ -60,15 +60,6 @@ class MTRConfig(Serialize):
                     If default option(False), then `HDF5_SEC2` driver will be used on posix OS(or `HDF5_WINDOWS` in Windows).
 
     """
-    endpoint = str
-    access_key = str
-    secret_key = str
-    secure = bool
-    min_object_size = int
-    max_object_size = int
-    multipart_upload_size = int
-    num_worker_threads = int
-    inmemory = bool
 
     def __init__(self, **kwargs):
 

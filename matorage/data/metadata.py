@@ -35,12 +35,6 @@ class _DataMetadata(Serialize):
                 As the page table in the OS, this class helps to map from the absolute index to the relative index.
 
     """
-    dataset_name = str
-    additional = dict
-    attributes = tuple
-    compressor = dict
-    bucket_name = str
-    indexer = dict
 
     def __init__(self, **kwargs):
         self.dataset_name = kwargs.pop("dataset_name", None)
