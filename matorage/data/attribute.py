@@ -15,10 +15,8 @@
 import copy
 
 from tables.atom import Atom
-from matorage.utils import auto_attr_check
 from matorage.serialize import Serialize
 
-@auto_attr_check
 class DataAttribute(Serialize):
 
     name = str

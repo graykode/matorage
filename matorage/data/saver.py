@@ -23,11 +23,10 @@ from time import sleep
 from functools import reduce
 from minio import Minio
 
-from matorage.utils import auto_attr_check, is_tf_available, is_torch_available
+from matorage.utils import is_tf_available, is_torch_available
 from matorage.data.config import DataConfig
 from matorage.data.uploader import DataUploader
 
-@auto_attr_check
 class DataSaver(object):
     r""" Dataset saver classes.
         Although it plays a similar role as `[torch.utils.data.DataLoader](https://pytorch.org/docs/stable/data.html)`

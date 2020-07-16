@@ -19,13 +19,10 @@ import hashlib
 from minio import Minio
 from functools import reduce
 
-from matorage.utils import auto_attr_check
 from matorage.config import MTRConfig
-
 from matorage.data.metadata import _DataMetadata
 from matorage.data.attribute import DataAttribute
 
-@auto_attr_check
 class DataConfig(MTRConfig):
     r""" Dataset configuration classes.
         Handles a few parameters configuration for only dataset.

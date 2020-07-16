@@ -58,29 +58,3 @@ def is_torch_available():
 
 def is_tf_available():
     return _tf_available
-
-def getter_setter_gen(name, type_):
-    """
-    For a class decorator that could automate this with a minimum of lines.
-    https://stackoverflow.com/questions/9305751/how-to-force-ensure-class-attributes-are-a-specific-type
-    """
-    def getter(self):
-        return getattr(self, "__" + name)
-    def setter(self, value):
-        if not isinstance(value, type_):
-            raise TypeError("%s attribute must be set to an instance of %s" % (name, type_))
-        setattr(self, "__" + name, value)
-    return property(getter, setter)
-
-def auto_attr_check(cls):
-    """
-    For a class decorator that could automate this with a minimum of lines.
-    https://stackoverflow.com/questions/9305751/how-to-force-ensure-class-attributes-are-a-specific-type
-
-    Note: ** This class decoder should only attach to the class used directly by the user. **
-    """
-    for key, value in cls.__dict__.items():
-        if isinstance(value, type):
-            getter_setter_gen(key, value)
-    # Creates a new class, using the modified dictionary as the class dict:
-    return cls

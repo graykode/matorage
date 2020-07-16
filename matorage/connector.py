@@ -16,9 +16,6 @@ from queue import Queue
 from minio import Minio
 from threading import Thread
 
-from matorage.utils import auto_attr_check
-
-@auto_attr_check
 class MRTConnector(object):
     r""" File Storage Connector class with multi-thread.
         MinIO is thread-safety, according to document.

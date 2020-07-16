@@ -14,10 +14,8 @@
 
 import copy
 
-from matorage.utils import auto_attr_check
 from matorage.serialize import Serialize
 
-@auto_attr_check
 class _DataMetadata(Serialize):
     r""" Metadata of dataset configuration classes.
         Handles a few parameters configuration for only dataset.

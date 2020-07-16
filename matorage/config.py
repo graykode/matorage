@@ -20,9 +20,7 @@ _MB = 1024 * _KB
 """The size of a Megabyte in bytes"""
 
 from matorage.serialize import Serialize
-from matorage.utils import auto_attr_check
 
-@auto_attr_check
 class MTRConfig(Serialize):
     r""" Storage connector configuration classes.
         Handles a few parameters configuration for backend storage, hdf5 and etc.
