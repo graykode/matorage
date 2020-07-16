@@ -41,6 +41,6 @@ class DataAttribute(Serialize):
             :obj:`Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
         """
         output = copy.deepcopy(self.__dict__)
-        if hasattr(self.__class__, "type"):
+        if hasattr(self.__class__, "type") or "type" in output:
             output["type"] = self.type.type
         return output

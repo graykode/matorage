@@ -56,11 +56,11 @@ class _DataMetadata(Serialize):
             :obj:`Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
         """
         output = copy.deepcopy(self.__dict__)
-        if hasattr(self.__class__, "attributes"):
+        if hasattr(self.__class__, "attributes") or "attributes" in output:
             output["attributes"] = [
                 _attribute.to_dict() for _attribute in self.attributes
             ]
-        if hasattr(self.__class__, "flatten_attributes"):
+        if hasattr(self.__class__, "flatten_attributes") or "flatten_attributes" in output:
             output["flatten_attributes"] = [
                 _attribute.to_dict() for _attribute in self.flatten_attributes
             ]

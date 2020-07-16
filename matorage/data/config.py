@@ -144,6 +144,9 @@ class DataConfig(MTRConfig):
         Returns:
             :obj: `str`:
         """
+        if not isinstance(self.additional, dict):
+            raise TypeError("additional is not dict type")
+
         key = self.dataset_name + json.dumps(self.additional)
         return hashlib.md5(key.encode('utf-8')).hexdigest()
 
@@ -157,7 +160,7 @@ class DataConfig(MTRConfig):
         output = copy.deepcopy(
             self.__class__.__base__(**self.__dict__).__dict__
         )
-        if hasattr(self.__class__, "metadata"):
+        if hasattr(self.__class__, "metadata") or "metadata" in output:
             output["dataset_name"] = self.metadata.dataset_name
             output["additional"] = self.metadata.additional
 
