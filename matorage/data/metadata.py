@@ -16,14 +16,14 @@ import copy
 
 from matorage.serialize import Serialize
 
-class _DataMetadata(Serialize):
+class DataMetadata(Serialize):
     r""" Metadata of dataset configuration classes.
         Handles a few parameters configuration for only dataset.
         This class is stored together in the MinIO in json format.
 
         Note:
             This class is recommended not to be used in the code of the user.
-            **`DataConfig` must be mapped with only one `_DataMetadata`.**
+            **`DataConfig` must be mapped with only one `DataMetadata`.**
 
         About indexer's work
                 When multiple atomic objects are also divided into one data,

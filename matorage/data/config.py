@@ -20,7 +20,7 @@ from minio import Minio
 from functools import reduce
 
 from matorage.config import MTRConfig
-from matorage.data.metadata import _DataMetadata
+from matorage.data.metadata import DataMetadata
 from matorage.data.attribute import DataAttribute
 
 class DataConfig(MTRConfig):
@@ -68,7 +68,7 @@ class DataConfig(MTRConfig):
     compressor: dict
     bucket_name: str
 
-    metadata = _DataMetadata
+    metadata = DataMetadata
 
     def __init__(self, **kwargs):
         super(DataConfig, self).__init__(**kwargs)
@@ -84,7 +84,7 @@ class DataConfig(MTRConfig):
 
         self._check_all()
 
-        self.metadata = _DataMetadata(**self.__dict__)
+        self.metadata = DataMetadata(**self.__dict__)
 
     def _check_all(self):
         """
@@ -190,7 +190,7 @@ class DataConfig(MTRConfig):
 
         return cls(
             **config_dict, **metadata_dict,
-            metadata=_DataMetadata(**metadata_dict)
+            metadata=DataMetadata(**metadata_dict)
         )
 
     def set_indexer(self, index):

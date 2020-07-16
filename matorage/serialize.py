@@ -23,6 +23,9 @@ import json
 
 class Serialize(object):
 
+    def __str__(self):
+        return self.__repr__()
+
     def __repr__(self):
         return "{} {}".format(self.__class__.__name__, self.to_json_string())
 
