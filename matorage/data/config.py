@@ -60,15 +60,6 @@ class DataConfig(MTRConfig):
                 Data compressor option, it same with [pytable's Filter](http://www.pytables.org/usersguide/libref/helper_classes.html#tables.Filters)
 
     """
-    # Requirement Arguments
-
-    dataset_name: str
-    additional: dict
-    attributes: list
-    compressor: dict
-    bucket_name: str
-
-    metadata = DataMetadata
 
     def __init__(self, **kwargs):
         super(DataConfig, self).__init__(**kwargs)
