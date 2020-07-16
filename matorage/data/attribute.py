@@ -28,7 +28,12 @@ class DataAttribute(Serialize):
     def __init__(self, name, type, shape):
 
         self.name = name
-        self.type = type
+
+        if isinstance(type, str):
+            self.type = Atom.from_type(type)
+        else:
+            self.type = type
+
         if isinstance(shape, int):
             self.shape = (shape,)
         else:

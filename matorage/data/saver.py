@@ -258,7 +258,7 @@ class DataSaver(object):
         for _earray in self.config.flatten_attributes:
             earray[_earray.name] = file.create_earray(
                 file.root, _earray.name,
-                _earray.type(),
+                _earray.type,
                 shape=tuple([0]) + _earray.shape,
                 filters=self.filter
             )

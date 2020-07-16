@@ -107,7 +107,7 @@ class DataConfig(MTRConfig):
 
         attribute_names = set()
         for attribute in self.attributes:
-            assert isinstance(attribute.type(), tables.atom.Atom)
+            assert isinstance(attribute.type, tables.atom.Atom)
             if attribute.name in attribute_names:
                 raise KeyError("{} is already exist in {}".format(attribute.name, attribute_names))
             else:
@@ -162,7 +162,9 @@ class DataConfig(MTRConfig):
         """
         output = dict()
 
-        output["config"] = copy.deepcopy(self.__class__.__base__().__dict__)
+        output["config"] = copy.deepcopy(
+            self.__class__.__base__(**self.__dict__).__dict__
+        )
         if hasattr(self.__class__, "metadata"):
             output["metadata"] = self.metadata.to_dict()
 
