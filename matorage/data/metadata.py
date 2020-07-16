@@ -48,7 +48,6 @@ class _DataMetadata(Serialize):
         self.dataset_name = kwargs.pop("dataset_name", None)
         self.additional = kwargs.pop("additional", {})
 
-        # TODO : Read from bucket/metadata.json below arguments
         self.attributes = kwargs.pop("attributes", None)
         self.compressor = kwargs.pop("compressor", {
             "complevel": 0,

@@ -180,15 +180,45 @@ class DataConfig(MTRConfig):
 
         """
         config_dict = cls._dict_from_json_file(json_file)
+        metadata_dict = cls._load_metadata_from_bucket(config_dict)
 
-        config_dict['metadata']['attributes'] = [
-            DataAttribute(**item) for item in config_dict['metadata']['attributes']
-        ]
+        if 'dataset_name' in config_dict:
+            del config_dict['dataset_name']
+        if 'additional' in config_dict:
+            del config_dict['additional']
+        if 'attributes' in metadata_dict:
+            metadata_dict['attributes'] = [
+                DataAttribute(**item) for item in metadata_dict['attributes']
+            ]
 
         return cls(
-            **config_dict['config'], **config_dict['metadata'],
-            metadata=_DataMetadata(**config_dict['metadata'])
+            **config_dict, **metadata_dict,
+            metadata=_DataMetadata(**metadata_dict)
         )
 
     def set_indexer(self, index):
         self.metadata.indexer.update(index)
+
+    @classmethod
+    def _load_metadata_from_bucket(cls, config_dict):
+        """
+        Load `metadata.json` from bucket name
+
+        Returns:
+            :obj: `dict`: metadata json
+        """
+        _bucket_name = hashlib.md5(
+            (config_dict['dataset_name'] + json.dumps(config_dict['additional'])).encode('utf-8')
+        ).hexdigest()
+
+        minioClient = Minio(config_dict['endpoint'],
+                            access_key=config_dict['access_key'],
+                            secret_key=config_dict['secret_key'],
+                            secure=config_dict['secure'])
+        if not minioClient.bucket_exists(_bucket_name):
+            raise AssertionError("{} with {} is not exist on {} or key is mismathced".format(
+                config_dict['dataset_name'], config_dict['additional'], config_dict['endpoint']
+            ))
+        _metadata = minioClient.get_object(_bucket_name, 'metadata.json')
+
+        return json.loads(_metadata.read().decode('utf-8'))
