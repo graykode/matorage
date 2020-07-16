@@ -23,8 +23,8 @@ import json
 
 class Serialize(object):
 
-    # def __repr__(self):
-    #     return "{} {}".format(self.__class__.__name__, self.to_json_string())
+    def __repr__(self):
+        return "{} {}".format(self.__class__.__name__, self.to_json_string())
 
     def to_dict(self):
         """
@@ -54,3 +54,9 @@ class Serialize(object):
             :obj:`string`: String containing all the attributes that make up this configuration instance in JSON format.
         """
         return json.dumps(self.to_dict(), indent=4, sort_keys=True) + "\n"
+
+    @classmethod
+    def _dict_from_json_file(cls, json_file):
+        with open(json_file, "r", encoding="utf-8") as reader:
+            text = reader.read()
+        return json.loads(text)

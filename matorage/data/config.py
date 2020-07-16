@@ -169,3 +169,24 @@ class DataConfig(MTRConfig):
             output["metadata"] = self.metadata.to_dict()
 
         return output
+
+    @classmethod
+    def from_json_file(cls, json_file):
+        """
+        Constructs a `Config` from the path to a json file of parameters.
+
+        Args:
+            json_file (:obj:`string`):
+                Path to the JSON file containing the parameters.
+
+        """
+        config_dict = cls._dict_from_json_file(json_file)
+
+        config_dict['metadata']['attributes'] = [
+            DataAttribute(**item) for item in config_dict['metadata']['attributes']
+        ]
+
+        return cls(
+            **config_dict['config'], **config_dict['metadata'],
+            metadata=_DataMetadata(**config_dict['metadata'])
+        )
