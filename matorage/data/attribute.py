@@ -14,19 +14,45 @@
 
 import copy
 
-from tables.atom import Atom
+from tables.atom import Atom, StringAtom
 from matorage.serialize import Serialize
 
 class DataAttribute(Serialize):
+    type_list = [
+        'string',
+        'bool',
+        'int',
+        'int',
+        'int8',
+        'int16',
+        'int32',
+        'int64',
+        'uint',
+        'uint8',
+        'uint16',
+        'uint32',
+        'uint64',
+        'uint64',
+        'float',
+        'float32',
+        'float64',
+    ]
 
-    def __init__(self, name, type, shape):
+    def __init__(self, name, type, shape, itemsize=0):
 
         self.name = name
 
-        if isinstance(type, str):
-            self.type = Atom.from_type(type)
+        if not isinstance(type, str):
+            raise TypeError("`type` is not str type")
+
+        if type not in self.type_list:
+            raise ValueError("`type` {} is unavailable type".format(type))
+        elif type == "string":
+            if itemsize == 0:
+                raise ValueError("set `itemsize` for string type")
+            self.type = StringAtom(itemsize=itemsize)
         else:
-            self.type = type
+            self.type = Atom.from_type(type)
 
         if isinstance(shape, int):
             self.shape = (shape,)
