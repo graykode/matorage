@@ -300,7 +300,7 @@ class DataSaver(object):
                 raise ValueError("{} OS not supported!".format(os.name))
 
     @property
-    def get_namelist(self):
+    def get_filelist(self):
         return self._filelist
 
     def disconnect(self):
