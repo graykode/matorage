@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import sys
 import uuid
 import atexit
 import tempfile
@@ -88,7 +89,8 @@ class DataSaver(object):
         self._uploader = DataUploader(
             client=self._client,
             bucket=self.config.bucket_name,
-            num_worker_threads=self.config.num_worker_threads
+            num_worker_threads=self.config.num_worker_threads,
+            inmemory=self.config.inmemory
         )
 
         atexit.register(self._exit)
@@ -118,7 +120,7 @@ class DataSaver(object):
                 array_size, self.config.max_object_size
             ))
 
-        if self.config.min_object_size < self._file.get_filesize():
+        if self.config.min_object_size < self._get_size():
             # If ProcessA and B approach this part at the same time,
             # there may be a race condition that creates different files.
             while self._lock:
@@ -127,9 +129,8 @@ class DataSaver(object):
             if not self._lock:
                 # atomic working
                 self._lock = True
-                self._file.close()
 
-                self._uploader.set_queue(self._file.filename)
+                self._file_closing()
 
                 self._file, self._earray = self._get_newfile()
                 self._lock = False
@@ -213,6 +214,21 @@ class DataSaver(object):
 
         self._append_all()
 
+    def _file_closing(self):
+        if not self.config.inmemory:
+            self._file.close()
+            self._uploader.set_queue(self._file.filename)
+        else:
+            self._uploader.set_queue(self._file.get_file_image())
+            self._file.close()
+
+    def _create_name(self, length=16):
+        return tempfile.mktemp("{}.h5".format(uuid.uuid4().hex[:length]))
+
+    def _exit(self):
+        self._file.close()
+        self._disconnected = True
+
     def _get_array_size(self):
         """
         Get size of all array .
@@ -225,13 +241,6 @@ class DataSaver(object):
             size += array.nbytes
         return size
 
-    def _create_name(self, length=16):
-        return tempfile.mktemp("{}.h5".format(uuid.uuid4().hex[:length]))
-
-    def _exit(self):
-        self._file.close()
-        self._disconnected = True
-
     def _get_newfile(self):
         """
         Get new file inode and it's attribute
@@ -243,7 +252,7 @@ class DataSaver(object):
                 'name1' : tables.EArray, 'name2' : tables.EArray
             }
         """
-        _driver, _driver_core_backing_store = self._set_driver(self.config)
+        _driver, _driver_core_backing_store = self._set_driver()
 
         new_name = self._create_name()
         self._filelist.append(new_name)
@@ -265,14 +274,20 @@ class DataSaver(object):
 
         return (file, earray)
 
-    def _set_driver(self, config):
+    def _get_size(self):
+        if self.config.inmemory:
+            return sys.getsizeof(self._file.get_file_image())
+        else:
+            return self._file.get_filesize()
+
+    def _set_driver(self):
         """
         Setting HDF5 driver type
 
         Returns:
             :obj:`str` : HDF5 driver type string
         """
-        if config.inmemory:
+        if self.config.inmemory:
             return 'H5FD_CORE', False
         else:
             if os.name == "posix":
@@ -287,8 +302,7 @@ class DataSaver(object):
         return self._filelist
 
     def disconnect(self):
-        self._file.close()
-        self._uploader.set_queue(self._file.filename)
+        self._file_closing()
         self._uploader.join_queue()
 
     @property

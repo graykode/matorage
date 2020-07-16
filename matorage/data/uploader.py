@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import io
 import os
+import uuid
 from minio import ResponseError
 
 from matorage.connector import MRTConnector
@@ -23,14 +25,25 @@ class DataUploader(MRTConnector):
         Although Python Global Interpreter Lock(GIL), multi thread can benefit greatly from file IO.
     """
 
-    def do_job(self, filename):
-        minio_key = os.path.basename(filename)
+    def _create_name(self, length=16):
+        return "{}.h5".format(uuid.uuid4().hex[:length])
+
+    def do_job(self, fileitem):
 
         try:
-            self._client.fput_object(
-                self._bucket, minio_key, filename
-            )
-            os.remove(filename)
+            if not self._inmemory:
+                minio_key = os.path.basename(fileitem)
+                filename = fileitem
+                self._client.fput_object(
+                    self._bucket, minio_key, filename
+                )
+                os.remove(filename)
+            else:
+                minio_key = self._create_name()
+                fileimage = io.BytesIO(fileitem)
+                self._client.put_object(
+                    self._bucket, minio_key, fileimage, len(fileitem),
+                )
         except ResponseError as err:
             print(err)
         return f"{minio_key} is uploaded"

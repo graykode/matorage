@@ -29,10 +29,11 @@ class MRTConnector(object):
     bucket = str
     num_worker_threads = int
 
-    def __init__(self, client, bucket, num_worker_threads):
+    def __init__(self, client, bucket, num_worker_threads, inmemory=False):
         self._client = client
         self._bucket = bucket
         self._queue = Queue()
+        self._inmemory = inmemory
 
         for i in range(num_worker_threads):
             _thread = Thread(target=self._worker)
@@ -41,8 +42,8 @@ class MRTConnector(object):
 
     def _worker(self):
         while True:
-            filename = self._queue.get()
-            self.do_job(filename)
+            fileitem = self._queue.get()
+            self.do_job(fileitem)
             self._queue.task_done()
 
     def set_queue(self, item):
