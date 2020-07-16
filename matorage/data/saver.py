@@ -221,6 +221,10 @@ class DataSaver(object):
         else:
             self._uploader.set_queue(self._file.get_file_image(), self._filename)
             self._file.close()
+        # Set filename indexer
+        self.config.set_indexer({
+            len(self._filelist) - 1 : os.path.basename(self._filename)
+        })
 
     def _create_name(self, length=16):
         return tempfile.mktemp("{}.h5".format(uuid.uuid4().hex[:length]))
@@ -304,6 +308,16 @@ class DataSaver(object):
     def disconnect(self):
         self._file_closing()
         self._uploader.join_queue()
+
+        # metadata set
+        _metadata_file = tempfile.mktemp('metadata.json')
+        self.config.metadata.to_json_file(_metadata_file)
+        self._client.fput_object(
+            self.config.bucket_name,
+            'metadata.json',
+            _metadata_file
+        )
+        os.remove(_metadata_file)
 
     @property
     def get_disconnected(self):

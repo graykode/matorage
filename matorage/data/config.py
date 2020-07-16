@@ -160,13 +160,12 @@ class DataConfig(MTRConfig):
         Returns:
             :obj:`Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
         """
-        output = dict()
-
-        output["config"] = copy.deepcopy(
+        output = copy.deepcopy(
             self.__class__.__base__(**self.__dict__).__dict__
         )
         if hasattr(self.__class__, "metadata"):
-            output["metadata"] = self.metadata.to_dict()
+            output["dataset_name"] = self.metadata.dataset_name
+            output["additional"] = self.metadata.additional
 
         return output
 
@@ -190,3 +189,6 @@ class DataConfig(MTRConfig):
             **config_dict['config'], **config_dict['metadata'],
             metadata=_DataMetadata(**config_dict['metadata'])
         )
+
+    def set_indexer(self, index):
+        self.metadata.indexer.update(index)
