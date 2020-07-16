@@ -13,36 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import unittest
 import numpy as np
-from minio import Minio
 
-from matorage.testing_utils import require_torch, require_tf
+from tests.test_data import DataTest
 
 from matorage.data.config import DataConfig
 from matorage.data.saver import DataSaver
 from matorage.data.attribute import DataAttribute
 
-class DataSaverTest(unittest.TestCase):
-    data_config = None
-    data_saver = None
-    storage_config = {
-        'endpoint' : '127.0.0.1:9000',
-        'access_key' : 'minio',
-        'secret_key' : 'miniosecretkey',
-        'secure' : False
-    }
-
-    def tearDown(self):
-        if self.data_config is not None:
-            # delete bucket
-            client = Minio(**self.storage_config)
-            client.remove_bucket(self.data_config.bucket_name)
-        if self.data_saver is not None:
-            # remove on local file
-            for _file in self.data_saver.get_filelist:
-                os.remove(_file)
+class DataSaverTest(DataTest, unittest.TestCase):
 
     def test_dataconfig_one_attribute(self):
         self.data_config = DataConfig(
