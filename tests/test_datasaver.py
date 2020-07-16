@@ -355,3 +355,105 @@ class DataSaverTest(DataTest, unittest.TestCase):
         self.data_saver({
             'x' : x
         })
+
+    def test_datasaver_inmemory(self):
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name='test_datasaver',
+            attributes=[
+                DataAttribute('x', 'float64', (2), itemsize=32)
+            ],
+            inmemory=True
+        )
+        self.data_saver = DataSaver(
+            config=self.data_config
+        )
+        x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        self.assertEqual(x.shape, (3, 2))
+        self.data_saver({
+            'x' : x
+        })
+
+    def test_datasaver_zlib(self):
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name='test_datasaver',
+            attributes=[
+                DataAttribute('x', 'float64', (2), itemsize=32)
+            ],
+            compressor={
+                "complevel" : 0,
+                "complib" : "zlib"
+            }
+        )
+        self.data_saver = DataSaver(
+            config=self.data_config
+        )
+        x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        self.assertEqual(x.shape, (3, 2))
+        self.data_saver({
+            'x' : x
+        })
+
+    def test_datasaver_lzo(self):
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name='test_datasaver',
+            attributes=[
+                DataAttribute('x', 'float64', (2), itemsize=32)
+            ],
+            compressor={
+                "complevel" : 0,
+                "complib" : "lzo"
+            }
+        )
+        self.data_saver = DataSaver(
+            config=self.data_config
+        )
+        x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        self.assertEqual(x.shape, (3, 2))
+        self.data_saver({
+            'x' : x
+        })
+
+    def test_datasaver_bzip2(self):
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name='test_datasaver',
+            attributes=[
+                DataAttribute('x', 'float64', (2), itemsize=32)
+            ],
+            compressor={
+                "complevel" : 0,
+                "complib" : "bzip2"
+            }
+        )
+        self.data_saver = DataSaver(
+            config=self.data_config
+        )
+        x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        self.assertEqual(x.shape, (3, 2))
+        self.data_saver({
+            'x' : x
+        })
+
+    def test_datasaver_blosc(self):
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name='test_datasaver',
+            attributes=[
+                DataAttribute('x', 'float64', (2), itemsize=32)
+            ],
+            compressor={
+                "complevel" : 0,
+                "complib" : "blosc"
+            }
+        )
+        self.data_saver = DataSaver(
+            config=self.data_config
+        )
+        x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        self.assertEqual(x.shape, (3, 2))
+        self.data_saver({
+            'x' : x
+        })
