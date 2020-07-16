@@ -40,8 +40,8 @@ if __name__ == '__main__':
         secret_key='miniosecretkey',
         dataset_name='mnist',
         attributes=[
-            DataAttribute('image', UInt8Atom, (28, 28)),
-            DataAttribute('target', UInt8Atom, (1))
+            DataAttribute('image', 'uint8', (28, 28)),
+            DataAttribute('target', 'uint8', (1))
         ]
     )
 
