@@ -59,6 +59,9 @@ class DataSaver(object):
             - According to the [MinIO python client document](https://docs.min.io/docs/python-client-api-reference.html),
             MinIO is a thread safety, but during multiprocessing, you must create a new MinIO Class object for each process.
 
+            Python supports asynchronous function with asyncio, however it's not in minio function.
+            So we use multi-thread to avoid blocking-io with thread job queue.
+
         Args:
             config (:obj:`matorage.config.MTRConfig`, `require`):
                 S3 object storage endpoint.
