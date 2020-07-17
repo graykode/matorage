@@ -190,6 +190,14 @@ class DataConfig(MTRConfig):
     def set_indexer(self, index):
         self.metadata.indexer.update(index)
 
+    @property
+    def get_indexer_last(self):
+        keys = list(self.metadata.indexer.keys())
+        if len(keys) == 0:
+            return 0
+        else:
+            return keys[-1]
+
     @classmethod
     def _load_metadata_from_bucket(cls, config_dict):
         """

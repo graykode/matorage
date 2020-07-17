@@ -26,14 +26,14 @@ class DataMetadata(Serialize):
             **`DataConfig` must be mapped with only one `DataMetadata`.**
 
         About indexer's work
-                When multiple atomic objects are also divided into one data,
-                it is difficult to bring data into absolute index numbers.
-                For example, suppose that 60000 datasets were divided into 600 objects, 100 each.
-                Also, it is assumed that all data has been stored sequentially.
-                If we want access to the 15011th data index, we need access to the 11th data from the 150th object file.
-                (100 * 150 + 11)
-                As the page table in the OS, this class helps to map from the absolute index to the relative index.
-
+            we manages index to dict type as total data length as key and file names as value.
+            Examples:
+                "indexer": {
+                    "15960": "tmpjopm9_qr118171adec9d410d.h5",
+                    "31920": "tmpnzdga4zfc952613ed2bf4fad.h5",
+                    "47880": "tmpy3fwohhx178eb7c1d17d4a78.h5",
+                    "60000": "tmpidco3y8u794f8adde1e5479a.h5"
+                }
     """
 
     def __init__(self, **kwargs):
