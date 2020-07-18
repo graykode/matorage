@@ -16,6 +16,8 @@ import os
 import sys
 import uuid
 import atexit
+import psutil
+import datetime
 import tempfile
 import tables as tb
 import numpy as np
@@ -315,11 +317,13 @@ class DataSaver(object):
         self._uploader.join_queue()
 
         # metadata set
-        _metadata_file = tempfile.mktemp('metadata.json')
+        cpu_num = psutil.Process().cpu_num()
+        key = uuid.uuid4().hex[:16]
+        _metadata_file = tempfile.mktemp(f'metadata_{cpu_num}_{key}.json')
         self.config.metadata.to_json_file(_metadata_file)
         self._client.fput_object(
             self.config.bucket_name,
-            'metadata.json',
+            f'metadata_{cpu_num}_{key}.json',
             _metadata_file
         )
         os.remove(_metadata_file)
