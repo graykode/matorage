@@ -69,7 +69,7 @@ class MTRConfig(Serialize):
         self.secret_key = kwargs.pop("secret_key", None)
         self.secure = kwargs.pop("secure", False)
         self.min_object_size = kwargs.pop("min_object_size", 10 * _MB)
-        self.max_object_size = kwargs.pop("max_object_size", 100 * _MB)
+        self.max_object_size = kwargs.pop("max_object_size", 1000 * _MB)
         self.multipart_upload_size = kwargs.pop("multipart_upload_size", 5 * _MB)
         self.num_worker_threads = kwargs.pop("num_worker_threads", 4)
 
