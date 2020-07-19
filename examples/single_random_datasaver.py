@@ -20,7 +20,7 @@ from matorage import DataSaver, DataConfig, DataAttribute
 
 def preprocessing_work():
     # abstract preprocessing work
-    pass
+    time.sleep(1)
 
 if __name__ == '__main__':
 
@@ -41,10 +41,10 @@ if __name__ == '__main__':
     start = time.time()
 
     for _ in tqdm(range(row)):
+        preprocessing_work()
         data_saver({
             'array' : data
         })
-        preprocessing_work()
 
     data_saver.disconnect()
 

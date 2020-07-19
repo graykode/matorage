@@ -21,15 +21,15 @@ from matorage import DataSaver, DataConfig, DataAttribute
 
 def preprocessing_work():
     # abstract preprocessing work
-    pass
+    time.sleep(1)
 
 def saver(row, data):
     data_saver = DataSaver(config=data_config)
     for _ in tqdm(range(row)):
+        preprocessing_work()
         data_saver({
             'array': data
         })
-        # preprocessing_work()
 
     data_saver.disconnect()
 
