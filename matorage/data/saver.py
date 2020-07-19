@@ -323,7 +323,7 @@ class DataSaver(object):
         self.config.metadata.to_json_file(_metadata_file)
         self._client.fput_object(
             self.config.bucket_name,
-            f'metadata_{cpu_num}_{key}.json',
+            f'metadata/{cpu_num}_{key}.json',
             _metadata_file
         )
         os.remove(_metadata_file)
