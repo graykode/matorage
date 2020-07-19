@@ -42,11 +42,10 @@ if __name__ == '__main__':
         dataset_name='multi_process_array_test2',
         attributes=[
             DataAttribute('array', 'float64', (3, 224, 224)),
-        ],
-        num_worker_threads=1
+        ]
     )
 
-    rows = [25] * 4
+    rows = [20] * 5
     data = np.random.rand(64, 3, 224, 224)
 
     start = time.time()
