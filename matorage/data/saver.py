@@ -325,13 +325,12 @@ class DataSaver(object):
         self._uploader.join_queue()
 
         # metadata set
-        cpu_num = psutil.Process().cpu_num()
         key = uuid.uuid4().hex[:16]
-        _metadata_file = tempfile.mktemp(f'metadata_{cpu_num}_{key}.json')
+        _metadata_file = tempfile.mktemp(f'{key}.json')
         self.config.metadata.to_json_file(_metadata_file)
         self._client.fput_object(
             self.config.bucket_name,
-            f'metadata/{cpu_num}_{key}.json',
+            f'metadata/{key}.json',
             _metadata_file
         )
         os.remove(_metadata_file)
