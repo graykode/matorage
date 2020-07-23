@@ -224,7 +224,7 @@ class DataSaver(object):
 
     def _file_closing(self):
         _length = len(list(self._earray.values())[0])
-        _last_key = self.config.get_indexer_last
+        _last_index = self.config.get_indexer_last
 
         if not self.config.inmemory:
             self._file.close()
@@ -233,9 +233,12 @@ class DataSaver(object):
             self._uploader.set_queue(self._file.get_file_image(), self._filename)
             self._file.close()
         # Set filename indexer
-        _new_key = _last_key + _length
+        _current_index = _last_index + _length
         self.config.set_indexer({
-            _new_key : os.path.basename(self._filename)
+            _current_index : {
+                "name" : os.path.basename(self._filename),
+                "length" : _length
+            }
         })
 
     def _create_name(self, length=16):
