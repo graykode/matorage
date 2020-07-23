@@ -13,8 +13,8 @@
 # limitations under the License.
 
 # Create path shortcut
-from matorage.data.torch.reader import DataReader
+from matorage.data.torch.loader import MTRDataLoader
 
 __all__ = [
-    'DataReader',
+    'MTRDataLoader',
 ]
