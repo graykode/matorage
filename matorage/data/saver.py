@@ -38,17 +38,16 @@ class DataSaver(object):
 
         To make This procedure easier to understand, the following is written in the pseudo-code.
             ```python
-            file is opened, if file already exist, there will be append mode.
-            for data(shape : 100 x 784) in multiprocessing(dataset(shape : 60000 x 784))
-                if MIN_OBJECT_SIZE <= file size <= MAX_OBJECT_SIZE
-                    file is closed
-                    lock other processes until new_file is opened
+            per_one_batch_data_size = array_size // batch size
+            per_one_file_batch_size = max(1, self.config.min_object_size // per_one_batch_data_size)
+            for batch_idx in range(bzs):
+                if get_current_stored_batch_size() < per_one_file_batch_size:
+                    file.append(data[batch_idx])
+                else:
+                    file_closing()
                     new_file is opened
-                    new_file.append(data)
-                    upload to backend storage
-                else
-                    file.append(data)
-            file is closed
+                    new_file.append(data[batch_idx])
+            All files are closed.
             ```
 
         Note:
@@ -85,7 +84,6 @@ class DataSaver(object):
         self._filelist = []
         self._file, self._earray = self._get_newfile()
 
-        self._lock = False
         self._disconnected = False
 
         self._client = Minio(
@@ -118,37 +116,20 @@ class DataSaver(object):
             :None
         """
         array_size = self._get_array_size()
-        if self.config.max_object_size <= array_size:
-            raise ValueError("a once updated size({}) of data have to lower than {}".format(
-                array_size, self.config.max_object_size
-            ))
+        bzs = list(self._datas.values())[0].shape[0]
 
-        if self.config.max_object_size < array_size:
-            raise ValueError("appended array_size is {} large than max_object_size {}".format(
-                array_size, self.config.max_object_size
-            ))
+        per_one_batch_data_size = array_size // bzs
+        per_one_file_batch_size = max(1, self.config.min_object_size // per_one_batch_data_size)
 
-        if self.config.min_object_size < self._get_size():
-            # If ProcessA and B approach this part at the same time,
-            # there may be a race condition that creates different files.
-            while self._lock:
-                sleep(0.005)
-
-            if not self._lock:
-                # atomic working
-                self._lock = True
-
+        for batch_idx in range(bzs):
+            if self._get_current_stored_batch_size() < per_one_file_batch_size:
+                for name, array in self._datas.items():
+                    self._earray[name].append(array[batch_idx, None])
+            else:
                 self._file_closing()
-
                 self._file, self._earray = self._get_newfile()
-                self._lock = False
-
-            for name, array in self._datas.items():
-                self._earray[name].append(array)
-
-        else:
-            for name, array in self._datas.items():
-                self._earray[name].append(array)
+                for name, array in self._datas.items():
+                    self._earray[name].append(array[batch_idx, None])
 
     def _check_attr_name(self, name):
         """
@@ -208,7 +189,6 @@ class DataSaver(object):
             }
 
         Note:
-            ** we suppose that a once appened size of datas is lower than `max_object_size` **
             file size will be closed and uploaded if bigger than `min_object_size`
 
         Returns:
@@ -259,6 +239,15 @@ class DataSaver(object):
         for name, array in self._datas.items():
             size += array.nbytes
         return size
+
+    def _get_current_stored_batch_size(self):
+        """
+        Get current file stored batch size
+
+        Returns:
+            :obj:`integer`: current stored batch size in a opened file.
+        """
+        return len(list(self._earray.values())[0])
 
     def _get_newfile(self):
         """
