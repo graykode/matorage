@@ -130,9 +130,12 @@ class DataConfig(MTRConfig):
                 self.bucket_name,
                 prefix='metadata/'
             )
+            _metadata = None
             for obj in objects:
                 _metadata = minioClient.get_object(self.bucket_name, obj.object_name)
                 break
+            if not _metadata:
+                return
 
             metadata_dict = json.loads(_metadata.read().decode('utf-8'))
             self.compressor = metadata_dict['compressor']
