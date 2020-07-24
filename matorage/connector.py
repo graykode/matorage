@@ -22,10 +22,11 @@ class MRTConnector(object):
         Although Python Global Interpreter Lock(GIL), multi thread can benefit greatly from file IO.
     """
 
-    def __init__(self, client, bucket, num_worker_threads, inmemory=False):
+    def __init__(self, client, bucket, num_worker_threads, multipart_upload_size, inmemory=False):
         self._client = client
         self._bucket = bucket
         self._queue = Queue()
+        self._multipart_upload_size = multipart_upload_size
         self._inmemory = inmemory
 
         for i in range(num_worker_threads):

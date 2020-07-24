@@ -99,6 +99,7 @@ class DataSaver(object):
             client=self._client,
             bucket=self.config.bucket_name,
             num_worker_threads=self.config.num_worker_threads,
+            multipart_upload_size=self.config.multipart_upload_size,
             inmemory=self.config.inmemory
         )
 
