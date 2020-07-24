@@ -154,10 +154,8 @@ class DataConfig(MTRConfig):
         output = copy.deepcopy(
             self.__class__.__base__(**self.__dict__).__dict__
         )
-        if hasattr(self.__class__, "metadata") or "metadata" in output:
-            output["dataset_name"] = self.metadata.dataset_name
-            output["additional"] = self.metadata.additional
-
+        output["dataset_name"] = self.metadata.dataset_name
+        output["additional"] = self.metadata.additional
         return output
 
     @classmethod
@@ -218,6 +216,12 @@ class DataConfig(MTRConfig):
             raise AssertionError("{} with {} is not exist on {} or key is mismathced".format(
                 config_dict['dataset_name'], config_dict['additional'], config_dict['endpoint']
             ))
-        _metadata = minioClient.get_object(_bucket_name, 'metadata.json')
+        objects = minioClient.list_objects(
+            _bucket_name,
+            prefix='metadata/'
+        )
+        for obj in objects:
+            _metadata = minioClient.get_object(_bucket_name, obj.object_name)
+            break
 
         return json.loads(_metadata.read().decode('utf-8'))
