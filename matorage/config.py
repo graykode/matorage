@@ -38,8 +38,6 @@ class MTRConfig(Serialize):
                     Set this value to True to enable secure (HTTPS) access. (Optional defaults to False unlike the original MinIO).
                 min_object_size (:obj:`int`, `optional`, defaults to `10 * 1024 * 1024`):
                     The minimum size of object storage stored as an actual object.
-                max_object_size (:obj:`int`, `optional`, defaults to `100 * 1024 * 1024`):
-                    The maximum size of object storage stored as an actual object.
                 multipart_upload_size (:obj:`int`, `optional`, defaults to `10 * 1024 * 1024`):
                     size of the incompletely uploaded object.
                     You can sync files faster with multipart upload in MinIO.
@@ -69,7 +67,6 @@ class MTRConfig(Serialize):
         self.secret_key = kwargs.pop("secret_key", None)
         self.secure = kwargs.pop("secure", False)
         self.min_object_size = kwargs.pop("min_object_size", 10 * _MB)
-        self.max_object_size = kwargs.pop("max_object_size", 1000 * _MB)
         self.multipart_upload_size = kwargs.pop("multipart_upload_size", 5 * _MB)
         self.num_worker_threads = kwargs.pop("num_worker_threads", 4)
 
