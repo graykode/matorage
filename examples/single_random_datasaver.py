@@ -30,13 +30,13 @@ if __name__ == '__main__':
         secret_key='miniosecretkey',
         dataset_name='array_test',
         attributes=[
-            DataAttribute('array', 'float64', (3, 224, 224)),
+            DataAttribute('array', 'uint8', (3, 224, 224)),
         ]
     )
 
     data_saver = DataSaver(config=data_config)
     row = 100
-    data = np.random.rand(64, 3, 224, 224)
+    data = np.random.rand(64, 3, 224, 224,).astype('uint8')
 
     start = time.time()
 
@@ -50,5 +50,3 @@ if __name__ == '__main__':
 
     end = time.time()
     print(end - start)
-
-    # 37.55967569351196

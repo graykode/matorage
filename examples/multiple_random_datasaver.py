@@ -41,12 +41,12 @@ if __name__ == '__main__':
         secret_key='miniosecretkey',
         dataset_name='multi_process_array_test2',
         attributes=[
-            DataAttribute('array', 'float64', (3, 224, 224)),
+            DataAttribute('array', 'uint8', (3, 224, 224)),
         ]
     )
 
     rows = [20] * 5
-    data = np.random.rand(64, 3, 224, 224)
+    data = np.random.rand(64, 3, 224, 224,).astype('uint8')
 
     start = time.time()
 
@@ -61,5 +61,3 @@ if __name__ == '__main__':
 
     end = time.time()
     print(end - start)
-
-    # 39.59222078323364
