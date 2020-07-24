@@ -51,10 +51,10 @@ class DataConfig(MTRConfig):
                     `attributes = DataAttribute('image', matorage.UInt8Atom, (28 * 28))`
                     or
                     ```python
-                    attributes = (
+                    attributes = [
                         DataAttribute('image', matorage.UInt8Atom, (28 * 28)),
                         DataAttribute('target', matorage.UInt8Atom, (1))
-                    )
+                    ]
                     ```
             compressor (:obj:`dict`, `optional`, defaults to `{"level" : 0, "lib" : "zlip"}`):
                 Data compressor option, it same with [pytable's Filter](http://www.pytables.org/usersguide/libref/helper_classes.html#tables.Filters)
@@ -84,6 +84,8 @@ class DataConfig(MTRConfig):
         Returns:
             :obj: `None`:
         """
+        self._check_bucket()
+
         if self.attributes is None:
             raise ValueError("attributes is empty")
         if isinstance(self.attributes, tuple):
@@ -109,11 +111,10 @@ class DataConfig(MTRConfig):
             raise ValueError("compressor mode {} is not valid. select in "
                              "zlib, lzo, bzip2, blosc".format(self.compressor['lib']))
 
-        self._check_bucket()
-
     def _check_bucket(self):
         """
         Check bucket name is exist. If not exist, create new bucket
+        If bucket and metadata sub folder exist, get metadata(attributes, compressor) from there.
 
         Returns:
             :obj: `None`:
@@ -124,6 +125,20 @@ class DataConfig(MTRConfig):
                             secure=self.secure)
         if not minioClient.bucket_exists(self.bucket_name):
             minioClient.make_bucket(self.bucket_name)
+        else:
+            objects = minioClient.list_objects(
+                self.bucket_name,
+                prefix='metadata/'
+            )
+            for obj in objects:
+                _metadata = minioClient.get_object(self.bucket_name, obj.object_name)
+                break
+
+            metadata_dict = json.loads(_metadata.read().decode('utf-8'))
+            self.compressor = metadata_dict['compressor']
+            self.attributes = [
+                DataAttribute(**item) for item in metadata_dict['attributes']
+            ]
 
     def _convert_type_flatten(self):
         for attribute in self.flatten_attributes:
