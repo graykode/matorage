@@ -48,6 +48,9 @@ class MTRConfig(Serialize):
                     size of the incompletely uploaded object.
                 num_worker_threads :obj:`int`, `optional`, defaults to `4`):
                     number of backend storage worker to upload or download.
+                batch_atomic (:obj:`boolean`, `optional`, defaults to `False`):
+                    Option for saving a single batch to one file.
+                    If the `batch_atomic` value is True, set `per_one_file_batch_size` to 1 regardless of the `max_object_size` value.
 
             HDF5 Options
                 inmemory (:obj:`bool`, `optional`, defaults to `False`):
@@ -69,6 +72,7 @@ class MTRConfig(Serialize):
         self.max_object_size = kwargs.pop("max_object_size", 10 * _MB)
         self.multipart_upload_size = kwargs.pop("multipart_upload_size", 5 * _MB)
         self.num_worker_threads = kwargs.pop("num_worker_threads", 4)
+        self.batch_atomic = kwargs.pop("batch_atomic", False)
 
         # HDF5 configuration
         self.inmemory = kwargs.pop("inmemory", False)

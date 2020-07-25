@@ -56,8 +56,6 @@ class DataSaver(object):
 
         Args:
             config (:obj:`matorage.config.MTRConfig`, `require`):
-            atomic (:obj:`boolean`, `optional`, defaults to `False`):
-                If the `atomic` value is 1, set `per_one_file_batch_size` to 1 regardless of the `max_object_size` value.
 
         Example::
             Single Process example
@@ -78,11 +76,10 @@ class DataSaver(object):
                 ```
     """
 
-    def __init__(self, config, atomic=False):
+    def __init__(self, config):
 
         self.config = config
         self.filter = tb.Filters(**config.compressor)
-        self.atomic = atomic
 
         self._filelist = []
         self._file, self._earray = self._get_newfile()
@@ -123,10 +120,8 @@ class DataSaver(object):
         bzs = list(self._datas.values())[0].shape[0]
 
         per_one_batch_data_size = array_size // bzs
-        per_one_file_batch_size = max(
-            int(self.atomic),
-            self.config.max_object_size // per_one_batch_data_size
-        )
+        per_one_file_batch_size = 1 if self.config.batch_atomic \
+            else max(1,self.config.max_object_size // per_one_batch_data_size)
 
         for batch_idx in range(bzs):
             if self._get_current_stored_batch_size() < per_one_file_batch_size:
