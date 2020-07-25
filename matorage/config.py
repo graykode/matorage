@@ -49,7 +49,8 @@ class MTRConfig(Serialize):
                 num_worker_threads :obj:`int`, `optional`, defaults to `4`):
                     number of backend storage worker to upload or download.
                 batch_atomic (:obj:`boolean`, `optional`, defaults to `False`):
-                    Option for saving a single batch to one file.
+                    Option for saving a single batch to one file in storage backend.
+                    Also, loading data in remote storage, local don't save as a file.
                     If the `batch_atomic` value is True, set `per_one_file_batch_size` to 1 regardless of the `max_object_size` value.
 
             HDF5 Options
