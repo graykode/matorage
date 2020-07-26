@@ -53,14 +53,6 @@ class MTRConfig(Serialize):
                     Also, loading data in remote storage, local don't save as a file.
                     If the `batch_atomic` value is True, set `per_one_file_batch_size` to 1 regardless of the `max_object_size` value.
 
-            HDF5 Options
-                inmemory (:obj:`bool`, `optional`, defaults to `False`):
-                    If you use this value as `True`, then you can use `HDF5_CORE` driver (https://support.hdfgroup.org/HDF5/doc/TechNotes/VFL.html#TOC1)
-                    so the temporary file for uploading or downloading to backend storage,
-                    such as MinIO, is not stored on disk but is in the memory.
-                    Keep in mind that using memory is fast because it doesn't use disk IO, but it's not always good.
-                    If default option(False), then `HDF5_SEC2` driver will be used on posix OS(or `HDF5_WINDOWS` in Windows).
-
     """
 
     def __init__(self, **kwargs):
@@ -74,6 +66,3 @@ class MTRConfig(Serialize):
         self.multipart_upload_size = kwargs.pop("multipart_upload_size", 5 * _MB)
         self.num_worker_threads = kwargs.pop("num_worker_threads", 4)
         self.batch_atomic = kwargs.pop("batch_atomic", False)
-
-        # HDF5 configuration
-        self.inmemory = kwargs.pop("inmemory", False)

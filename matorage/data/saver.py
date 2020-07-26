@@ -56,6 +56,14 @@ class DataSaver(object):
 
         Args:
             config (:obj:`matorage.config.MTRConfig`, `require`):
+            HDF5 Options
+                inmemory (:obj:`bool`, `optional`, defaults to `False`):
+                    If you use this value as `True`, then you can use `HDF5_CORE` driver (https://support.hdfgroup.org/HDF5/doc/TechNotes/VFL.html#TOC1)
+                    so the temporary file for uploading or downloading to backend storage,
+                    such as MinIO, is not stored on disk but is in the memory.
+                    Keep in mind that using memory is fast because it doesn't use disk IO, but it's not always good.
+                    If default option(False), then `HDF5_SEC2` driver will be used on posix OS(or `HDF5_WINDOWS` in Windows).
+
 
         Example::
             Single Process example
@@ -76,9 +84,12 @@ class DataSaver(object):
                 ```
     """
 
-    def __init__(self, config):
+    def __init__(self, config, inmemory=False):
 
         self.config = config
+        # HDF5 configuration
+        self.inmemory = inmemory
+
         self.filter = tb.Filters(**config.compressor)
 
         self._filelist = []
@@ -97,7 +108,7 @@ class DataSaver(object):
             bucket=self.config.bucket_name,
             num_worker_threads=self.config.num_worker_threads,
             multipart_upload_size=self.config.multipart_upload_size,
-            inmemory=self.config.inmemory
+            inmemory=self.inmemory
         )
 
         atexit.register(self._exit)
@@ -208,7 +219,7 @@ class DataSaver(object):
         _length = len(list(self._earray.values())[0])
         _last_index = self.config.get_indexer_last
 
-        if not self.config.inmemory:
+        if not self.inmemory:
             self._file.close()
             self._uploader.set_queue(self._file.filename, self._filename)
         else:
@@ -285,7 +296,7 @@ class DataSaver(object):
         return (file, earray)
 
     def _get_size(self):
-        if self.config.inmemory:
+        if self.inmemory:
             return sys.getsizeof(self._file.get_file_image())
         else:
             return self._file.get_filesize()
@@ -297,7 +308,7 @@ class DataSaver(object):
         Returns:
             :obj:`str` : HDF5 driver type string
         """
-        if self.config.inmemory:
+        if self.inmemory:
             return 'H5FD_CORE', False
         else:
             if os.name == "posix":
