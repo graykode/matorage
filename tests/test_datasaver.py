@@ -362,11 +362,11 @@ class DataSaverTest(DataTest, unittest.TestCase):
             dataset_name='test_datasaver',
             attributes=[
                 DataAttribute('x', 'float64', (2), itemsize=32)
-            ],
-            inmemory=True
+            ]
         )
         self.data_saver = DataSaver(
-            config=self.data_config
+            config=self.data_config,
+            inmemory=True
         )
         x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
         self.assertEqual(x.shape, (3, 2))
