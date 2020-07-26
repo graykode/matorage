@@ -119,20 +119,20 @@ class DataConfig(MTRConfig):
         Returns:
             :obj: `None`:
         """
-        minioClient = Minio(self.endpoint,
+        _client = Minio(self.endpoint,
                             access_key=self.access_key,
                             secret_key=self.secret_key,
                             secure=self.secure)
-        if not minioClient.bucket_exists(self.bucket_name):
-            minioClient.make_bucket(self.bucket_name)
+        if not _client.bucket_exists(self.bucket_name):
+            _client.make_bucket(self.bucket_name)
         else:
-            objects = minioClient.list_objects(
+            objects = _client.list_objects(
                 self.bucket_name,
                 prefix='metadata/'
             )
             _metadata = None
             for obj in objects:
-                _metadata = minioClient.get_object(self.bucket_name, obj.object_name)
+                _metadata = _client.get_object(self.bucket_name, obj.object_name)
                 break
             if not _metadata:
                 return
@@ -226,21 +226,21 @@ class DataConfig(MTRConfig):
             (config_dict['dataset_name'] + json.dumps(config_dict['additional'])).encode('utf-8')
         ).hexdigest()
 
-        minioClient = Minio(config_dict['endpoint'],
+        _client = Minio(config_dict['endpoint'],
                             access_key=config_dict['access_key'],
                             secret_key=config_dict['secret_key'],
                             secure=config_dict['secure'])
-        if not minioClient.bucket_exists(_bucket_name):
+        if not _client.bucket_exists(_bucket_name):
             raise AssertionError("{} with {} is not exist on {} or key is mismathced".format(
                 config_dict['dataset_name'], config_dict['additional'], config_dict['endpoint']
             ))
-        objects = minioClient.list_objects(
+        objects = _client.list_objects(
             _bucket_name,
             prefix='metadata/'
         )
         _metadata = None
         for obj in objects:
-            _metadata = minioClient.get_object(_bucket_name, obj.object_name)
+            _metadata = _client.get_object(_bucket_name, obj.object_name)
             break
         if not _metadata:
             raise AssertionError("metadata folder is not exist in minio storage")
