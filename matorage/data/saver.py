@@ -29,6 +29,12 @@ from matorage.utils import is_tf_available, is_torch_available
 from matorage.data.config import DataConfig
 from matorage.data.uploader import DataUploader
 
+_KB = 1024
+"""The size of a Kilobyte in bytes"""
+
+_MB = 1024 * _KB
+"""The size of a Megabyte in bytes"""
+
 class DataSaver(object):
     r""" Dataset saver classes.
         This class is initialized independently of the process and goes through the process of uploading
@@ -56,6 +62,16 @@ class DataSaver(object):
 
         Args:
             config (:obj:`matorage.config.MTRConfig`, `require`):
+            Storage Options
+                multipart_upload_size (:obj:`int`, `optional`, defaults to `5 * 1024 * 1024`):
+                    size of the incompletely uploaded object.
+                    You can sync files faster with multipart upload in MinIO.
+                    (https://github.com/minio/minio-py/blob/master/minio/api.py#L1795)
+                    This is because MinIO clients use multi-threading, which improves IO speed more
+                    efficiently regardless of Python's Global Interpreter Lock(GIL).
+                num_worker_threads :obj:`int`, `optional`, defaults to `4`):
+                    number of backend storage worker to upload or download.
+
             HDF5 Options
                 inmemory (:obj:`bool`, `optional`, defaults to `False`):
                     If you use this value as `True`, then you can use `HDF5_CORE` driver (https://support.hdfgroup.org/HDF5/doc/TechNotes/VFL.html#TOC1)
@@ -84,9 +100,17 @@ class DataSaver(object):
                 ```
     """
 
-    def __init__(self, config, inmemory=False):
+    def __init__(self, config,
+                 multipart_upload_size=5*_MB,
+                 num_worker_threads=4,
+                 inmemory=False):
 
         self.config = config
+
+        # Storage configuration
+        self.multipart_upload_size = multipart_upload_size
+        self.num_worker_threads = num_worker_threads
+
         # HDF5 configuration
         self.inmemory = inmemory
 
@@ -106,8 +130,8 @@ class DataSaver(object):
         self._uploader = DataUploader(
             client=self._client,
             bucket=self.config.bucket_name,
-            num_worker_threads=self.config.num_worker_threads,
-            multipart_upload_size=self.config.multipart_upload_size,
+            num_worker_threads=self.num_worker_threads,
+            multipart_upload_size=self.multipart_upload_size,
             inmemory=self.inmemory
         )
 

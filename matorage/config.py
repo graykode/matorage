@@ -38,16 +38,6 @@ class MTRConfig(Serialize):
                     Set this value to True to enable secure (HTTPS) access. (Optional defaults to False unlike the original MinIO).
                 max_object_size (:obj:`int`, `optional`, defaults to `10 * 1024 * 1024`):
                     The maximum size of object storage stored as an actual object.
-                multipart_upload_size (:obj:`int`, `optional`, defaults to `10 * 1024 * 1024`):
-                    size of the incompletely uploaded object.
-                    You can sync files faster with multipart upload in MinIO.
-                    (https://github.com/minio/minio-py/blob/master/minio/api.py#L1795)
-                    This is because MinIO clients use multi-threading, which improves IO speed more
-                    efficiently regardless of Python's Global Interpreter Lock(GIL).
-                multipart_upload_size (:obj:`int`, `optional`, defaults to `5 * 1024 * 1024`):
-                    size of the incompletely uploaded object.
-                num_worker_threads :obj:`int`, `optional`, defaults to `4`):
-                    number of backend storage worker to upload or download.
                 batch_atomic (:obj:`boolean`, `optional`, defaults to `False`):
                     Option for saving a single batch to one file in storage backend.
                     Also, loading data in remote storage, local don't save as a file.
@@ -63,6 +53,4 @@ class MTRConfig(Serialize):
         self.secret_key = kwargs.pop("secret_key", None)
         self.secure = kwargs.pop("secure", False)
         self.max_object_size = kwargs.pop("max_object_size", 10 * _MB)
-        self.multipart_upload_size = kwargs.pop("multipart_upload_size", 5 * _MB)
-        self.num_worker_threads = kwargs.pop("num_worker_threads", 4)
         self.batch_atomic = kwargs.pop("batch_atomic", False)
