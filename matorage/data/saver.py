@@ -16,17 +16,14 @@ import os
 import sys
 import uuid
 import atexit
-import psutil
-import datetime
 import tempfile
 import tables as tb
 import numpy as np
-from time import sleep
 from functools import reduce
 from minio import Minio
 
-from matorage.utils import is_tf_available, is_torch_available
-from matorage.data.config import DataConfig
+from matorage.nas import NAS
+from matorage.utils import is_tf_available, is_torch_available, check_nas
 from matorage.data.uploader import DataUploader
 
 _KB = 1024
@@ -126,7 +123,7 @@ class DataSaver(object):
             access_key=self.config.access_key,
             secret_key=self.config.secret_key,
             secure=self.config.secure,
-        )
+        ) if not check_nas(self.config.endpoint) else NAS(self.config.endpoint)
         self._uploader = DataUploader(
             client=self._client,
             bucket=self.config.bucket_name,

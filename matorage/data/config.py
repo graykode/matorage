@@ -19,6 +19,8 @@ import hashlib
 from minio import Minio
 from functools import reduce
 
+from matorage.nas import NAS
+from matorage.utils import check_nas
 from matorage.config import MTRConfig
 from matorage.data.metadata import DataMetadata
 from matorage.data.attribute import DataAttribute
@@ -122,7 +124,7 @@ class DataConfig(MTRConfig):
         _client = Minio(self.endpoint,
                             access_key=self.access_key,
                             secret_key=self.secret_key,
-                            secure=self.secure)
+                            secure=self.secure) if not check_nas(self.endpoint) else NAS(self.endpoint)
         if not _client.bucket_exists(self.bucket_name):
             _client.make_bucket(self.bucket_name)
         else:
@@ -229,7 +231,8 @@ class DataConfig(MTRConfig):
         _client = Minio(config_dict['endpoint'],
                             access_key=config_dict['access_key'],
                             secret_key=config_dict['secret_key'],
-                            secure=config_dict['secure'])
+                            secure=config_dict['secure']) \
+            if not check_nas(config_dict['endpoint']) else NAS(config_dict['endpoint'])
         if not _client.bucket_exists(_bucket_name):
             raise AssertionError("{} with {} is not exist on {} or key is mismathced".format(
                 config_dict['dataset_name'], config_dict['additional'], config_dict['endpoint']

@@ -20,6 +20,7 @@
 
 import os
 import logging
+from urllib.parse import urlsplit
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -58,3 +59,12 @@ def is_torch_available():
 
 def is_tf_available():
     return _tf_available
+
+def check_nas(endpoint):
+    _url_or_path = '//' + endpoint
+    u = urlsplit(_url_or_path)
+    if u.path:
+        return True
+    if u.netloc:
+        return False
+    raise ValueError("This endpoint is not suitable.")

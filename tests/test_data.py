@@ -15,6 +15,9 @@
 import os
 import unittest
 from minio import Minio
+from urllib.parse import urlsplit
+
+from matorage.nas import NAS
 
 class DataTest(unittest.TestCase):
     data_config = None
@@ -26,10 +29,21 @@ class DataTest(unittest.TestCase):
         'secure': False
     }
 
+    def check_nas(self, endpoint):
+        _url_or_path = '//' + endpoint
+        u = urlsplit(_url_or_path)
+        if u.path:
+            return True
+        if u.netloc:
+            return False
+        raise ValueError("This endpoint is not suitable.")
+
     def tearDown(self):
         if self.data_config is not None:
             # delete bucket
-            client = Minio(**self.storage_config)
+            client = Minio(**self.storage_config) \
+                if not self.check_nas(self.data_config.endpoint) \
+                else NAS(self.data_config.endpoint)
             objects = client.list_objects(self.data_config.bucket_name)
             for obj in objects:
                 client.remove_object(self.data_config.bucket_name, obj.object_name)

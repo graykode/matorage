@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import unittest
 import numpy as np
 
@@ -440,6 +441,30 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_blosc(self):
         self.data_config = DataConfig(
             **self.storage_config,
+            dataset_name='test_datasaver',
+            attributes=[
+                DataAttribute('x', 'float64', (2), itemsize=32)
+            ],
+            compressor={
+                "complevel" : 0,
+                "complib" : "blosc"
+            }
+        )
+        self.data_saver = DataSaver(
+            config=self.data_config
+        )
+        x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        self.assertEqual(x.shape, (3, 2))
+        self.data_saver({
+            'x' : x
+        })
+
+    def test_datasaver_nas(self):
+        storage_config = copy.deepcopy(self.storage_config)
+        storage_config['endpoint'] = '/tmp'
+
+        self.data_config = DataConfig(
+            **storage_config,
             dataset_name='test_datasaver',
             attributes=[
                 DataAttribute('x', 'float64', (2), itemsize=32)
