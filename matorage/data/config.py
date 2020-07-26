@@ -238,8 +238,11 @@ class DataConfig(MTRConfig):
             _bucket_name,
             prefix='metadata/'
         )
+        _metadata = None
         for obj in objects:
             _metadata = minioClient.get_object(_bucket_name, obj.object_name)
             break
+        if not _metadata:
+            raise AssertionError("metadata folder is not exist in minio storage")
 
         return json.loads(_metadata.read().decode('utf-8'))
