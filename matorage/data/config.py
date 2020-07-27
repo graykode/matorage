@@ -140,6 +140,10 @@ class DataConfig(MTRConfig):
                 return
 
             metadata_dict = json.loads(_metadata.read().decode('utf-8'))
+            if self.endpoint != metadata_dict['endpoint']:
+                raise ValueError("Already created endpoint({}) doesn't current endpoint str({})"
+                                 " It may occurs permission denied error".format(metadata_dict['endpoint'], self.endpoint))
+
             self.compressor = metadata_dict['compressor']
             self.attributes = [
                 DataAttribute(**item) for item in metadata_dict['attributes']

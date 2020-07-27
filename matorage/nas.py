@@ -40,7 +40,8 @@ class NAS(object):
         shutil.copyfile(src=file_path, dst=_filename)
 
     def get_object(self, bucket_name, object_name):
-        pass
+        _filename = os.path.join(self.path, bucket_name, object_name)
+        return open(_filename, 'rb')
 
     def put_object(self, bucket_name, object_name, data, length, part_size=None):
         _filename = os.path.join(self.path, bucket_name, object_name)
@@ -54,7 +55,7 @@ class NAS(object):
         objects = os.listdir(
             os.path.join(self.path, bucket_name, prefix)
         )
-        return [Obj(o) for o in objects]
+        return [Obj(os.path.join(prefix, o)) for o in objects]
 
     def make_bucket(self, bucket_name):
         os.makedirs(

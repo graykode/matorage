@@ -37,6 +37,7 @@ class DataMetadata(Serialize):
     """
 
     def __init__(self, **kwargs):
+        self.endpoint = kwargs['endpoint']
         self.dataset_name = kwargs.pop("dataset_name", None)
         self.additional = kwargs.pop("additional", {})
 
