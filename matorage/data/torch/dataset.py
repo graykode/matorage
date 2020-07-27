@@ -14,12 +14,18 @@
 
 import os
 import json
+import time
+import torch
 import tables
 import bisect
 import tempfile
 from minio import Minio
+from multiprocessing import Manager
 
 from torch.utils.data import Dataset
+
+from matorage.nas import NAS
+from matorage.utils import check_nas
 
 class MTRDataset(Dataset):
     r"""MTRDataset class for Pytorch Dataset
@@ -38,10 +44,10 @@ class MTRDataset(Dataset):
                 Delete all files stored on the local storage after the program finishes.
 
     """
-    def __init__(self, config, download=True, clear=True):
+    def __init__(self, config, inmemory=False, clear=True):
         self.config = config
-        self.download = False if config.batch_atomic or config.inmemory else download
-        self.clear = clear
+        self.download = False if (config.batch_atomic or inmemory) else True
+        self.clear = False if not self.download else clear
 
         self.reindexer = self._merge_metadata(
             bucket_name=self.config.bucket_name
@@ -50,36 +56,70 @@ class MTRDataset(Dataset):
 
         self._clients = {}
 
-        self.cnt = 0
+        # To avoid processes race condition.
+        _manager = Manager()
+        self._worker_job = dict()
+        self._object_file_mapper = _manager.dict()
+
+        self.num_worker = -1
 
     def __len__(self):
         return self.ends[-1]
 
     def __getitem__(self, idx):
-        _filename, _index = self._fine_file(idx)
-        _local_filename = tempfile.mktemp(_filename)
+        if self.num_worker == -1:
+            self._set_num_worker()
+            self._balance_worker()
+            self._create_clients()
 
-        # create minio client once in a process to avoid thread unsafe
-        _pid = os.getpid()
-        if _pid not in self._clients:
-            self._clients[_pid] = self._create_client()
+        _worker_info = torch.utils.data.get_worker_info()
+        if _worker_info is None:
+            worker_id = 0
+        else:
+            worker_id = _worker_info.id
 
-        if self.download and not os.path.exists(_local_filename):
-            self._clients[_pid].fget_object(
-                bucket_name=self.config.bucket_name,
-                object_name=_filename,
-                file_path=_local_filename
-            )
+        _objectname, _index = self._find_object(idx)
+
+        # memoization : if _filename is in local file or in-memory return it.
+        if _objectname in self._object_file_mapper:
+            self._get_from_local_file_or_memory()
+            return 0
+
+        print(worker_id, _objectname, self._object_file_mapper)
+        while _objectname not in self._object_file_mapper and \
+                self._worker_job[_objectname] != worker_id:
+            time.sleep(0.00001)
+
+        if self.download:
+            if _objectname not in self._object_file_mapper:
+                _local_filename = tempfile.mktemp(_objectname)
+                self._clients[worker_id].fget_object(
+                    bucket_name=self.config.bucket_name,
+                    object_name=_objectname,
+                    file_path=_local_filename
+                )
+                self._object_file_mapper[_objectname] = _local_filename
+                print(worker_id, _objectname, 'done')
+
             # to read file, blocking until download finish.
 
+            return 0
         else:
-            _object = self._clients[_pid].get_object(
+            # if not set `batch_atomic` first find in lru cache.
+            _object = self._clients[worker_id].get_object(
                 bucket_name=self.config.bucket_name,
                 object_name=_filename
             )
-            # read in-memory
 
-        return 0
+            return 0
+
+    def _balance_worker(self):
+        _files = list(self.reindexer.values())
+        _idx = 0
+        for _file in _files:
+            if _idx == self.num_worker:
+                _idx = 0
+            self._worker_job[_file] = _idx
 
     def _create_client(self):
         return Minio(
@@ -87,9 +127,14 @@ class MTRDataset(Dataset):
             access_key=self.config.access_key,
             secret_key=self.config.secret_key,
             secure=self.config.secure,
-        )
+        ) if not check_nas(self.config.endpoint) else NAS(self.config.endpoint)
 
-    def _fine_file(self, index):
+    def _create_clients(self):
+        # create minio client once in a process to avoid thread unsafe
+        for w in range(self.num_worker):
+             self._clients[w] = self._create_client()
+
+    def _find_object(self, index):
         """
         find filename by index with binary search algorithm(indexes had been sorted).
 
@@ -101,6 +146,9 @@ class MTRDataset(Dataset):
         _last_key = self.ends[_key_idx - 1] if _key_idx else 0
         _relative_index = (index - _last_key)
         return self.reindexer[_key], _relative_index
+
+    def _get_from_local_file_or_memory(self):
+        pass
 
     def _merge_metadata(self, bucket_name):
         """
@@ -136,3 +184,10 @@ class MTRDataset(Dataset):
             reindexer[key] = _index["name"]
 
         return reindexer
+
+    def _set_num_worker(self):
+        _worker_info = torch.utils.data.get_worker_info()
+        if _worker_info is None:
+            self.num_worker = 0
+        else:
+            self.num_worker = _worker_info.num_workers
