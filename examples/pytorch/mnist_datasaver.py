@@ -44,7 +44,7 @@ if __name__ == '__main__':
         secret_key='miniosecretkey',
         dataset_name='mnist',
         attributes=[
-            DataAttribute('image', 'float32', (28, 28)),
+            DataAttribute('image', 'float32', (1, 28, 28)),
             DataAttribute('target', 'int64', (1))
         ]
     )
