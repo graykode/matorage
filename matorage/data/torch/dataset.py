@@ -77,9 +77,20 @@ class MTRDataset(Dataset):
             json.dump(self._object_file_mapper, f)
 
     def _pre_open_files(self):
-        self.open_files = {}
+        """
+        pre-open file for each processes.
+        This function call from individuallly all processes.
+        Because in Pytorch Multi Processing of DataLoader use `fork` mode.
+
+        Returns:
+            :None
+        """
         for _remote, _local in self._object_file_mapper.items():
-            self.open_files[_remote] = tables.open_file(_local, 'r')
+            _file = tables.open_file(_local, 'r')
+            self.open_files[_remote] = {
+                "file" : _file,
+                "attr_names" : list(_file.get_node("/")._v_children.keys())
+            }
 
     def __init__(self, config, num_worker_threads=4, clear=True, inmemory=False, cache_folder_path='~/.matorage'):
         self.config = config
@@ -109,15 +120,15 @@ class MTRDataset(Dataset):
 
         if self.download:
             self._init_download()
-            logger.info('All Dataset Downloaded Done.')
-        self._pre_open_files()
+            logger.info('All dataset downloaded done.')
+        self.open_files = {}
 
         assert len(self._object_file_mapper) == len(self.reindexer)
         atexit.register(self._exit)
 
     def _exit(self):
         for _file in list(self.open_files.values()):
-            _file.close()
+            _file["file"].close()
         if self.clear:
             for _local_file in list(self._object_file_mapper.values()):
                 os.remove(_local_file)
@@ -128,17 +139,25 @@ class MTRDataset(Dataset):
         return self.end_indices[-1]
 
     def __getitem__(self, idx):
+        if not self.open_files:
+            self._pre_open_files()
+
         _objectname, _relative_index = self._find_object(idx)
         if _objectname in self._object_file_mapper:
-            _file = self.open_files[_objectname]
+            _open_file = self.open_files[_objectname]
+            _file = _open_file["file"]
+            _attr_names = _open_file["attr_names"]
 
-            _attr_names = list(_file.get_node("/")._v_children.keys())
             return_tensor = {}
             for _attr_name in _attr_names:
-                return_tensor[_attr_name] = self._reshape_convert_tensor(
-                    numpy_array=_file.root[_attr_name][_relative_index],
-                    attr_name=_attr_name
-                )
+                try:
+                    return_tensor[_attr_name] = self._reshape_convert_tensor(
+                        numpy_array=_file.root[_attr_name][_relative_index],
+                        attr_name=_attr_name
+                    )
+                except:
+                    raise IOError("Crash on concurrent read")
+
             return list(return_tensor.values())
         else:
             raise ValueError("objectname({}) is not exist in {}".format(
@@ -223,6 +242,6 @@ class MTRDataset(Dataset):
 
     def _reshape_convert_tensor(self, numpy_array, attr_name):
         _shape = self.attribute[attr_name]["shape"]
-        # numpy_array = numpy_array.reshape(_shape)
-        # tensor = torch.from_numpy(numpy_array)
-        return numpy_array
+        numpy_array = numpy_array.reshape(_shape)
+        tensor = torch.from_numpy(numpy_array)
+        return tensor
