@@ -155,6 +155,8 @@ class MTRDataset(Dataset):
                         numpy_array=_file.root[_attr_name][_relative_index],
                         attr_name=_attr_name
                     )
+                    if list(return_tensor[_attr_name].size()) == [1]:
+                        return_tensor[_attr_name] = return_tensor[_attr_name].item()
                 except:
                     raise IOError("Crash on concurrent read")
 
@@ -235,7 +237,7 @@ class MTRDataset(Dataset):
         _metadata_attributes = self.config.metadata.attributes
         for _attr in _metadata_attributes:
             _attributes[_attr.name] = {
-                "shape" : tuple([-1] + list(_attr.shape)),
+                "shape" : _attr.shape,
                 "type" : str(_attr.type.type)
             }
         return _attributes
