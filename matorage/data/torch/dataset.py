@@ -131,7 +131,8 @@ class MTRDataset(Dataset):
             _file["file"].close()
         if self.clear:
             for _local_file in list(self._object_file_mapper.values()):
-                os.remove(_local_file)
+                if os.path.exists(_local_file):
+                    os.remove(_local_file)
             if os.path.exists(self.cache_path):
                 os.remove(self.cache_path)
 
