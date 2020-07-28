@@ -12,49 +12,93 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+import time
+import argparse
 from tqdm import tqdm
-from glob import glob
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
 from matorage import *
 
-if __name__ == '__main__':
-
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])
-
-    dataset = datasets.MNIST(
-        '/tmp/data',
-        train=True,
-        download=True,
-        transform=transform
-    )
-
-    image_type, target_type = dataset[0]
-    print('Image Type :', image_type.dtype)
-    print('Target Type :', type(target_type))
-
-    data_config = DataConfig(
+def traindata_save(dataset):
+    traindata_config = DataConfig(
         endpoint='127.0.0.1:9000',
         access_key='minio',
         secret_key='miniosecretkey',
         dataset_name='mnist',
+        additional={
+            "mode": "train"
+        },
         attributes=[
             DataAttribute('image', 'float32', (1, 28, 28)),
             DataAttribute('target', 'int64', (1))
         ]
     )
 
-    data_saver = DataSaver(config=data_config)
+    traindata_saver = DataSaver(config=traindata_config)
 
     train_loader = DataLoader(dataset, batch_size=60, num_workers=8)
     for (image, target) in tqdm(train_loader):
-        data_saver({
-            'image' : image,
-            'target' : target
+        traindata_saver({
+            'image': image,
+            'target': target
         })
-    data_saver.disconnect()
+    traindata_saver.disconnect()
+
+def testdata_save(dataset):
+    testdata_config = DataConfig(
+        endpoint='127.0.0.1:9000',
+        access_key='minio',
+        secret_key='miniosecretkey',
+        dataset_name='mnist',
+        additional={
+            "mode": "test"
+        },
+        attributes=[
+            DataAttribute('image', 'float32', (1, 28, 28)),
+            DataAttribute('target', 'int64', (1))
+        ]
+    )
+
+    testdata_saver = DataSaver(config=testdata_config)
+
+    test_loader = DataLoader(dataset, batch_size=60, num_workers=8)
+    for (image, target) in tqdm(test_loader):
+        testdata_saver({
+            'image': image,
+            'target': target
+        })
+    testdata_saver.disconnect()
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
+    parser.add_argument('--train', action='store_true', default=True)
+    parser.add_argument('--test', action='store_true', default=True)
+    args = parser.parse_args()
+
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+
+    start = time.time()
+
+    if args.train:
+        train_dataset = datasets.MNIST(
+            '/tmp/data',
+            train=True,
+            download=True,
+            transform=transform
+        )
+        traindata_save(train_dataset)
+    if args.test:
+        test_dataset = datasets.MNIST(
+            '/tmp/data',
+            train=False,
+            transform=transform
+        )
+        testdata_save(test_dataset)
+
+    end = time.time()
+    print(end - start)
