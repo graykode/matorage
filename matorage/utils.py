@@ -22,7 +22,13 @@ import os
 import logging
 from urllib.parse import urlsplit
 
+# from https://github.com/huggingface/transformers/blob/master/examples/distillation/utils.py
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(name)s - PID: %(process)d -  %(message)s",
+    datefmt="%m/%d/%Y %H:%M:%S",
+    level=logging.INFO,
+)
 
 try:
     USE_TF = os.environ.get("USE_TF", "AUTO").upper()
