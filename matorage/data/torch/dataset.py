@@ -241,6 +241,14 @@ class MTRDataset(Dataset):
         return _attributes
 
     def _reshape_convert_tensor(self, numpy_array, attr_name):
+        """
+        Reshape numpy tensor and convert from numpy to torch tensor.
+        In matorage dataset save in 2D (bz, N) shape to cpu L1 cache manage dataset fast.
+        Therefore, this function restores the shape for the user to use.
+
+        Returns:
+            :obj:`torch.tensor`
+        """
         _shape = self.attribute[attr_name]["shape"]
         numpy_array = numpy_array.reshape(_shape)
         tensor = torch.from_numpy(numpy_array)
