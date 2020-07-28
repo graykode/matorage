@@ -33,11 +33,11 @@ class MRTConnector(object):
 
     def _worker(self):
         while True:
-            _fileitem, _filename = self._queue.get()
-            self.do_job(_fileitem, _filename)
+            _local_file, _remote_file = self._queue.get()
+            self.do_job(_local_file, _remote_file)
             self._queue.task_done()
 
-    def set_queue(self, fileitem, filename):
+    def set_queue(self, local_file, remote_file):
         """
         Set queue of storage connector.
         `fileitem` : file bytes image or filename in local storage.
@@ -49,7 +49,7 @@ class MRTConnector(object):
         Returns:
             :None
         """
-        self._queue.put((fileitem, filename, ))
+        self._queue.put((local_file, remote_file, ))
 
     def join_queue(self):
         self._queue.join()

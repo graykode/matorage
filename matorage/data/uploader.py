@@ -28,21 +28,21 @@ class DataUploader(MRTConnector):
         self._multipart_upload_size = multipart_upload_size
         self._inmemory = inmemory
 
-    def do_job(self, fileitem, filename):
+    def do_job(self, local_file, remote_file):
 
-        if isinstance(filename, str):
-            minio_key = os.path.basename(filename)
+        if isinstance(remote_file, str):
+            minio_key = os.path.basename(remote_file)
         try:
             if not self._inmemory:
                 self._client.fput_object(
-                    self._bucket, minio_key, fileitem,
+                    self._bucket, minio_key, local_file,
                     part_size=self._multipart_upload_size
                 )
-                os.remove(fileitem)
+                os.remove(local_file)
             else:
-                fileimage = io.BytesIO(fileitem)
+                fileimage = io.BytesIO(local_file)
                 self._client.put_object(
-                    self._bucket, minio_key, fileimage, len(fileitem),
+                    self._bucket, minio_key, fileimage, len(local_file),
                     part_size=self._multipart_upload_size
                 )
         except ResponseError as err:
