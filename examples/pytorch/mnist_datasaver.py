@@ -34,14 +34,18 @@ if __name__ == '__main__':
         transform=transform
     )
 
+    image_type, target_type = dataset[0]
+    print('Image Type :', image_type.dtype)
+    print('Target Type :', type(target_type))
+
     data_config = DataConfig(
         endpoint='127.0.0.1:9000',
         access_key='minio',
         secret_key='miniosecretkey',
         dataset_name='mnist',
         attributes=[
-            DataAttribute('image', 'uint8', (28, 28)),
-            DataAttribute('target', 'uint8', (1))
+            DataAttribute('image', 'float32', (28, 28)),
+            DataAttribute('target', 'int64', (1))
         ]
     )
 
