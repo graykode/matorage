@@ -51,7 +51,7 @@ def test(model, device):
         },
     )
     test_dataset = MTRDataset(config=testdata_config, clear=True)
-    test_loader = DataLoader(test_dataset, batch_size=64, num_workers=4)
+    test_loader = DataLoader(test_dataset, batch_size=64, num_workers=8)
 
     model.eval()
     test_loss = 0
@@ -66,15 +66,15 @@ def test(model, device):
 
     test_loss /= len(test_loader.dataset)
 
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+    print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--train', action='store_true', default=True)
-    parser.add_argument('--test', action='store_true', default=True)
+    parser.add_argument('--train', action='store_true')
+    parser.add_argument('--test', action='store_true')
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -97,9 +97,9 @@ if __name__ == '__main__':
 
     start = time.time()
 
-    train_loader = DataLoader(train_dataset, batch_size=64, num_workers=4, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=64, num_workers=8, shuffle=True)
     for epoch in range(5):
-        for batch_idx, (image, target) in enumerate(train_loader):
+        for batch_idx, (image, target) in enumerate(tqdm(train_loader)):
             image, target = image.to(device), target.to(device)
             if args.train:
                 optimizer.zero_grad()
@@ -108,10 +108,6 @@ if __name__ == '__main__':
                 loss.backward()
                 optimizer.step()
 
-                if batch_idx % 20 == 0:
-                    print('Train Epoch: {} [{}/{} ({:.0f}%)] Loss: {:.6f}'.format(
-                        epoch, batch_idx * len(image), len(train_loader.dataset),
-                               100. * batch_idx / len(train_loader), loss.item()))
         if args.test:
             test(model, device)
 
