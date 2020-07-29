@@ -44,11 +44,15 @@ class MTRDataset(MTRData):
 
     """
 
-    def __init__(self, config, batch_size, num_worker_threads=4, clear=True, inmemory=False, cache_folder_path='~/.matorage'):
+    def __init__(self, config, batch_size, shuffle=False, seed=42, num_worker_threads=4, clear=True, inmemory=False, cache_folder_path='~/.matorage'):
         super(MTRDataset, self).__init__(config, num_worker_threads, clear, inmemory, cache_folder_path)
-        _dataset = tf.data.Dataset.from_tensor_slices(self.objectnames)
         self._batch_size = batch_size
-        self._dataloader = _dataset.interleave(self._create_tfiodata, cycle_length=len(self.objectnames))
+        self._shuffle = shuffle
+        self._seed = seed
+        _dataset = tf.data.Dataset.from_tensor_slices(self.filenames)
+        if shuffle:
+            _dataset = _dataset.shuffle(len(self.filenames), seed=self._seed)
+        self._dataloader = _dataset.interleave(self._create_tfiodata, cycle_length=len(self.filenames))
 
     def _create_tfiodata(self, filename):
         _tfios = []
@@ -59,17 +63,20 @@ class MTRDataset(MTRData):
                     dataset=f"/{_attr_name}",
                     spec=tf.as_dtype(_attr_value["type"])
                 ).map(
-                    lambda x: tf.reshape(x, _attr_value["shape"])
+                    lambda x: tf.reshape(x, _attr_value["shape"]) \
+                        if not _attr_value["shape"] == [1] else x[0]
                 )
             )
-        return tf.data.Dataset.zip(
-            tuple(_tfios)
-        ).batch(self._batch_size, drop_remainder=True).prefetch(
+        _tfiodataset = tf.data.Dataset.zip(tuple(_tfios))
+        if self._shuffle:
+            _tfiodataset = _tfiodataset.shuffle(1000, seed=self._seed)
+        _tfiodataset = _tfiodataset.batch(self._batch_size, drop_remainder=True).prefetch(
             tf.data.experimental.AUTOTUNE
         )
+        return _tfiodataset
 
     @property
-    def objectnames(self):
+    def filenames(self):
         """
         Get object name in minio storage
 
