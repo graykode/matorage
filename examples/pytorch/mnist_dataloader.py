@@ -38,21 +38,16 @@ class Model(nn.Module):
         x = self.fc3(x)
         return x
 
-def test(model, device):
+def train(model, train_loader, optimizer, criterion, device):
+    for batch_idx, (image, target) in enumerate(tqdm(train_loader)):
+        image, target = image.to(device), target.to(device)
+        optimizer.zero_grad()
+        output = model(image)
+        loss = criterion(output, target)
+        loss.backward()
+        optimizer.step()
 
-    testdata_config = DataConfig(
-        endpoint='127.0.0.1:9000',
-        access_key='minio',
-        secret_key='miniosecretkey',
-        dataset_name='mnist',
-        additional={
-            "mode": "test",
-            "framework": "pytorch"
-        },
-    )
-    test_dataset = MTRDataset(config=testdata_config, clear=True)
-    test_loader = DataLoader(test_dataset, batch_size=64, num_workers=8)
-
+def test(model, test_loader, device):
     model.eval()
     test_loss = 0
     correct = 0
@@ -60,8 +55,8 @@ def test(model, device):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            test_loss += F.nll_loss(output, target, reduction='sum').item()  # sum up batch loss
-            pred = output.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
+            test_loss += F.nll_loss(output, target, reduction='sum').item()
+            pred = output.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
@@ -78,38 +73,45 @@ if __name__ == '__main__':
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    model = Model().to(device)
     if args.train:
-        model = Model().to(device)
-        criterion = torch.nn.CrossEntropyLoss()
         optimizer = optim.Adam(model.parameters(), lr=0.01)
+        criterion = torch.nn.CrossEntropyLoss()
 
-    traindata_config = DataConfig(
-        endpoint='127.0.0.1:9000',
-        access_key='minio',
-        secret_key='miniosecretkey',
-        dataset_name='mnist',
-        additional={
-            "mode": "train",
-            "framework": "pytorch"
-        },
-    )
-    train_dataset = MTRDataset(config=traindata_config, clear=True)
+        traindata_config = DataConfig(
+            endpoint='127.0.0.1:9000',
+            access_key='minio',
+            secret_key='miniosecretkey',
+            dataset_name='mnist',
+            additional={
+                "mode": "train",
+                "framework": "pytorch"
+            },
+        )
+        train_dataset = MTRDataset(config=traindata_config, clear=True)
+        train_loader = DataLoader(train_dataset, batch_size=64, num_workers=8, shuffle=True)
+
+    if args.test:
+        testdata_config = DataConfig(
+            endpoint='127.0.0.1:9000',
+            access_key='minio',
+            secret_key='miniosecretkey',
+            dataset_name='mnist',
+            additional={
+                "mode": "test",
+                "framework": "pytorch"
+            },
+        )
+        test_dataset = MTRDataset(config=testdata_config, clear=True)
+        test_loader = DataLoader(test_dataset, batch_size=64, num_workers=8)
 
     start = time.time()
 
-    train_loader = DataLoader(train_dataset, batch_size=64, num_workers=8, shuffle=True)
     for epoch in range(5):
-        for batch_idx, (image, target) in enumerate(tqdm(train_loader)):
-            image, target = image.to(device), target.to(device)
-            if args.train:
-                optimizer.zero_grad()
-                output = model(image)
-                loss = criterion(output, target)
-                loss.backward()
-                optimizer.step()
-
+        if args.train:
+            train(model, train_loader, optimizer, criterion, device)
         if args.test:
-            test(model, device)
+            test(model, test_loader, device)
 
     end = time.time()
     print(end - start)
