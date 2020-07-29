@@ -124,6 +124,8 @@ class DataSaver(object):
             secret_key=self.config.secret_key,
             secure=self.config.secure,
         ) if not check_nas(self.config.endpoint) else NAS(self.config.endpoint)
+        self._check_and_create_bucket()
+
         self._uploader = DataUploader(
             client=self._client,
             bucket=self.config.bucket_name,
@@ -164,6 +166,10 @@ class DataSaver(object):
                 self._file, self._earray = self._get_newfile()
                 for name, array in self._datas.items():
                     self._earray[name].append(array[batch_idx, None])
+
+    def _check_and_create_bucket(self):
+        if not self._client.bucket_exists(self.config.bucket_name):
+            self._client.make_bucket(self.config.bucket_name)
 
     def _check_attr_name(self, name):
         """

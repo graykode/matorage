@@ -125,9 +125,7 @@ class DataConfig(MTRConfig):
                             access_key=self.access_key,
                             secret_key=self.secret_key,
                             secure=self.secure) if not check_nas(self.endpoint) else NAS(self.endpoint)
-        if not _client.bucket_exists(self.bucket_name):
-            _client.make_bucket(self.bucket_name)
-        else:
+        if _client.bucket_exists(self.bucket_name):
             objects = _client.list_objects(
                 self.bucket_name,
                 prefix='metadata/'
