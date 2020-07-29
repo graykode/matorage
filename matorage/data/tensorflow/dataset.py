@@ -21,6 +21,7 @@ import bisect
 import tempfile
 from minio import Minio
 import tensorflow as tf
+import tensorflow_io as tfio
 from os.path import expanduser
 from multiprocessing import Manager, Barrier
 
@@ -122,34 +123,29 @@ class MTRDataset(object):
         assert len(self._object_file_mapper) == len(self.reindexer)
         atexit.register(self._exit)
 
-    def __call__(self, _objectname):
-
-        _objectname = _objectname.decode('utf-8')
-        if not self.open_files:
-            self._pre_open_files()
-
-        _open_file = self.open_files[_objectname]
-        _file = _open_file["file"]
-        _attr_names = _open_file["attr_names"]
-
-        for _file_index in range(self.object_length[_objectname]):
-            return_tensor = {}
-            for _attr_name in _attr_names:
-                try:
-                    return_tensor[_attr_name] = self._reshape_convert_tensor(
-                        numpy_array=_file.root[_attr_name][_file_index],
-                        attr_name=_attr_name
-                    )
-                except:
-                    raise IOError("Crash on concurrent read")
-            yield tuple(return_tensor.values())
+    def __call__(self, filename):
+        _tfios = []
+        for _attr_name, _attr_value in self.attribute.items():
+            _tfios.append(
+                tfio.IODataset.from_hdf5(
+                    filename,
+                    dataset=f"/{_attr_name}",
+                    spec=tf.as_dtype(_attr_value["type"])
+                ).map(
+                    lambda x: tf.reshape(x, _attr_value["shape"])
+                )
+            )
+        return tf.data.Dataset.zip(
+            tuple(_tfios)
+        ).batch(64, drop_remainder=True).prefetch(
+            tf.data.experimental.AUTOTUNE
+        )
 
     def _exit(self):
-        for _file in list(self.open_files.values()):
-            _file["file"].close()
         if self.clear:
             for _local_file in list(self._object_file_mapper.values()):
-                os.remove(_local_file)
+                if os.path.exists(_local_file):
+                    os.remove(_local_file)
             if os.path.exists(self.cache_path):
                 os.remove(self.cache_path)
 
@@ -160,19 +156,6 @@ class MTRDataset(object):
             secret_key=self.config.secret_key,
             secure=self.config.secure,
         ) if not check_nas(self.config.endpoint) else NAS(self.config.endpoint)
-
-    def _find_object(self, index):
-        """
-        find filename by index with binary search algorithm(indexes had been sorted).
-
-        Returns:
-            :obj:`str`: filename for index
-        """
-        _key_idx = bisect.bisect_right(self.end_indices, index)
-        _key = self.end_indices[_key_idx]
-        _last_key = self.end_indices[_key_idx - 1] if _key_idx else 0
-        _relative_index = (index - _last_key)
-        return self.reindexer[_key], _relative_index
 
     def _merge_metadata(self, bucket_name):
         """
@@ -203,9 +186,7 @@ class MTRDataset(object):
             total_index.extend(list(local_indexer.values()))
 
         reindexer = {}
-        self.object_length = {}
         for _index in total_index:
-            self.object_length[_index["name"]] = _index["length"]
             key = list(reindexer.keys())[-1] + _index["length"] if reindexer else _index["length"]
             reindexer[key] = _index["name"]
 
@@ -231,20 +212,6 @@ class MTRDataset(object):
             }
         return _attributes
 
-    def _reshape_convert_tensor(self, numpy_array, attr_name):
-        """
-        Reshape numpy tensor and convert from numpy to torch tensor.
-        In matorage dataset save in 2D (bz, N) shape to cpu L1 cache manage dataset fast.
-        Therefore, this function restores the shape for the user to use.
-
-        Returns:
-            :obj:`torch.tensor`
-        """
-        _shape = self.attribute[attr_name]["shape"]
-        numpy_array = numpy_array.reshape(_shape)
-        tensor = tf.convert_to_tensor(numpy_array)
-        return tensor
-
     @property
     def get_objectnames(self):
-        return list(self._object_file_mapper.keys())
+        return list(self._object_file_mapper.values())
