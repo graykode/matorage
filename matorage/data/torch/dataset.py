@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import io
 import torch
 import tables
 import bisect
+import h5py
+import tempfile
 from torch.utils.data import Dataset
 
 from matorage.data.data import MTRData
@@ -46,10 +50,46 @@ class MTRDataset(Dataset, MTRData):
 
     """
 
+    def __init__(self, config, num_worker_threads=4, clear=True, cache_folder_path='~/.matorage'):
+        super(MTRDataset, self).__init__(config, num_worker_threads, clear, cache_folder_path)
+        self._clients = {}
+
     def __len__(self):
         return self.end_indices[-1]
 
     def __getitem__(self, idx):
+        if self.download:
+            return self._get_item_with_download(idx)
+        else:
+            return self._get_item_with_inmemory(idx)
+
+    def _get_item_with_inmemory(self, idx):
+        _pid = os.getpid()
+        if _pid not in self._clients:
+            self._clients[_pid] = self._create_client()
+
+        _objectname, _relative_index = self._find_object(idx)
+        _file_image = self._clients[_pid].get_object(
+            self.config.bucket_name,
+            object_name=_objectname
+        ).read()
+        _file_image = h5py.File(io.BytesIO(_file_image),'r')
+
+        return_tensor = {}
+        for _attr_name in list(self.attribute.keys()):
+            try:
+                return_tensor[_attr_name] = self._reshape_convert_tensor(
+                    numpy_array=_file_image[_attr_name][_relative_index],
+                    attr_name=_attr_name
+                )
+                if list(return_tensor[_attr_name].size()) == [1]:
+                    return_tensor[_attr_name] = return_tensor[_attr_name].item()
+            except:
+                raise IOError("Crash on concurrent read")
+
+        return list(return_tensor.values())
+
+    def _get_item_with_download(self, idx):
         if not self.open_files:
             self._pre_open_files()
 
@@ -113,9 +153,31 @@ class MTRDataset(Dataset, MTRData):
         Returns:
             :None
         """
+        _driver, _driver_core_backing_store = self._set_driver()
         for _remote, _local in self._object_file_mapper.items():
-            _file = tables.open_file(_local, 'r')
+            _file = tables.open_file(
+                _local, 'r',
+                driver=_driver,
+                driver_core_backing_store=_driver_core_backing_store
+            )
             self.open_files[_remote] = {
                 "file" : _file,
                 "attr_names" : list(_file.get_node("/")._v_children.keys())
             }
+
+    def _set_driver(self):
+        """
+        Setting HDF5 driver type
+
+        Returns:
+            :obj:`str` : HDF5 driver type string
+        """
+        if self.config.batch_atomic:
+            return 'H5FD_CORE', False
+        else:
+            if os.name == "posix":
+                return 'H5FD_SEC2', True
+            elif os.name == "nt":
+                return 'H5FD_WINDOWS', True
+            else:
+                raise ValueError("{} OS not supported!".format(os.name))

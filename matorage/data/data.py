@@ -25,14 +25,14 @@ from matorage.data.downloader import DataDownloader
 
 class MTRData(object):
 
-    def __init__(self, config, num_worker_threads=4, clear=True, inmemory=False, cache_folder_path='~/.matorage'):
+    def __init__(self, config, num_worker_threads=4, clear=True, cache_folder_path='~/.matorage'):
         self.config = config
         self.attribute = self._set_attribute()
 
         # Storage configuration
         self.num_worker_threads = num_worker_threads
 
-        self.download = False if (config.batch_atomic or inmemory) else True
+        self.download = False if config.batch_atomic else True
         self.clear = False if not self.download else clear
 
         self.cache_folder_path = expanduser(cache_folder_path)
@@ -55,7 +55,6 @@ class MTRData(object):
             self._init_download()
         self.open_files = {}
 
-        assert len(self._object_file_mapper) == len(self.reindexer)
         atexit.register(self._exit)
 
     def _create_client(self):
@@ -88,6 +87,8 @@ class MTRData(object):
                 self._object_file_mapper[_remote_file] = _local_file
                 _downloader.set_queue(local_file=_local_file, remote_file=_remote_file)
         _downloader.join_queue()
+
+        assert len(self._object_file_mapper) == len(self.reindexer)
 
         if not os.path.exists(self.cache_path):
             with open(self.cache_path, "w") as f:
