@@ -46,7 +46,8 @@ def test(model, device):
         secret_key='miniosecretkey',
         dataset_name='mnist',
         additional={
-            "mode": "test"
+            "mode": "test",
+            "framework": "pytorch"
         },
     )
     test_dataset = MTRDataset(config=testdata_config, clear=True)
@@ -88,7 +89,8 @@ if __name__ == '__main__':
         secret_key='miniosecretkey',
         dataset_name='mnist',
         additional={
-            "mode": "train"
+            "mode": "train",
+            "framework": "pytorch"
         },
     )
     train_dataset = MTRDataset(config=traindata_config, clear=True)

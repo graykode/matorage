@@ -32,7 +32,8 @@ def traindata_save(dataset):
         secret_key='miniosecretkey',
         dataset_name='mnist',
         additional={
-            "mode": "train"
+            "mode": "train",
+            "framework": "tensorflow"
         },
         attributes=[
             DataAttribute('image', 'float32', (28, 28)),
@@ -59,7 +60,8 @@ def testdata_save(dataset):
         secret_key='miniosecretkey',
         dataset_name='mnist',
         additional={
-            "mode": "test"
+            "mode": "test",
+            "framework": "tensorflow"
         },
         attributes=[
             DataAttribute('image', 'float32', (28, 28)),
