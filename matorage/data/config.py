@@ -146,6 +146,7 @@ class DataConfig(MTRConfig):
             self.attributes = [
                 DataAttribute(**item) for item in metadata_dict['attributes']
             ]
+            self.batch_atomic = metadata_dict['batch_atomic']
         else:
             logger.info("{} {} is not exist!".format(self.dataset_name, str(self.additional)))
 
