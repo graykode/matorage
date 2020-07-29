@@ -20,7 +20,7 @@ from minio import Minio
 from functools import reduce
 
 from matorage.nas import NAS
-from matorage.utils import check_nas
+from matorage.utils import check_nas, logger
 from matorage.config import MTRConfig
 from matorage.data.metadata import DataMetadata
 from matorage.data.attribute import DataAttribute
@@ -146,6 +146,8 @@ class DataConfig(MTRConfig):
             self.attributes = [
                 DataAttribute(**item) for item in metadata_dict['attributes']
             ]
+        else:
+            logger.info("{} {} is not exist!".format(self.dataset_name, str(self.additional)))
 
     def _convert_type_flatten(self):
         for attribute in self.flatten_attributes:
