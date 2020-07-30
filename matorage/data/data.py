@@ -41,7 +41,7 @@ class MTRData(object):
         self.merged_indexer = self._merge_metadata()
 
         # download all object in /tmp folder
-        if self.download and not check_nas(self.config.endpoint):
+        if self.download:
             self._init_download()
 
         atexit.register(self._exit)
@@ -83,10 +83,21 @@ class MTRData(object):
 
         _remote_files = list(self.merged_indexer.values())
         for _remote_file in _remote_files:
-            _local_file = tempfile.mktemp(_remote_file)
-            if _remote_file not in self._object_file_mapper:
-                self._object_file_mapper[_remote_file] = _local_file
-                _downloader.set_queue(local_file=_local_file, remote_file=_remote_file)
+            if not check_nas(self.config.endpoint):
+                _local_file = tempfile.mktemp(_remote_file)
+                if _remote_file not in self._object_file_mapper:
+                    self._object_file_mapper[_remote_file] = _local_file
+                    _downloader.set_queue(
+                        local_file=_local_file,
+                        remote_file=_remote_file
+                    )
+            else:
+                if _remote_file not in self._object_file_mapper:
+                    self._object_file_mapper[_remote_file] = os.path.join(
+                        self.config.endpoint,
+                        self.config.bucket_name,
+                        _remote_file
+                    )
         _downloader.join_queue()
 
         assert len(self._object_file_mapper) == len(self.merged_indexer)
