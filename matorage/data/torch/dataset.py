@@ -52,6 +52,9 @@ class MTRDataset(Dataset, MTRData):
 
     def __init__(self, config, num_worker_threads=4, clear=True, cache_folder_path='~/.matorage'):
         super(MTRDataset, self).__init__(config, num_worker_threads, clear, cache_folder_path)
+        self.end_indices = list(self.merged_indexer.keys())
+        self.open_files = {}
+
         self._clients = {}
 
     def __len__(self):
@@ -128,7 +131,19 @@ class MTRDataset(Dataset, MTRData):
         _key = self.end_indices[_key_idx]
         _last_key = self.end_indices[_key_idx - 1] if _key_idx else 0
         _relative_index = (index - _last_key)
-        return self.reindexer[_key], _relative_index
+        return self.merged_indexer[_key], _relative_index
+
+    def _exit(self):
+        """
+        Close all opened files and remove.
+
+        Returns:
+            :obj: `None`:
+        """
+        super(MTRDataset, self)._exit()
+        for _file in list(self.open_files.values()):
+            if _file["file"].isopen:
+                _file["file"].close()
 
     def _reshape_convert_tensor(self, numpy_array, attr_name):
         """

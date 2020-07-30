@@ -31,10 +31,22 @@ class MTRData(object):
 
         # Storage configuration
         self.num_worker_threads = num_worker_threads
-
         self.download = False if config.batch_atomic else True
         self.clear = False if not self.download else clear
 
+        # cache object which is downloaded.
+        self._caching(cache_folder_path=cache_folder_path)
+
+        # merge all metadatas and load in memory.
+        self.merged_indexer = self._merge_metadata()
+
+        # download all object in /tmp folder
+        if self.download:
+            self._init_download()
+
+        atexit.register(self._exit)
+
+    def _caching(self, cache_folder_path):
         self.cache_folder_path = expanduser(cache_folder_path)
         if not os.path.exists(self.cache_folder_path):
             os.makedirs(self.cache_folder_path)
@@ -45,17 +57,6 @@ class MTRData(object):
                 self._object_file_mapper = json.load(f)
         else:
             self._object_file_mapper = {}
-
-        self.reindexer = self._merge_metadata(
-            bucket_name=self.config.bucket_name
-        )
-        self.end_indices = list(self.reindexer.keys())
-
-        if self.download:
-            self._init_download()
-        self.open_files = {}
-
-        atexit.register(self._exit)
 
     def _create_client(self):
         return Minio(
@@ -80,7 +81,7 @@ class MTRData(object):
             num_worker_threads=self.num_worker_threads
         )
 
-        _remote_files = list(self.reindexer.values())
+        _remote_files = list(self.merged_indexer.values())
         for _remote_file in _remote_files:
             _local_file = tempfile.mktemp(_remote_file)
             if _remote_file not in self._object_file_mapper:
@@ -88,7 +89,7 @@ class MTRData(object):
                 _downloader.set_queue(local_file=_local_file, remote_file=_remote_file)
         _downloader.join_queue()
 
-        assert len(self._object_file_mapper) == len(self.reindexer)
+        assert len(self._object_file_mapper) == len(self.merged_indexer)
 
         if not os.path.exists(self.cache_path):
             with open(self.cache_path, "w") as f:
@@ -105,10 +106,6 @@ class MTRData(object):
             :obj: `None`:
         """
 
-        for _file in list(self.open_files.values()):
-            if _file["file"].isopen:
-                _file["file"].close()
-
         if self.clear:
             for _local_file in list(self._object_file_mapper.values()):
                 if os.path.exists(_local_file):
@@ -116,7 +113,7 @@ class MTRData(object):
             if os.path.exists(self.cache_path):
                 os.remove(self.cache_path)
 
-    def _merge_metadata(self, bucket_name):
+    def _merge_metadata(self):
         """
         merge splited metadatas to a one file.
 
@@ -131,14 +128,14 @@ class MTRData(object):
         """
         client = self._create_client()
         objects = client.list_objects(
-            bucket_name,
+            self.config.bucket_name,
             prefix='metadata/'
         )
 
         total_index = []
         for obj in objects:
             metadata = client.get_object(
-                bucket_name,
+                self.config.bucket_name,
                 object_name=obj.object_name
             )
             local_indexer = json.loads(metadata.read().decode('utf-8'))["indexer"]
