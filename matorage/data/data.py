@@ -41,7 +41,7 @@ class MTRData(object):
         self.merged_indexer = self._merge_metadata()
 
         # download all object in /tmp folder
-        if self.download:
+        if self.download and not check_nas(self.config.endpoint):
             self._init_download()
 
         atexit.register(self._exit)

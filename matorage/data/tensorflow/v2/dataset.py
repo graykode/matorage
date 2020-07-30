@@ -16,6 +16,7 @@ import tensorflow as tf
 import tensorflow_io as tfio
 
 from matorage.data.data import MTRData
+from matorage.utils import logger
 
 class MTRDataset(MTRData):
     r"""MTRDataset class for Tensorflow Dataset
@@ -44,8 +45,9 @@ class MTRDataset(MTRData):
 
     """
 
-    def __init__(self, config, batch_size, shuffle=False, seed=42, num_worker_threads=4, clear=True, inmemory=False, cache_folder_path='~/.matorage'):
-        super(MTRDataset, self).__init__(config, num_worker_threads, clear, inmemory, cache_folder_path)
+    def __init__(self, config, batch_size, shuffle=False, seed=42, num_worker_threads=4, clear=True, cache_folder_path='~/.matorage'):
+        super(MTRDataset, self).__init__(config, num_worker_threads, clear, cache_folder_path)
+
         self._batch_size = batch_size
         self._shuffle = shuffle
         self._seed = seed
