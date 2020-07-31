@@ -46,7 +46,6 @@ class DataMetadata(Serialize):
             "complevel": 0,
             "complib": "zlib"
         })
-        self.batch_atomic = kwargs['batch_atomic']
 
         self.indexer = {}
 

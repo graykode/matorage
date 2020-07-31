@@ -154,8 +154,7 @@ class DataSaver(object):
         bzs = list(self._datas.values())[0].shape[0]
 
         per_one_batch_data_size = array_size // bzs
-        per_one_file_batch_size = 1 if self.config.batch_atomic \
-            else max(1,self.config.max_object_size // per_one_batch_data_size)
+        per_one_file_batch_size = max(1,self.config.max_object_size // per_one_batch_data_size)
 
         for batch_idx in range(bzs):
             if self._get_current_stored_batch_size() < per_one_file_batch_size:

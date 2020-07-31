@@ -146,9 +146,8 @@ class DataConfig(MTRConfig):
             self.attributes = [
                 DataAttribute(**item) for item in metadata_dict['attributes']
             ]
-            self.batch_atomic = metadata_dict['batch_atomic']
         else:
-            logger.info("{} {} is not exist!".format(self.dataset_name, str(self.additional)))
+            logger.error("{} {} is not exist!".format(self.dataset_name, str(self.additional)))
 
     def _convert_type_flatten(self):
         for attribute in self.flatten_attributes:

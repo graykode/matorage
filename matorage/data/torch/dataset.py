@@ -61,10 +61,7 @@ class MTRDataset(Dataset, MTRData):
         return self.end_indices[-1]
 
     def __getitem__(self, idx):
-        if self.download:
-            return self._get_item_with_download(idx)
-        else:
-            return self._get_item_with_inmemory(idx)
+        return self._get_item_with_download(idx)
 
     def _get_item_with_inmemory(self, idx):
         _pid = os.getpid()
@@ -187,12 +184,10 @@ class MTRDataset(Dataset, MTRData):
         Returns:
             :obj:`str` : HDF5 driver type string
         """
-        if self.config.batch_atomic:
-            return 'H5FD_CORE', False
+
+        if os.name == "posix":
+            return 'H5FD_SEC2', True
+        elif os.name == "nt":
+            return 'H5FD_WINDOWS', True
         else:
-            if os.name == "posix":
-                return 'H5FD_SEC2', True
-            elif os.name == "nt":
-                return 'H5FD_WINDOWS', True
-            else:
-                raise ValueError("{} OS not supported!".format(os.name))
+            raise ValueError("{} OS not supported!".format(os.name))

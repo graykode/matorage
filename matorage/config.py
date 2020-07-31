@@ -38,10 +38,6 @@ class MTRConfig(Serialize):
                     Set this value to True to enable secure (HTTPS) access. (Optional defaults to False unlike the original MinIO).
                 max_object_size (:obj:`int`, `optional`, defaults to `10 * 1024 * 1024`):
                     The maximum size of object storage stored as an actual object.
-                batch_atomic (:obj:`boolean`, `optional`, defaults to `False`):
-                    Option for saving a single batch to one file in storage backend.
-                    Also, loading data in remote storage, local don't save as a file.
-                    If the `batch_atomic` value is True, set `per_one_file_batch_size` to 1 regardless of the `max_object_size` value.
 
     """
 
@@ -53,4 +49,3 @@ class MTRConfig(Serialize):
         self.secret_key = kwargs.pop("secret_key", None)
         self.secure = kwargs.pop("secure", False)
         self.max_object_size = kwargs.pop("max_object_size", 10 * _MB)
-        self.batch_atomic = kwargs.pop("batch_atomic", False)

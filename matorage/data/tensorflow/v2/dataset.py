@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import io
+import h5py
 import tensorflow as tf
 import tensorflow_io as tfio
 

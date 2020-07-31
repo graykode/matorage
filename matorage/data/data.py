@@ -31,8 +31,7 @@ class MTRData(object):
 
         # Storage configuration
         self.num_worker_threads = num_worker_threads
-        self.download = False if config.batch_atomic else True
-        self.clear = False if not self.download else clear
+        self.clear = clear
 
         # cache object which is downloaded.
         self._caching(cache_folder_path=cache_folder_path)
@@ -41,8 +40,7 @@ class MTRData(object):
         self.merged_indexer = self._merge_metadata()
 
         # download all object in /tmp folder
-        if self.download:
-            self._init_download()
+        self._init_download()
 
         atexit.register(self._exit)
 
