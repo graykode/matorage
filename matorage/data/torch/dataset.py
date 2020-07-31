@@ -13,10 +13,8 @@
 # limitations under the License.
 
 import os
-import io
 import torch
 import tables
-import bisect
 from torch.utils.data import Dataset
 
 from matorage.data.data import MTRData
@@ -35,10 +33,7 @@ class MTRDataset(Dataset, MTRData):
 
     def __init__(self, config, **kwargs):
         super(MTRDataset, self).__init__(config, **kwargs)
-        self.end_indices = list(self.merged_indexer.keys())
         self.open_files = {}
-
-        self._clients = {}
 
     def __len__(self):
         return self.end_indices[-1]
@@ -48,34 +43,6 @@ class MTRDataset(Dataset, MTRData):
             return self._get_item_with_download(idx)
         else:
             return self._get_item_with_inmemory(idx)
-
-    def _get_item_with_inmemory(self, idx):
-        import h5py
-
-        _pid = os.getpid()
-        if _pid not in self._clients:
-            self._clients[_pid] = self._create_client()
-
-        _objectname, _relative_index = self._find_object(idx)
-        _file_image = self._clients[_pid].get_object(
-            self.config.bucket_name,
-            object_name=_objectname
-        ).read()
-        _file_image = h5py.File(io.BytesIO(_file_image),'r')
-
-        return_tensor = {}
-        for _attr_name in list(self.attribute.keys()):
-            try:
-                return_tensor[_attr_name] = self._reshape_convert_tensor(
-                    numpy_array=_file_image[_attr_name][_relative_index],
-                    attr_name=_attr_name
-                )
-                if list(return_tensor[_attr_name].size()) == [1]:
-                    return_tensor[_attr_name] = return_tensor[_attr_name].item()
-            except:
-                raise IOError("Crash on concurrent read")
-
-        return list(return_tensor.values())
 
     def _get_item_with_download(self, idx):
         if not self.open_files:
@@ -104,19 +71,6 @@ class MTRDataset(Dataset, MTRData):
             raise ValueError("objectname({}) is not exist in {}".format(
                 _objectname, self._object_file_mapper
             ))
-
-    def _find_object(self, index):
-        """
-        find filename by index with binary search algorithm(indexes had been sorted).
-
-        Returns:
-            :obj:`str`: filename for index
-        """
-        _key_idx = bisect.bisect_right(self.end_indices, index)
-        _key = self.end_indices[_key_idx]
-        _last_key = self.end_indices[_key_idx - 1] if _key_idx else 0
-        _relative_index = (index - _last_key)
-        return self.merged_indexer[_key], _relative_index
 
     def _exit(self):
         """

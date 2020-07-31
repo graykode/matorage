@@ -13,8 +13,10 @@
 # limitations under the License.
 
 import os
+import io
 import json
 import atexit
+import bisect
 import tempfile
 from minio import Minio
 from os.path import expanduser
@@ -55,6 +57,9 @@ class MTRData(object):
 
         # merge all metadatas and load in memory.
         self.merged_indexer = self._merge_metadata()
+        self.end_indices = list(self.merged_indexer.keys())
+
+        self._clients = {}
 
         if not self.index:
             # cache object which is downloaded.
@@ -84,6 +89,45 @@ class MTRData(object):
             secret_key=self.config.secret_key,
             secure=self.config.secure,
         ) if not check_nas(self.config.endpoint) else NAS(self.config.endpoint)
+
+    def _find_object(self, index):
+        """
+        find filename by index with binary search algorithm(indexes had been sorted).
+
+        Returns:
+            :obj:`str`: filename for index
+        """
+        _key_idx = bisect.bisect_right(self.end_indices, index)
+        _key = self.end_indices[_key_idx]
+        _last_key = self.end_indices[_key_idx - 1] if _key_idx else 0
+        _relative_index = (index - _last_key)
+        return self.merged_indexer[_key], _relative_index
+
+    def _get_item_with_inmemory(self, idx):
+        import h5py
+
+        _pid = os.getpid()
+        if _pid not in self._clients:
+            self._clients[_pid] = self._create_client()
+
+        _objectname, _relative_index = self._find_object(idx)
+        _file_image = self._clients[_pid].get_object(
+            self.config.bucket_name,
+            object_name=_objectname
+        ).read()
+        _file_image = h5py.File(io.BytesIO(_file_image),'r')
+
+        return_tensor = {}
+        for _attr_name in list(self.attribute.keys()):
+            try:
+                return_tensor[_attr_name] = self._reshape_convert_tensor(
+                    numpy_array=_file_image[_attr_name][_relative_index],
+                    attr_name=_attr_name
+                )
+            except:
+                raise IOError("Crash on concurrent read")
+
+        return list(return_tensor.values())
 
     def _init_download(self):
         """

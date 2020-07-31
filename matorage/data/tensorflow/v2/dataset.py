@@ -14,7 +14,6 @@
 
 import os
 import io
-import h5py
 import tensorflow as tf
 import tensorflow_io as tfio
 
@@ -29,37 +28,32 @@ class MTRDataset(MTRData):
             {'tmpv7sy5_1fff7845eccd874068.h5': '/tmp/tmpja6wo221tmpv7sy5_1fff7845eccd874068.h5'}
             When minio object is downloaded, it is recorded in _object_file_maper.
         2. We read `_object_file_mapper` and download only new objects that are not there.
-        3. if Tensorflow v2, we use `tfio.IODataset.from_hdf5` and parallel `interleave` more fast
-
-        Args:
-            config (:obj:`matorage.config.MTRConfig`, `require`):
-            num_worker_threads :obj:`int`, `optional`, defaults to `4`):
-                    number of backend storage worker to upload or download.
-            clear (:obj:`boolean`, `optional`, defaults to `True`):
-                Delete all files stored on the local storage after the program finishes.
-
-        HDF5 Options
-            inmemory (:obj:`bool`, `optional`, defaults to `False`):
-                If you use this value as `True`, then you can use `HDF5_CORE` driver (https://support.hdfgroup.org/HDF5/doc/TechNotes/VFL.html#TOC1)
-                so the temporary file for uploading or downloading to backend storage,
-                such as MinIO, is not stored on disk but is in the memory.
-                Keep in mind that using memory is fast because it doesn't use disk IO, but it's not always good.
-                If default option(False), then `HDF5_SEC2` driver will be used on posix OS(or `HDF5_WINDOWS` in Windows).
+        3. if Tensorflow v2(2.2.0>=), we use `tfio.IODataset.from_hdf5` and parallel `interleave` more fast
 
     """
 
-    def __init__(self, config, batch_size, shuffle=False, seed=42, num_worker_threads=4, clear=True, cache_folder_path='~/.matorage'):
-        super(MTRDataset, self).__init__(config, num_worker_threads, clear, cache_folder_path)
+    def __init__(self, config, batch_size=1, **kwargs):
+        super(MTRDataset, self).__init__(config, **kwargs)
 
+        # class parameters
         self._batch_size = batch_size
-        self._shuffle = shuffle
-        self._seed = seed
-        _dataset = tf.data.Dataset.from_tensor_slices(self.filenames)
-        if shuffle:
-            _dataset = _dataset.shuffle(len(self.filenames), seed=self._seed)
-        self._dataloader = _dataset.interleave(self._create_tfiodata, cycle_length=len(self.filenames))
+        self._shuffle = kwargs.pop('shuffle', False)
+        self._seed = kwargs.pop('seed', 42)
+        self.index = kwargs.pop('index', False)
 
-    def _create_tfiodata(self, filename):
+        if not self.index:
+            _dataset = tf.data.Dataset.from_tensor_slices(self.filenames)
+            if self._shuffle:
+                _dataset = _dataset.shuffle(len(self.filenames), seed=self._seed)
+            self._dataloader = _dataset.interleave(
+                self._get_item_with_download,
+                cycle_length=len(self.filenames)
+            )
+
+    def __getitem__(self, idx):
+        return self._get_item_with_inmemory(idx)
+
+    def _get_item_with_download(self, filename):
         _tfios = []
         for _attr_name, _attr_value in self.attribute.items():
             _tfios.append(
@@ -79,6 +73,20 @@ class MTRDataset(MTRData):
             tf.data.experimental.AUTOTUNE
         )
         return _tfiodataset
+
+    def _reshape_convert_tensor(self, numpy_array, attr_name):
+        """
+        Reshape numpy tensor and convert from numpy to torch tensor.
+        In matorage dataset save in 2D (bz, N) shape to cpu L1 cache manage dataset fast.
+        Therefore, this function restores the shape for the user to use.
+
+        Returns:
+            :obj:`tf.tensor`
+        """
+        _shape = self.attribute[attr_name]["shape"]
+        numpy_array = numpy_array.reshape(_shape)
+        tensor = tf.convert_to_tensor(numpy_array)
+        return tensor
 
     @property
     def filenames(self):

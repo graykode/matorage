@@ -12,28 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import torch
 import unittest
 import numpy as np
 from tqdm import tqdm
-from torch.utils.data import DataLoader, Dataset
+import tensorflow as tf
 
 from tests.test_data import DataTest
 
 from matorage.data.config import DataConfig
 from matorage.data.saver import DataSaver
 from matorage.data.attribute import DataAttribute
-from matorage.testing_utils import require_torch
+from matorage.testing_utils import require_tf
 
-@require_torch
-class TorchDataTest(DataTest, unittest.TestCase):
+@require_tf
+class TFDataTest(DataTest, unittest.TestCase):
 
-    def test_torch_saver(self):
+    def test_tf_saver(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_torch_saver',
+            dataset_name='test_tf_saver',
             additional={
-                "framework" : "pytorch"
+                "framework" : "tensorflow"
             },
             attributes=[
                 DataAttribute('image', 'uint8', (2, 2), itemsize=32),
@@ -53,23 +52,24 @@ class TorchDataTest(DataTest, unittest.TestCase):
         })
         self.data_saver.disconnect()
 
-    def test_torch_loader(self):
-        from matorage.torch import MTRDataset
+    def test_tf_loader(self):
+        from matorage.tensorflow import MTRDataset
 
-        self.test_torch_saver()
+        self.test_tf_saver()
 
         dataset = MTRDataset(config=self.data_config)
-        loader = DataLoader(dataset, batch_size=64, num_workers=8, shuffle=True)
 
-        for batch_idx, (image, target) in enumerate(tqdm(loader)):
+        for batch_idx, (image, target) in enumerate(
+                tqdm(dataset.dataloader, total=2)
+        ):
             pass
 
-    def test_torch_index(self):
-        from matorage.torch import MTRDataset
+    def test_tf_index(self):
+        from matorage.tensorflow import MTRDataset
 
-        self.test_torch_saver()
+        self.test_tf_loader()
 
         dataset = MTRDataset(config=self.data_config, index=True)
 
-        assert torch.equal(dataset[0][0], torch.tensor([[1, 2], [3, 4]], dtype=torch.uint8))
-        assert torch.equal(dataset[0][1], torch.tensor([0], dtype=torch.uint8))
+        assert tf.reduce_all(tf.equal(dataset[0][0], tf.constant([[1, 2], [3, 4]], dtype=tf.uint8)))
+        assert tf.reduce_all(tf.equal(dataset[0][1], tf.constant([0], dtype=tf.uint8)))
