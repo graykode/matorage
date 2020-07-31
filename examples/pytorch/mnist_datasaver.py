@@ -75,8 +75,8 @@ def testdata_save(dataset):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--train', action='store_true', default=True)
-    parser.add_argument('--test', action='store_true', default=True)
+    parser.add_argument('--train', action='store_true')
+    parser.add_argument('--test', action='store_true')
     args = parser.parse_args()
 
     transform = transforms.Compose([
