@@ -28,14 +28,14 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_dataconfig_one_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_one_attribute',
             attributes=DataAttribute('x', 'uint8', (1))
         )
 
     def test_dataconfig_two_attributes(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_two_attributes',
             attributes=[
                 DataAttribute('x', 'uint8', (1)),
                 DataAttribute('y', 'uint8', (1))
@@ -44,19 +44,20 @@ class DataSaverTest(DataTest, unittest.TestCase):
 
     def test_dataconfig_attributes_already_exist(self):
         with self.assertRaisesRegex(KeyError, 'is already exist in'):
-            self.data_config = DataConfig(
-                **self.storage_config,
-                dataset_name='test_dataconfig',
-                attributes=[
-                    DataAttribute('x', 'uint8', (1)),
-                    DataAttribute('x', 'uint8', (1))
-                ]
-            )
+            for _ in range(2):
+                self.data_config = DataConfig(
+                    **self.storage_config,
+                    dataset_name='test_dataconfig_attributes_already_exist',
+                    attributes=[
+                        DataAttribute('x', 'uint8', (1)),
+                        DataAttribute('x', 'uint8', (1))
+                    ]
+                )
 
     def test_dataconfig_string_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_string_attribute',
             attributes=[
                 DataAttribute('x', 'string', (1), itemsize=32)
             ]
@@ -65,7 +66,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_dataconfig_bool_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_bool_attribute',
             attributes=[
                 DataAttribute('x', 'bool', (1))
             ]
@@ -74,7 +75,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_dataconfig_int8_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_int8_attribute',
             attributes=[
                 DataAttribute('x', 'int8', (1))
             ]
@@ -83,7 +84,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_dataconfig_int16_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_int16_attribute',
             attributes=[
                 DataAttribute('x', 'int16', (1))
             ]
@@ -92,7 +93,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_dataconfig_int32_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_int32_attribute',
             attributes=[
                 DataAttribute('x', 'int32', (1))
             ]
@@ -101,7 +102,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_dataconfig_uint8_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_uint8_attribute',
             attributes=[
                 DataAttribute('x', 'uint8', (1))
             ]
@@ -110,7 +111,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_dataconfig_uint16_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_uint16_attribute',
             attributes=[
                 DataAttribute('x', 'uint16', (1))
             ]
@@ -120,7 +121,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_dataconfig_uint32_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_uint32_attribute',
             attributes=[
                 DataAttribute('x', 'uint32', (1))
             ]
@@ -129,7 +130,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_dataconfig_uint64_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_uint64_attribute',
             attributes=[
                 DataAttribute('x', 'uint64', (1))
             ]
@@ -138,7 +139,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_dataconfig_float32_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_float32_attribute',
             attributes=[
                 DataAttribute('x', 'float32', (1))
             ]
@@ -147,7 +148,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_dataconfig_float64_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_dataconfig',
+            dataset_name='test_dataconfig_float64_attribute',
             attributes=[
                 DataAttribute('x', 'float64', (1))
             ]
@@ -156,7 +157,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_string_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_string_attribute',
             attributes=[
                 DataAttribute('x', 'string', (2), itemsize=32)
             ]
@@ -173,7 +174,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_bool_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_bool_attribute',
             attributes=[
                 DataAttribute('x', 'bool', (2), itemsize=32)
             ]
@@ -190,7 +191,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_int8_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_int8_attribute',
             attributes=[
                 DataAttribute('x', 'int8', (2), itemsize=32)
             ]
@@ -207,7 +208,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_int16_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_int16_attribute',
             attributes=[
                 DataAttribute('x', 'int16', (2), itemsize=32)
             ]
@@ -224,7 +225,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_int32_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_int32_attribute',
             attributes=[
                 DataAttribute('x', 'int32', (2), itemsize=32)
             ]
@@ -241,7 +242,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_int64_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_int64_attribute',
             attributes=[
                 DataAttribute('x', 'int64', (2), itemsize=32)
             ]
@@ -258,7 +259,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_uint8_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_uint8_attribute',
             attributes=[
                 DataAttribute('x', 'uint8', (2), itemsize=32)
             ]
@@ -275,7 +276,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_uint16_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_uint16_attribute',
             attributes=[
                 DataAttribute('x', 'uint16', (2), itemsize=32)
             ]
@@ -292,7 +293,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_uint32_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_uint32_attribute',
             attributes=[
                 DataAttribute('x', 'uint32', (2), itemsize=32)
             ]
@@ -309,7 +310,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_uint64_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_uint64_attribute',
             attributes=[
                 DataAttribute('x', 'uint64', (2), itemsize=32)
             ]
@@ -326,7 +327,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_float32_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_float32_attribute',
             attributes=[
                 DataAttribute('x', 'float32', (2), itemsize=32)
             ]
@@ -343,7 +344,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_float64_attribute(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_float64_attribute',
             attributes=[
                 DataAttribute('x', 'float64', (2), itemsize=32)
             ]
@@ -360,7 +361,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_inmemory(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_inmemory',
             attributes=[
                 DataAttribute('x', 'float64', (2), itemsize=32)
             ]
@@ -378,7 +379,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_zlib(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_zlib',
             attributes=[
                 DataAttribute('x', 'float64', (2), itemsize=32)
             ],
@@ -399,7 +400,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_lzo(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_lzo',
             attributes=[
                 DataAttribute('x', 'float64', (2), itemsize=32)
             ],
@@ -420,7 +421,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_bzip2(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_bzip2',
             attributes=[
                 DataAttribute('x', 'float64', (2), itemsize=32)
             ],
@@ -441,7 +442,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_blosc(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_datasaver',
+            dataset_name='test_datasaver_blosc',
             attributes=[
                 DataAttribute('x', 'float64', (2), itemsize=32)
             ],
@@ -460,12 +461,10 @@ class DataSaverTest(DataTest, unittest.TestCase):
         })
 
     def test_datasaver_nas(self):
-        storage_config = copy.deepcopy(self.storage_config)
-        storage_config['endpoint'] = '/tmp'
 
         self.data_config = DataConfig(
-            **storage_config,
-            dataset_name='test_datasaver',
+            endpoint='/tmp',
+            dataset_name='test_datasaver_nas',
             attributes=[
                 DataAttribute('x', 'float64', (2), itemsize=32)
             ],

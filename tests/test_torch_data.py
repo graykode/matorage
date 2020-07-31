@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import torch
 import unittest
+import numpy as np
 from tqdm import tqdm
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets, transforms
 
 from tests.test_data import DataTest
@@ -24,27 +26,37 @@ from matorage.data.saver import DataSaver
 from matorage.data.attribute import DataAttribute
 from matorage.testing_utils import require_torch
 
+class TorchDataset(Dataset):
+    def __init__(self):
+        self.x_data = torch.tensor([
+            [[1, 2], [3, 4]],
+            [[5, 6], [7, 8]]
+        ], dtype=torch.uint8)
+        self.y_data = torch.tensor([0, 1], dtype=torch.uint8)
+
+    def __len__(self):
+        return len(self.x_data)
+
+    def __getitem__(self, idx):
+        return self.x_data[idx], self.y_data[idx]
+
 @require_torch
-class TorchDataSaverTest(DataTest, unittest.TestCase):
+class TorchDataTest(DataTest, unittest.TestCase):
 
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
     ])
 
-    def test_mnist_saver(self):
-        dataset = datasets.MNIST(
-            '/tmp/data/mnist',
-            train=True,
-            download=True,
-            transform=self.transform
-        )
-
+    def test_torch_saver(self):
         self.data_config = DataConfig(
             **self.storage_config,
-            dataset_name='test_mnist_saver',
+            dataset_name='test_torch_saver',
+            additional={
+                "framework" : "pytorch"
+            },
             attributes=[
-                DataAttribute('image', 'uint8', (28, 28), itemsize=32),
+                DataAttribute('image', 'uint8', (2, 2), itemsize=32),
                 DataAttribute('target', 'uint8', (1), itemsize=32)
             ]
         )
@@ -52,10 +64,22 @@ class TorchDataSaverTest(DataTest, unittest.TestCase):
             config=self.data_config
         )
 
-        train_loader = DataLoader(dataset, batch_size=60, num_workers=8)
-        for (image, target) in tqdm(train_loader):
+        _dataset = TorchDataset()
+        loader = DataLoader(_dataset)
+        for (image, target) in tqdm(loader):
             self.data_saver({
                 'image': image,
                 'target': target
             })
         self.data_saver.disconnect()
+
+    def test_torch_loader(self):
+        from matorage.torch import MTRDataset
+
+        self.test_mnist_saver()
+
+        dataset = MTRDataset(config=self.data_config, clear=True)
+        loader = DataLoader(dataset, batch_size=64, num_workers=8, shuffle=True)
+
+        for batch_idx, (image, target) in enumerate(tqdm(loader)):
+            pass

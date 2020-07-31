@@ -39,16 +39,16 @@ class DataTest(unittest.TestCase):
         raise ValueError("This endpoint is not suitable.")
 
     def tearDown(self):
-        if self.data_config is not None:
+        if self.data_saver is not None:
             # delete bucket
             client = Minio(**self.storage_config) \
                 if not self.check_nas(self.data_config.endpoint) \
                 else NAS(self.data_config.endpoint)
-            objects = client.list_objects(self.data_config.bucket_name)
+            objects = client.list_objects(self.data_config.bucket_name, recursive=True)
             for obj in objects:
                 client.remove_object(self.data_config.bucket_name, obj.object_name)
             client.remove_bucket(self.data_config.bucket_name)
-        if self.data_saver is not None:
+
             # remove on local file
             for _file in self.data_saver.get_filelist:
                 if os.path.exists(_file):

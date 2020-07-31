@@ -51,11 +51,18 @@ class NAS(object):
         with open(_filename, 'wb') as f:
             shutil.copyfileobj(data, f, length=length)
 
-    def list_objects(self, bucket_name, prefix=''):
-        objects = os.listdir(
-            os.path.join(self.path, bucket_name, prefix)
-        )
-        return [Obj(os.path.join(prefix, o)) for o in objects]
+    def list_objects(self, bucket_name, prefix='', recursive=False):
+        _foldername = os.path.join(self.path, bucket_name)
+        if not recursive:
+            objects = os.listdir(_foldername)
+        else:
+            objects = [
+                os.path.join(dp, f) for dp, dn, fn
+                in os.walk(_foldername) for f in fn
+            ]
+        return [
+            Obj(o) for o in objects if o.startswith(prefix)
+        ]
 
     def make_bucket(self, bucket_name):
         os.makedirs(
