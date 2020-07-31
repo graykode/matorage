@@ -17,8 +17,6 @@ import io
 import torch
 import tables
 import bisect
-import h5py
-import tempfile
 from torch.utils.data import Dataset
 
 from matorage.data.data import MTRData
@@ -33,25 +31,10 @@ class MTRDataset(Dataset, MTRData):
         2. We read `_object_file_mapper` and download only new objects that are not there.
         3. `__getitem__` brings numpy data in local data from data index.
 
-        Args:
-            config (:obj:`matorage.config.MTRConfig`, `require`):
-            num_worker_threads :obj:`int`, `optional`, defaults to `4`):
-                    number of backend storage worker to upload or download.
-            clear (:obj:`boolean`, `optional`, defaults to `True`):
-                Delete all files stored on the local storage after the program finishes.
-
-        HDF5 Options
-            inmemory (:obj:`bool`, `optional`, defaults to `False`):
-                If you use this value as `True`, then you can use `HDF5_CORE` driver (https://support.hdfgroup.org/HDF5/doc/TechNotes/VFL.html#TOC1)
-                so the temporary file for uploading or downloading to backend storage,
-                such as MinIO, is not stored on disk but is in the memory.
-                Keep in mind that using memory is fast because it doesn't use disk IO, but it's not always good.
-                If default option(False), then `HDF5_SEC2` driver will be used on posix OS(or `HDF5_WINDOWS` in Windows).
-
     """
 
-    def __init__(self, config, num_worker_threads=4, clear=True, cache_folder_path='~/.matorage'):
-        super(MTRDataset, self).__init__(config, num_worker_threads, clear, cache_folder_path)
+    def __init__(self, config, **kwargs):
+        super(MTRDataset, self).__init__(config, **kwargs)
         self.end_indices = list(self.merged_indexer.keys())
         self.open_files = {}
 
@@ -61,9 +44,14 @@ class MTRDataset(Dataset, MTRData):
         return self.end_indices[-1]
 
     def __getitem__(self, idx):
-        return self._get_item_with_download(idx)
+        if not self.index:
+            return self._get_item_with_download(idx)
+        else:
+            return self._get_item_with_inmemory(idx)
 
     def _get_item_with_inmemory(self, idx):
+        import h5py
+
         _pid = os.getpid()
         if _pid not in self._clients:
             self._clients[_pid] = self._create_client()
@@ -165,6 +153,9 @@ class MTRDataset(Dataset, MTRData):
         Returns:
             :None
         """
+        if self.index:
+            raise FileNotFoundError("index mode can't not open files.")
+
         _driver, _driver_core_backing_store = self._set_driver()
         for _remote, _local in self._object_file_mapper.items():
             _file = tables.open_file(

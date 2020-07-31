@@ -14,10 +14,8 @@
 
 import torch
 import unittest
-import numpy as np
 from tqdm import tqdm
 from torch.utils.data import DataLoader, Dataset
-from torchvision import datasets, transforms
 
 from tests.test_data import DataTest
 
@@ -42,11 +40,6 @@ class TorchDataset(Dataset):
 
 @require_torch
 class TorchDataTest(DataTest, unittest.TestCase):
-
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])
 
     def test_torch_saver(self):
         self.data_config = DataConfig(
@@ -76,10 +69,20 @@ class TorchDataTest(DataTest, unittest.TestCase):
     def test_torch_loader(self):
         from matorage.torch import MTRDataset
 
-        self.test_mnist_saver()
+        self.test_torch_saver()
 
-        dataset = MTRDataset(config=self.data_config, clear=True)
+        dataset = MTRDataset(config=self.data_config)
         loader = DataLoader(dataset, batch_size=64, num_workers=8, shuffle=True)
 
         for batch_idx, (image, target) in enumerate(tqdm(loader)):
             pass
+
+    def test_torch_index(self):
+        from matorage.torch import MTRDataset
+
+        self.test_torch_saver()
+
+        dataset = MTRDataset(config=self.data_config, index=True)
+
+        assert torch.equal(dataset[0][0], torch.tensor([[1, 2], [3, 4]], dtype=torch.uint8))
+        assert dataset[0][1] == 0

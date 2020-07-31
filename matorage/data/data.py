@@ -24,25 +24,46 @@ from matorage.utils import logger, check_nas
 from matorage.data.downloader import DataDownloader
 
 class MTRData(object):
+    r"""MTRDataset class for Tensorflow Dataset
 
-    def __init__(self, config, num_worker_threads=4, clear=True, cache_folder_path='~/.matorage'):
+        This class is customized for the dataset of the Tensorflow, so it is operated by the following procedure.
+        1. The `_object_file_mapper` manages the minio object as key and the downloaded local path as value.
+            {'tmpv7sy5_1fff7845eccd874068.h5': '/tmp/tmpja6wo221tmpv7sy5_1fff7845eccd874068.h5'}
+            When minio object is downloaded, it is recorded in _object_file_maper.
+        2. We read `_object_file_mapper` and download only new objects that are not there.
+        3. if Tensorflow v2(2.2.0>=), we use `tfio.IODataset.from_hdf5` and parallel `interleave` more fast
+
+        Args:
+            config (:obj:`matorage.config.MTRConfig`, `require`):
+            num_worker_threads :obj:`int`, `optional`, defaults to `4`):
+                    number of backend storage worker to upload or download.
+            clear (:obj:`boolean`, `optional`, defaults to `True`):
+                Delete all files stored on the local storage after the program finishes.
+            cache_folder_path (:obj:`str`, `optional`, defaults to `~/.matorage`):
+                cached folder path to check which files are downloaded complete.
+            index (:obj:`boolean`, `optional`, defaults to `False`):
+                setting for index mode.
+    """
+    def __init__(self, config, num_worker_threads=4, clear=True, cache_folder_path='~/.matorage', index=False):
         self.config = config
         self.attribute = self._set_attribute()
 
         # Storage configuration
         self.num_worker_threads = num_worker_threads
         self.clear = clear
-
-        # cache object which is downloaded.
-        self._caching(cache_folder_path=cache_folder_path)
+        self.index = index
 
         # merge all metadatas and load in memory.
         self.merged_indexer = self._merge_metadata()
 
-        # download all object in /tmp folder
-        self._init_download()
+        if not self.index:
+            # cache object which is downloaded.
+            self._caching(cache_folder_path=cache_folder_path)
 
-        atexit.register(self._exit)
+            # download all object in /tmp folder
+            self._init_download()
+
+            atexit.register(self._exit)
 
     def _caching(self, cache_folder_path):
         self.cache_folder_path = expanduser(cache_folder_path)
