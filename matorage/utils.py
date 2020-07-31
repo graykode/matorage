@@ -20,6 +20,7 @@
 
 import os
 import logging
+from packaging import version
 from urllib.parse import urlsplit
 
 # from https://github.com/huggingface/transformers/blob/master/examples/distillation/utils.py
@@ -50,10 +51,13 @@ try:
 
     if USE_TF in ("1", "ON", "YES", "AUTO") and USE_TORCH not in ("1", "ON", "YES"):
         import tensorflow as tf
+        import tensorflow_io as tfio
 
-        assert hasattr(tf, "__version__") and int(tf.__version__[0]) >= 2
+        assert hasattr(tf, "__version__") and version.parse(tf.__version__) >= version.parse("2.2")
+        assert hasattr(tfio, "__version__") and version.parse(tfio.__version__) >= version.parse("0.13")
         _tf_available = True  # pylint: disable=invalid-name
         logger.info("TensorFlow version {} available.".format(tf.__version__))
+        logger.info("TensorFlow IO version {} available.".format(tfio.__version__))
     else:
         logger.info("Disabling Tensorflow because USE_TORCH is set")
         _tf_available = False
