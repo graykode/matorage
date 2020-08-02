@@ -22,5 +22,6 @@ __all__ = [
     'MTRConfig',
 
     'DataAttribute',
-    'DataConfig'
+    'DataConfig',
+    'DataSaver'
 ]

@@ -19,5 +19,11 @@ DataConfig
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: matorage.DataConfig
-   :members: to_dict, from_json_file, set_indexer,
+   :members:
 
+DataSaver
+~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: matorage.DataSaver
+   :members:
+   :special-members: __call__

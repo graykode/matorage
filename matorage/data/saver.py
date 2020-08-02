@@ -33,68 +33,79 @@ _MB = 1024 * _KB
 """The size of a Megabyte in bytes"""
 
 class DataSaver(object):
-    r""" Dataset saver classes.
-        This class is initialized independently of the process and goes through the process of uploading
-        the numby data created through the pre-processing process to the MinIO.
-        Update the file, push the upload queue if it exceeds a certain size, close the file, and create a new file.
-        After saving, you should disconnect the data saver.
+    """
+    Dataset saver classes.
 
-        To make This procedure easier to understand, the following is written in the pseudo-code.
-            ```python
-            per_one_batch_data_size = array_size // batch size
-            per_one_file_batch_size = max(1, self.config.max_object_size // per_one_batch_data_size)
-            for batch_idx in range(bzs):
-                if get_current_stored_batch_size() < per_one_file_batch_size:
-                    file.append(data[batch_idx])
-                else:
-                    file_closing()
-                    new_file is opened
-                    new_file.append(data[batch_idx])
-            All files are closed.
-            ```
+    This class must be created independently for the process. The independent process uses
+    multiple threads to upload to storage and generates unique metadata information when upload is complete.
+    Update the file, push the upload queue if it exceeds a certain size, close the file, and create a new file.
+    After saving, you should disconnect the data saver.
 
-        Note:
-            - Deep Learning Framework Type : All(pure python is also possible)
-            - **All processes should call the constructors of this class independently.**
+    To make This procedure easier to understand, the following is written in the pseudo-code.
 
-        Args:
-            config (:obj:`matorage.config.MTRConfig`, `require`):
-            Storage Options
-                multipart_upload_size (:obj:`int`, `optional`, defaults to `5 * 1024 * 1024`):
-                    size of the incompletely uploaded object.
-                    You can sync files faster with multipart upload in MinIO.
-                    (https://github.com/minio/minio-py/blob/master/minio/api.py#L1795)
-                    This is because MinIO clients use multi-threading, which improves IO speed more
-                    efficiently regardless of Python's Global Interpreter Lock(GIL).
-                num_worker_threads :obj:`int`, `optional`, defaults to `4`):
-                    number of backend storage worker to upload or download.
+    .. code-block::
 
-            HDF5 Options
-                inmemory (:obj:`bool`, `optional`, defaults to `False`):
-                    If you use this value as `True`, then you can use `HDF5_CORE` driver (https://support.hdfgroup.org/HDF5/doc/TechNotes/VFL.html#TOC1)
-                    so the temporary file for uploading or downloading to backend storage,
-                    such as MinIO, is not stored on disk but is in the memory.
-                    Keep in mind that using memory is fast because it doesn't use disk IO, but it's not always good.
-                    If default option(False), then `HDF5_SEC2` driver will be used on posix OS(or `HDF5_WINDOWS` in Windows).
+        per_one_batch_data_size = array_size // batch size
+        per_one_file_batch_size = max_object_size // per_one_batch_data_size
+        for batch_idx in range(bzs):
+            if get_current_stored_batch_size() < per_one_file_batch_size:
+                file.append(data[batch_idx])
+            else:
+                file_closing()
+                new_file is opened
+                new_file.append(data[batch_idx])
+        All files are closed.
+
+    Note:
+        - Deep Learning Framework Type : All(pure python is also possible)
+        - **All processes should call the constructors of this class independently.**
+        - After data save is over, you must disconnect through the disconnect function.
+
+    Args:
+        config (:obj:`matorage.DataConfig`, **require**):
+            A DataConfig instance object
+        multipart_upload_size (:obj:`integer`, optional, defaults to `5 * 1024 * 1024`):
+            size of the incompletely uploaded object.
+            You can sync files faster with `multipart upload in MinIO. <https://github.com/minio/minio-py/blob/master/minio/api.py#L1795>`_
+            This is because MinIO clients use multi-threading, which improves IO speed more
+            efficiently regardless of Python's Global Interpreter Lock(GIL).
+        num_worker_threads (:obj:`integer`, optional, defaults to 4):
+            number of backend storage worker to upload or download.
+
+        inmemory (:obj:`boolean`, optional, defaults to `False`):
+            If you use this value as `True`, then you can use `HDF5_CORE driver <https://support.hdfgroup.org/HDF5/doc/TechNotes/VFL.html#TOC1>`_
+            so the temporary file for uploading or downloading to backend storage,
+            such as MinIO, is not stored on disk but is in the memory.
+            Keep in mind that using memory is fast because it doesn't use disk IO, but it's not always good.
+            If default option(False), then `HDF5_SEC2` driver will be used on posix OS(or `HDF5_WINDOWS` in Windows).
 
 
-        Example::
-            Single Process example
-                ```python
-                data_saver = DataSaver(config=data_config)
-                row = 100
-                data = np.random.rand(64, 3, 224, 224)
+    Single Process example
 
-                start = time.time()
+        .. code-block:: python
 
-                for _ in tqdm(range(row)):
-                    preprocessing_work()
-                    data_saver({
-                        'array' : data
-                    })
+            data_config = DataConfig(
+                endpoint='127.0.0.1:9000',
+                access_key='minio',
+                secret_key='miniosecretkey',
+                dataset_name='array_test',
+                attributes=[
+                    DataAttribute('array', 'uint8', (3, 224, 224)),
+                ]
+            )
 
-                data_saver.disconnect()
-                ```
+            data_saver = DataSaver(config=data_config)
+            row = 100
+            data = np.random.rand(64, 3, 224, 224)
+
+            for _ in tqdm(range(row)):
+                preprocessing_work()
+                data_saver({
+                    'array' : data
+                })
+
+            data_saver.disconnect()
+
     """
 
     def __init__(self, config,
@@ -219,16 +230,18 @@ class DataSaver(object):
 
     def __call__(self, datas):
         """
-        datas is `dict` type. key is `str`, value is `numpy.ndarray`
-        **`value` is `numpy.ndarray` type with (B, *) shape, B means batch size**
-        example:
-            {
+
+        Args:
+            datas (:obj:`Dict[str, numpy.ndarray]`, **require**):
+                `value` is `numpy.ndarray` type with (Batch size, *) shape.
+
+        .. code-block:: python
+
+            data_saver = DataSaver(config=data_config)
+            data_saver({
                 'image' : np.random.rand(16, 28, 28),
                 'target' : np.random.rand(16)
-            }
-
-        Note:
-            file size will be closed and uploaded if bigger than `max_object_size`
+            })
 
         Returns:
             :None
@@ -349,6 +362,15 @@ class DataSaver(object):
         return self._filelist
 
     def disconnect(self):
+        """
+        disconnecting datasaver
+
+        1. close all opened files.
+        2. upload to backend storage.
+
+        Returns:
+            :obj: `None`:
+        """
         self._file_closing()
         self._uploader.join_queue()
 

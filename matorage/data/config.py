@@ -233,13 +233,6 @@ class DataConfig(MTRConfig):
 
     @property
     def get_indexer_last(self):
-        """
-        Get the last index. If the index is empty, 0 is returned.
-
-        Returns:
-            :obj:`integer`: last index number. It's means total length.
-
-        """
         keys = list(self.metadata.indexer.keys())
         if len(keys) == 0:
             return 0
