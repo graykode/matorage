@@ -33,14 +33,14 @@ class DataAttribute(Serialize):
         UInt8Atom(shape=(), dflt=0)
 
     Args:
-        name (:obj:`string`, `require`):
-            S3 object storage endpoint.
-        type (:obj:`string`, `require`):
+        name (:obj:`string`, **require**):
+            data attribute name .
+        type (:obj:`string`, **require**):
             data attribute type. select in `string`, `bool`, `int8`, `int16`, `int32`, `int64`,
             `uint8`, `uint16`, `uint32`, `uint64`, `float32`, `float64`
-        shape (:obj:`tuple`, `require`):
+        shape (:obj:`tuple`, **require**):
             data attribute shape. For example, if you specify a shape with (2, 2), you can store an array of (B, 2, 2) shapes.
-        itemsize (:obj:`integer`, `optional`, defaults to `0`):
+        itemsize (:obj:`integer`, optional, defaults to 0):
             itemsize(bytes) for string type attribute. Must be set for string type attribute.
 
     """

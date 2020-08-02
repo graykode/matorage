@@ -13,3 +13,11 @@ DataAttribute
 
 .. autoclass:: matorage.DataAttribute
     :members:
+
+
+DataConfig
+~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: matorage.DataConfig
+   :members: to_dict, from_json_file, set_indexer,
+

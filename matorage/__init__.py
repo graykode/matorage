@@ -17,5 +17,6 @@ from matorage.data.attribute import DataAttribute
 from matorage.data.saver import DataSaver
 
 __all__ = [
-    'DataAttribute'
+    'DataAttribute',
+    'DataConfig'
 ]

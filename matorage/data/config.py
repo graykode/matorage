@@ -26,40 +26,56 @@ from matorage.data.metadata import DataMetadata
 from matorage.data.attribute import DataAttribute
 
 class DataConfig(MTRConfig):
-    r""" Dataset configuration classes.
-        Handles a few parameters configuration for only dataset.
+    """
+    Dataset configuration classes. This class overrides ``MTRConfig``.
 
-        Note:
-            The variables in this class are static variables that are calculated
-            only once when DataClass is declared.
+    .. code-block:: python
 
-        Args:
-            dataset_name (:obj:`string`, `require`):
-                dataset name.
-            additional (:obj:`dict`, `optional`, defaults to `{}`):
-                Parameters for additional description of datasets.
-                The key and value of the dictionay can be specified very freely.
-                example
-                    ```python
-                        {
-                            'data_creator' : 'taehwanjung',
-                            'data_version' : 0.1
-                            ...
-                        }
-                    ```
-            attributes (:obj:`list`, `require`):
-                DataAttribute type of list for data attributes
-                example
-                    `attributes = DataAttribute('image', matorage.UInt8Atom, (28 * 28))`
-                    or
-                    ```python
-                    attributes = [
-                        DataAttribute('image', matorage.UInt8Atom, (28 * 28)),
-                        DataAttribute('target', matorage.UInt8Atom, (1))
-                    ]
-                    ```
-            compressor (:obj:`dict`, `optional`, defaults to `{"level" : 0, "lib" : "zlip"}`):
-                Data compressor option, it same with [pytable's Filter](http://www.pytables.org/usersguide/libref/helper_classes.html#tables.Filters)
+        from matorage import DataConfig
+
+        data_config = DataConfig(
+            endpoint='127.0.0.1:9000',
+            access_key='minio',
+            secret_key='miniosecretkey',
+            dataset_name='mnist',
+            additional={
+                "framework" : "pytorch",
+                "mode" : "training"
+            },
+            compressor={
+                "complevel" : 0,
+                "complib" : "zlib"
+            },
+            attributes=[
+                DataAttribute('image', 'float32', (28, 28)),
+                DataAttribute('target', 'int64', (1, ))
+            ]
+        )
+
+    Args:
+        endpoint (:obj:`string`, **require**):
+            S3 object storage endpoint.
+        access_key (:obj:`string`, optional, defaults to `None`):
+            Access key for the object storage endpoint. (Optional if you need anonymous access).
+        secret_key (:obj:`string`, optional, defaults to `None`):
+            Secret key for the object storage endpoint. (Optional if you need anonymous access).
+        secure (:obj:`boolean`, optional, defaults to `False`):
+            Set this value to True to enable secure (HTTPS) access. (Optional defaults to False unlike the original MinIO).
+        max_object_size (:obj:`integer`, optional, defaults to `10MB`):
+            One object file is divided into `max_object_size` and stored.
+
+        dataset_name (:obj:`string`, **require**):
+            dataset name.
+        attributes (:obj:`list`, **require**):
+            DataAttribute type of list for data attributes
+        additional (:obj:`dict`, optional, defaults to ``{}``):
+            Parameters for additional description of datasets. The key and value of the dictionay can be specified very freely.
+        compressor (:obj:`dict`, optional, defaults to :code:`{"complevel" : 0, "complib" : "zlib"}`):
+            Data compressor option. It consists of a dict type that has complevel and complib as keys.
+            For further reference, read `pytable's Filter <http://www.pytables.org/usersguide/libref/helper_classes.html#tables.Filters>`_.
+
+            - complevel (:obj:`integer`, defaults to 0) : compressor level(0~9). The larger the number, the more compressed it is.
+            - complib (:obj:`string`, defaults to 'zlib') : compressor library. choose in zlib, lzo, bzip2, blosc
 
     """
 
@@ -191,6 +207,9 @@ class DataConfig(MTRConfig):
             json_file (:obj:`string`):
                 Path to the JSON file containing the parameters.
 
+        Returns:
+            :obj:`DataConfig`: An instance of a configuration object
+
         """
         config_dict = cls._dict_from_json_file(json_file)
         metadata_dict = cls._load_metadata_from_bucket(config_dict)
@@ -214,6 +233,13 @@ class DataConfig(MTRConfig):
 
     @property
     def get_indexer_last(self):
+        """
+        Get the last index. If the index is empty, 0 is returned.
+
+        Returns:
+            :obj:`integer`: last index number. It's means total length.
+
+        """
         keys = list(self.metadata.indexer.keys())
         if len(keys) == 0:
             return 0
