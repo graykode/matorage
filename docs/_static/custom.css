@@ -1,0 +1,49 @@
+/* Custom CSS for landing page accordion */
+/* https://github.com/horovod/horovod/blob/master/docs/_static/custom.css */
+
+div.document {
+  width: 1040px;
+}
+
+/*Accordion open/close button style */
+.accordion {
+  background-color: #eee;
+  color: #444;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  outline: none;
+  transition: 0.4s;
+  font-size: 16px;
+}
+
+/* Active button style*/
+.active, .accordion:hover {
+  background-color: #ccc;
+}
+
+/* Accordion panel style */
+.panel {
+  padding: 0 18px;
+  background-color: white;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  font-size: 16px;
+}
+
+/* Plus sign */
+.accordion:after {
+  content: '\02795';
+  font-size: 16px;
+  color: #777;
+  float: right;
+  margin-left: 5px;
+}
+
+/* Minus sign */
+.active:after {
+  content: "\2796";
+}
