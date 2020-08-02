@@ -17,3 +17,9 @@ refer to `the corresponding document <https://docs.min.io/docs/>`_.
             -e "MINIO_SECRET_KEY=miniosecretkey" \
             -v ~/shared:/container/vol minio/minio \
             gateway nas /container/vol
+
+MTRConfig
+~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: matorage.MTRConfig
+   :members:

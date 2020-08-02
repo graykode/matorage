@@ -22,22 +22,31 @@ _MB = 1024 * _KB
 from matorage.serialize import Serialize
 
 class MTRConfig(Serialize):
-    r""" Storage connector configuration classes.
-        Handles a few parameters configuration for backend storage, hdf5 and etc.
+    """
+    Storage connector configuration classes.
+    For MinIO, see `this page <https://docs.min.io/docs/python-client-api-reference.html>`_ for more details.
 
-        Args:
-            For MinIO, see [this page](https://docs.min.io/docs/python-client-api-reference.html) for more details.
-            MinIO Options
-                endpoint (:obj:`string`, `require`):
-                    S3 object storage endpoint.
-                access_key (:obj:`string`, `optional`, defaults to `None`):
-                    Access key for the object storage endpoint. (Optional if you need anonymous access).
-                secret_key (:obj:`string`, `optional`, defaults to `None`):
-                    Secret key for the object storage endpoint. (Optional if you need anonymous access).
-                secure (:obj:`bool`, `optional`, defaults to `False`):
-                    Set this value to True to enable secure (HTTPS) access. (Optional defaults to False unlike the original MinIO).
-                max_object_size (:obj:`int`, `optional`, defaults to `10 * 1024 * 1024`):
-                    The maximum size of object storage stored as an actual object.
+    .. code-block:: python
+
+        from matorage import MTRConfig
+
+        storage_config = MTRConfig(
+            endpoint='127.0.0.1:9000',
+            access_key='minio',
+            secret_key='miniosecretkey'
+        )
+
+    Args:
+        endpoint (:obj:`string`, **require**):
+            S3 object storage endpoint.
+        access_key (:obj:`string`, optional, defaults to `None`):
+            Access key for the object storage endpoint. (Optional if you need anonymous access).
+        secret_key (:obj:`string`, optional, defaults to `None`):
+            Secret key for the object storage endpoint. (Optional if you need anonymous access).
+        secure (:obj:`boolean`, optional, defaults to `False`):
+            Set this value to True to enable secure (HTTPS) access. (Optional defaults to False unlike the original MinIO).
+        max_object_size (:obj:`integer`, optional, defaults to `10MB`):
+            One object file is divided into `max_object_size` and stored.
 
     """
 
