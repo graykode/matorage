@@ -26,13 +26,15 @@ Guides
 ------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    introduce
 
    storage
 
    dataset
+
+   dataset_module
 
    model
 
