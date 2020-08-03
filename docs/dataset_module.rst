@@ -14,6 +14,7 @@ DataConfig
 
 .. autoclass:: matorage.DataConfig
    :members:
+   :inherited-members:
 
 DataSaver
 ~~~~~~~~~~~~~~~~~~~~~
@@ -26,4 +27,10 @@ torch.MTRDataset
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: matorage.torch.MTRDataset
+   :members:
+
+tensorflow.MTRDataset
+~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: matorage.tensorflow.MTRDataset
    :members:

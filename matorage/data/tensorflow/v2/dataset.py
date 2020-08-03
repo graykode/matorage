@@ -21,14 +21,39 @@ from matorage.data.data import MTRData
 from matorage.utils import logger
 
 class MTRDataset(MTRData):
-    r"""MTRDataset class for Tensorflow Dataset
+    """
+    MTRDataset class for Tensorflow Dataset
 
-        This class is customized for the dataset of the Tensorflow, so it is operated by the following procedure.
-        1. The `_object_file_mapper` manages the minio object as key and the downloaded local path as value.
-            {'tmpv7sy5_1fff7845eccd874068.h5': '/tmp/tmpja6wo221tmpv7sy5_1fff7845eccd874068.h5'}
-            When minio object is downloaded, it is recorded in _object_file_maper.
-        2. We read `_object_file_mapper` and download only new objects that are not there.
-        3. if Tensorflow v2(2.2.0>=), we use `tfio.IODataset.from_hdf5` and parallel `interleave` more fast
+    This class is customized for the dataset of the PyTorch, so it is operated by the following procedure.
+
+    1. The ``_object_file_mapper`` manages the minio object as key and the downloaded local path as value.
+        When minio object is downloaded, it is recorded in _object_file_maper.
+    2. We read ``_object_file_mapper`` and download only new objects that are not there.
+    3. if Tensorflow v2(2.2.0>=), we use ``tfio.IODataset.from_hdf5`` and parallel ``interleave`` more fast
+
+    .. code-block::
+
+        from matorage import DataConfig, DataAttribute
+        from matorage.tensorflow import MTRDataset
+
+        data_config = DataConfig(
+            endpoint='127.0.0.1:9000',
+            access_key='minio',
+            secret_key='miniosecretkey',
+            dataset_name='array_test',
+            attributes=[
+                DataAttribute('array', 'uint8', (3, 224, 224)),
+            ]
+        )
+
+        dataset = MTRDataset(config=traindata_config, clear=True)
+
+        # iterative mode
+        for array in dataset.dataloader:
+            print(array)
+
+        # index mode
+        print(dataset[0])
 
     """
 
@@ -91,17 +116,17 @@ class MTRDataset(MTRData):
     @property
     def filenames(self):
         """
-        Get object name in minio storage
+        Get filenames(file absolute path) in local storage
 
         Returns:
-            :obj:`list`: object name of list
+            :obj:`list`: filenames(file absolute path) in local storage
         """
         return list(self._object_file_mapper.values())
 
     @property
     def dataloader(self):
         """
-        Get dataloader
+        Get iterative dataloader
 
         Returns:
             :obj:`InterleaveDataset`:

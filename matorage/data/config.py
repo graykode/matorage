@@ -52,9 +52,34 @@ class DataConfig(MTRConfig):
             ]
         )
 
+    If you have NAS(network access storage) settings, You can save/load faster by using the endpoint as a NAS folder path.
+
+    .. code-block:: python
+
+        from matorage import DataConfig
+
+        # NAS example
+        data_config = DataConfig(
+            endpoint='~/shared',
+            dataset_name='mnist',
+            additional={
+                "framework" : "pytorch",
+                "mode" : "training"
+            },
+            compressor={
+                "complevel" : 0,
+                "complib" : "zlib"
+            },
+            attributes=[
+                DataAttribute('image', 'float32', (28, 28)),
+                DataAttribute('target', 'int64', (1, ))
+            ]
+        )
+
+
     Args:
         endpoint (:obj:`string`, **require**):
-            S3 object storage endpoint.
+            S3 object storage endpoint. or If use NAS setting, NAS folder path.
         access_key (:obj:`string`, optional, defaults to `None`):
             Access key for the object storage endpoint. (Optional if you need anonymous access).
         secret_key (:obj:`string`, optional, defaults to `None`):

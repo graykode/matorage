@@ -45,9 +45,9 @@ class DataSaver(object):
 
     .. code-block::
 
-        per_one_batch_data_size = array_size // batch size
+        per_one_batch_data_size = array_size // num_batch
         per_one_file_batch_size = max_object_size // per_one_batch_data_size
-        for batch_idx in range(bzs):
+        for batch_idx in range(num_batch):
             if get_current_stored_batch_size() < per_one_file_batch_size:
                 file.append(data[batch_idx])
             else:
@@ -84,6 +84,9 @@ class DataSaver(object):
 
         .. code-block:: python
 
+            import numpy as np
+            from matorage import DataConfig, DataSaver, DataAttribute
+
             data_config = DataConfig(
                 endpoint='127.0.0.1:9000',
                 access_key='minio',
@@ -99,7 +102,6 @@ class DataSaver(object):
             data = np.random.rand(64, 3, 224, 224)
 
             for _ in tqdm(range(row)):
-                preprocessing_work()
                 data_saver({
                     'array' : data
                 })

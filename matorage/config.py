@@ -38,7 +38,7 @@ class MTRConfig(Serialize):
 
     Args:
         endpoint (:obj:`string`, **require**):
-            S3 object storage endpoint.
+            S3 object storage endpoint. or If use NAS setting, NAS folder path.
         access_key (:obj:`string`, optional, defaults to `None`):
             Access key for the object storage endpoint. (Optional if you need anonymous access).
         secret_key (:obj:`string`, optional, defaults to `None`):

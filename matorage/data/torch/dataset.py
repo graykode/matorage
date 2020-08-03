@@ -20,14 +20,40 @@ from torch.utils.data import Dataset
 from matorage.data.data import MTRData
 
 class MTRDataset(Dataset, MTRData):
-    r"""MTRDataset class for Pytorch Dataset
+    """
+    MTRDataset class for Pytorch Dataset
 
-        This class is customized for the dataset of the PyTorch, so it is operated by the following procedure.
-        1. The `_object_file_mapper` manages the minio object as key and the downloaded local path as value.
-            {'tmpv7sy5_1fff7845eccd874068.h5': '/tmp/tmpja6wo221tmpv7sy5_1fff7845eccd874068.h5'}
-            When minio object is downloaded, it is recorded in _object_file_maper.
-        2. We read `_object_file_mapper` and download only new objects that are not there.
-        3. `__getitem__` brings numpy data in local data from data index.
+    This class is customized for the dataset of the PyTorch, so it is operated by the following procedure.
+
+    1. The ``_object_file_mapper`` manages the minio object as key and the downloaded local path as value.
+        When minio object is downloaded, it is recorded in _object_file_maper.
+    2. We read ``_object_file_mapper`` and download only new objects that are not there.
+    3. ``__getitem__`` brings numpy data in local data from data index.
+
+    .. code-block::
+
+        from matorage import DataConfig, DataAttribute
+        from matorage.torch import MTRDataset
+        from torch.utils.data import DataLoader
+
+        data_config = DataConfig(
+            endpoint='127.0.0.1:9000',
+            access_key='minio',
+            secret_key='miniosecretkey',
+            dataset_name='array_test',
+            attributes=[
+                DataAttribute('array', 'uint8', (3, 224, 224)),
+            ]
+        )
+
+        dataset = MTRDataset(config=traindata_config, clear=True)
+
+        # iterative mode
+        for array in DataLoader(dataset):
+            array = array.to('cuda')
+
+        # index mode
+        print(dataset[0])
 
     """
 
