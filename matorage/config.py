@@ -15,16 +15,16 @@
 
 from matorage.serialize import Serialize
 
-class MTRConfig(Serialize):
+class StorageConfig(Serialize):
     """
     Storage connector configuration classes.
     For MinIO, see `this page <https://docs.min.io/docs/python-client-api-reference.html>`_ for more details.
 
     .. code-block:: python
 
-        from matorage import MTRConfig
+        from matorage import StorageConfig
 
-        storage_config = MTRConfig(
+        storage_config = StorageConfig(
             endpoint='127.0.0.1:9000',
             access_key='minio',
             secret_key='miniosecretkey'

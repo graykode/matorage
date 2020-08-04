@@ -16,10 +16,10 @@ from matorage.data.config import DataConfig
 from matorage.data.attribute import DataAttribute
 from matorage.data.saver import DataSaver
 
-from matorage.config import MTRConfig
+from matorage.config import StorageConfig
 
 __all__ = [
-    'MTRConfig',
+    'StorageConfig',
 
     'DataAttribute',
     'DataConfig',

@@ -18,8 +18,8 @@ refer to `the corresponding document <https://docs.min.io/docs/>`_.
             -v ~/shared:/container/vol minio/minio \
             gateway nas /container/vol
 
-MTRConfig
+StorageConfig
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: matorage.MTRConfig
+.. autoclass:: matorage.StorageConfig
    :members:

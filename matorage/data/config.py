@@ -27,13 +27,13 @@ from functools import reduce
 
 from matorage.nas import NAS
 from matorage.utils import check_nas, logger
-from matorage.config import MTRConfig
+from matorage.config import StorageConfig
 from matorage.data.metadata import DataMetadata
 from matorage.data.attribute import DataAttribute
 
-class DataConfig(MTRConfig):
+class DataConfig(StorageConfig):
     """
-    Dataset configuration classes. This class overrides ``MTRConfig``.
+    Dataset configuration classes. This class overrides ``StorageConfig``.
 
     .. code-block:: python
 
