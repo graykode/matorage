@@ -180,7 +180,7 @@ class MTRData(object):
             :obj: `None`:
         """
 
-        if self.clear:
+        if self.clear and not check_nas():
             for _local_file in list(self._object_file_mapper.values()):
                 if os.path.exists(_local_file):
                     os.remove(_local_file)
