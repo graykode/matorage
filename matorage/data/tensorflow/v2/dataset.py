@@ -20,9 +20,9 @@ import tensorflow_io as tfio
 from matorage.data.data import MTRData
 from matorage.utils import logger
 
-class MTRDataset(MTRData):
+class Dataset(MTRData):
     """
-    MTRDataset class for Tensorflow Dataset
+    Dataset class for Tensorflow Dataset
 
     This class is customized for the dataset of the PyTorch, so it is operated by the following procedure.
 
@@ -34,7 +34,7 @@ class MTRDataset(MTRData):
     .. code-block::
 
         from matorage import DataConfig, DataAttribute
-        from matorage.tensorflow import MTRDataset
+        from matorage.tensorflow import Dataset
 
         data_config = DataConfig(
             endpoint='127.0.0.1:9000',
@@ -46,7 +46,7 @@ class MTRDataset(MTRData):
             ]
         )
 
-        dataset = MTRDataset(config=traindata_config, clear=True)
+        dataset = Dataset(config=traindata_config, clear=True)
 
         # iterative mode
         for array in dataset.dataloader:
@@ -58,7 +58,7 @@ class MTRDataset(MTRData):
     """
 
     def __init__(self, config, batch_size=1, **kwargs):
-        super(MTRDataset, self).__init__(config, **kwargs)
+        super(Dataset, self).__init__(config, **kwargs)
 
         # class parameters
         self._batch_size = batch_size

@@ -23,14 +23,14 @@ DataSaver
    :members:
    :special-members: __call__
 
-torch.MTRDataset
+torch.Dataset
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: matorage.torch.MTRDataset
+.. autoclass:: matorage.torch.Dataset
    :members:
 
-tensorflow.MTRDataset
+tensorflow.Dataset
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: matorage.tensorflow.MTRDataset
+.. autoclass:: matorage.tensorflow.Dataset
    :members:

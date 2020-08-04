@@ -13,8 +13,8 @@
 # limitations under the License.
 
 # Create path shortcut
-from matorage.data.torch.dataset import MTRDataset
+from matorage.data.torch.dataset import Dataset
 
 __all__ = [
-    'MTRDataset',
+    'Dataset',
 ]

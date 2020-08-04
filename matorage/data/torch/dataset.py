@@ -15,13 +15,12 @@
 import os
 import torch
 import tables
-from torch.utils.data import Dataset
 
 from matorage.data.data import MTRData
 
-class MTRDataset(Dataset, MTRData):
+class Dataset(torch.utils.data.Dataset, MTRData):
     """
-    MTRDataset class for Pytorch Dataset
+    Dataset class for Pytorch Dataset
 
     This class is customized for the dataset of the PyTorch, so it is operated by the following procedure.
 
@@ -33,7 +32,7 @@ class MTRDataset(Dataset, MTRData):
     .. code-block::
 
         from matorage import DataConfig, DataAttribute
-        from matorage.torch import MTRDataset
+        from matorage.torch import Dataset
         from torch.utils.data import DataLoader
 
         data_config = DataConfig(
@@ -46,7 +45,7 @@ class MTRDataset(Dataset, MTRData):
             ]
         )
 
-        dataset = MTRDataset(config=traindata_config, clear=True)
+        dataset = Dataset(config=traindata_config, clear=True)
 
         # iterative mode
         for array in DataLoader(dataset):
@@ -58,7 +57,7 @@ class MTRDataset(Dataset, MTRData):
     """
 
     def __init__(self, config, **kwargs):
-        super(MTRDataset, self).__init__(config, **kwargs)
+        super(Dataset, self).__init__(config, **kwargs)
         self.open_files = {}
 
     def __len__(self):
@@ -105,7 +104,7 @@ class MTRDataset(Dataset, MTRData):
         Returns:
             :obj: `None`:
         """
-        super(MTRDataset, self)._exit()
+        super(Dataset, self)._exit()
         for _file in list(self.open_files.values()):
             if _file["file"].isopen:
                 _file["file"].close()

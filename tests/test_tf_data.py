@@ -53,11 +53,11 @@ class TFDataTest(DataTest, unittest.TestCase):
         self.data_saver.disconnect()
 
     def test_tf_loader(self):
-        from matorage.tensorflow import MTRDataset
+        from matorage.tensorflow import Dataset
 
         self.test_tf_saver()
 
-        dataset = MTRDataset(config=self.data_config)
+        dataset = Dataset(config=self.data_config)
 
         for batch_idx, (image, target) in enumerate(
                 tqdm(dataset.dataloader, total=2)
@@ -65,11 +65,11 @@ class TFDataTest(DataTest, unittest.TestCase):
             pass
 
     def test_tf_index(self):
-        from matorage.tensorflow import MTRDataset
+        from matorage.tensorflow import Dataset
 
         self.test_tf_loader()
 
-        dataset = MTRDataset(config=self.data_config, index=True)
+        dataset = Dataset(config=self.data_config, index=True)
 
         assert tf.reduce_all(tf.equal(dataset[0][0], tf.constant([[1, 2], [3, 4]], dtype=tf.uint8)))
         assert tf.reduce_all(tf.equal(dataset[0][1], tf.constant([0], dtype=tf.uint8)))

@@ -26,7 +26,7 @@ from matorage.utils import logger, check_nas
 from matorage.data.downloader import DataDownloader
 
 class MTRData(object):
-    r"""MTRDataset class for Tensorflow Dataset
+    r"""Parent Dataset class for Tensorflow and Pytorch Dataset
 
         This class is customized for the dataset of the Tensorflow, so it is operated by the following procedure.
         1. The `_object_file_mapper` manages the minio object as key and the downloaded local path as value.

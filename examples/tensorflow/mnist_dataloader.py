@@ -83,7 +83,7 @@ if __name__ == '__main__':
                 "framework": "tensorflow"
             },
         )
-        train_dataset = MTRDataset(config=traindata_config, shuffle=True, batch_size=64, clear=True)
+        train_dataset = Dataset(config=traindata_config, shuffle=True, batch_size=64, clear=True)
 
     if args.test:
         testdata_config = DataConfig(
@@ -96,7 +96,7 @@ if __name__ == '__main__':
                 "framework": "tensorflow"
             },
         )
-        test_dataset = MTRDataset(config=testdata_config, batch_size=64, clear=True)
+        test_dataset = Dataset(config=testdata_config, batch_size=64, clear=True)
 
     epochs = 5
     template = 'Epoch: {}, Loss: {}, Accuracy: {}, Test Loss: {}, Test Accuracy: {}'

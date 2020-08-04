@@ -88,7 +88,7 @@ if __name__ == '__main__':
                 "framework": "pytorch"
             },
         )
-        train_dataset = MTRDataset(config=traindata_config, clear=True)
+        train_dataset = Dataset(config=traindata_config, clear=True)
         train_loader = DataLoader(train_dataset, batch_size=64, num_workers=8, shuffle=True)
 
     if args.test:
@@ -102,7 +102,7 @@ if __name__ == '__main__':
                 "framework": "pytorch"
             },
         )
-        test_dataset = MTRDataset(config=testdata_config, clear=True)
+        test_dataset = Dataset(config=testdata_config, clear=True)
         test_loader = DataLoader(test_dataset, batch_size=64, num_workers=8)
 
     start = time.time()

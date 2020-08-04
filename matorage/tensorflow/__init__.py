@@ -13,8 +13,8 @@
 # limitations under the License.
 
 # Create path shortcut
-from matorage.data.tensorflow.v2.dataset import MTRDataset
+from matorage.data.tensorflow.v2.dataset import Dataset
 
 __all__ = [
-    'MTRDataset',
+    'Dataset',
 ]
