@@ -22,6 +22,7 @@ from matorage.nas import NAS
 class DataTest(unittest.TestCase):
     data_config = None
     data_saver = None
+    dataset = None
     storage_config = {
         'endpoint': '127.0.0.1:9000',
         'access_key': 'minio',
@@ -53,3 +54,7 @@ class DataTest(unittest.TestCase):
             for _file in self.data_saver.get_filelist:
                 if os.path.exists(_file):
                     os.remove(_file)
+
+        if self.dataset is not None:
+            if os.path.exists(self.dataset.cache_path):
+                os.remove(self.dataset.cache_path)

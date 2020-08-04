@@ -58,8 +58,8 @@ class TorchDataTest(DataTest, unittest.TestCase):
 
         self.test_torch_saver()
 
-        dataset = Dataset(config=self.data_config)
-        loader = DataLoader(dataset, batch_size=64, num_workers=8, shuffle=True)
+        self.dataset = Dataset(config=self.data_config)
+        loader = DataLoader(self.dataset, batch_size=64, num_workers=8, shuffle=True)
 
         for batch_idx, (image, target) in enumerate(tqdm(loader)):
             pass

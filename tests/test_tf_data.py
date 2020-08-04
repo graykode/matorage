@@ -57,10 +57,10 @@ class TFDataTest(DataTest, unittest.TestCase):
 
         self.test_tf_saver()
 
-        dataset = Dataset(config=self.data_config)
+        self.dataset = Dataset(config=self.data_config)
 
         for batch_idx, (image, target) in enumerate(
-                tqdm(dataset.dataloader, total=2)
+                tqdm(self.dataset.dataloader, total=2)
         ):
             pass
 
