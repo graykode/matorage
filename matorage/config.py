@@ -13,12 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-_KB = 1024
-"""The size of a Kilobyte in bytes"""
-
-_MB = 1024 * _KB
-"""The size of a Megabyte in bytes"""
-
 from matorage.serialize import Serialize
 
 class MTRConfig(Serialize):
@@ -45,8 +39,6 @@ class MTRConfig(Serialize):
             Secret key for the object storage endpoint. (Optional if you need anonymous access).
         secure (:obj:`boolean`, optional, defaults to `False`):
             Set this value to True to enable secure (HTTPS) access. (Optional defaults to False unlike the original MinIO).
-        max_object_size (:obj:`integer`, optional, defaults to `10MB`):
-            One object file is divided into `max_object_size` and stored.
 
     """
 
@@ -57,4 +49,3 @@ class MTRConfig(Serialize):
         self.access_key = kwargs.pop("access_key", None)
         self.secret_key = kwargs.pop("secret_key", None)
         self.secure = kwargs.pop("secure", False)
-        self.max_object_size = kwargs.pop("max_object_size", 10 * _MB)

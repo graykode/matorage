@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+_KB = 1024
+"""The size of a Kilobyte in bytes"""
+
+_MB = 1024 * _KB
+"""The size of a Megabyte in bytes"""
+
 import copy
 import json
 import tables
@@ -101,6 +107,8 @@ class DataConfig(MTRConfig):
 
             - complevel (:obj:`integer`, defaults to 0) : compressor level(0~9). The larger the number, the more compressed it is.
             - complib (:obj:`string`, defaults to 'zlib') : compressor library. choose in zlib, lzo, bzip2, blosc
+        max_object_size (:obj:`integer`, optional, defaults to `10MB`):
+            One object file is divided into `max_object_size` and stored.
 
     """
 
@@ -114,6 +122,8 @@ class DataConfig(MTRConfig):
             "complevel" : 0,
             "complib" : "zlib"
         })
+        self.max_object_size = kwargs.pop("max_object_size", 10 * _MB)
+
         self.bucket_name = self._hashmap_transfer()
 
         self._check_all()
