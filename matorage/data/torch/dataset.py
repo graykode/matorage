@@ -30,7 +30,7 @@ class Dataset(torch.utils.data.Dataset, MTRData):
     3. ``__getitem__`` brings numpy data in local data from data index.
 
     Args:
-        config (:obj:`matorage.config.StorageConfig`, `require`):
+        config (:obj:`matorage.DataConfig`, `require`):
         num_worker_threads :obj:`int`, `optional`, defaults to `4`):
                 number of backend storage worker to upload or download.
         clear (:obj:`boolean`, `optional`, defaults to `True`):

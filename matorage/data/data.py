@@ -36,7 +36,7 @@ class MTRData(object):
         3. if Tensorflow v2(2.2.0>=), we use `tfio.IODataset.from_hdf5` and parallel `interleave` more fast
 
         Args:
-            config (:obj:`matorage.config.StorageConfig`, `require`):
+            config (:obj:`matorage.DataConfig`, `require`):
             num_worker_threads :obj:`int`, `optional`, defaults to `4`):
                     number of backend storage worker to upload or download.
             clear (:obj:`boolean`, `optional`, defaults to `True`):
