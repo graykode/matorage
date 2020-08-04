@@ -29,6 +29,17 @@ class Dataset(torch.utils.data.Dataset, MTRData):
     2. We read ``_object_file_mapper`` and download only new objects that are not there.
     3. ``__getitem__`` brings numpy data in local data from data index.
 
+    Args:
+        config (:obj:`matorage.config.StorageConfig`, `require`):
+        num_worker_threads :obj:`int`, `optional`, defaults to `4`):
+                number of backend storage worker to upload or download.
+        clear (:obj:`boolean`, `optional`, defaults to `True`):
+            Delete all files stored on the local storage after the program finishes.
+        cache_folder_path (:obj:`str`, `optional`, defaults to `~/.matorage`):
+            cached folder path to check which files are downloaded complete.
+        index (:obj:`boolean`, `optional`, defaults to `False`):
+            setting for index mode.
+
     .. code-block::
 
         from matorage import DataConfig, DataAttribute

@@ -31,6 +31,24 @@ class Dataset(MTRData):
     2. We read ``_object_file_mapper`` and download only new objects that are not there.
     3. if Tensorflow v2(2.2.0>=), we use ``tfio.IODataset.from_hdf5`` and parallel ``interleave`` more fast
 
+    Args:
+        config (:obj:`matorage.config.StorageConfig`, `require`):
+        num_worker_threads :obj:`int`, `optional`, defaults to `4`):
+                number of backend storage worker to upload or download.
+        clear (:obj:`boolean`, `optional`, defaults to `True`):
+            Delete all files stored on the local storage after the program finishes.
+        cache_folder_path (:obj:`str`, `optional`, defaults to `~/.matorage`):
+            cached folder path to check which files are downloaded complete.
+        index (:obj:`boolean`, `optional`, defaults to `False`):
+            setting for index mode.
+
+        batch_size (:obj:`integer`, `optional`, defaults to `1`):
+            how many samples per batch to load.
+        shuffle (:obj:`boolean`, `optional`, defaults to `False`):
+            set to True to have the data reshuffled at every epoch.
+        seed (:obj:`integer`, `optional`, defaults to `0`):
+            random seed used to shuffle the sampler if ``shuffle=True``.
+
     .. code-block::
 
         from matorage import DataConfig, DataAttribute
@@ -63,7 +81,7 @@ class Dataset(MTRData):
         # class parameters
         self._batch_size = batch_size
         self._shuffle = kwargs.pop('shuffle', False)
-        self._seed = kwargs.pop('seed', 42)
+        self._seed = kwargs.pop('seed', 0)
         self.index = kwargs.pop('index', False)
 
         if not self.index:
