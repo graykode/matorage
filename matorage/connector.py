@@ -15,7 +15,7 @@
 from queue import Queue
 from threading import Thread
 
-class MRTConnector(object):
+class MTRConnector(object):
     r""" File Storage Connector class with multi-thread.
         MinIO is thread-safety, according to document.
         Although Python Global Interpreter Lock(GIL), multi thread can benefit greatly from file IO.
