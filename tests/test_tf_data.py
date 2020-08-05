@@ -27,18 +27,22 @@ from matorage.testing_utils import require_tf
 @require_tf
 class TFDataTest(DataTest, unittest.TestCase):
 
-    def test_tf_saver(self, save_to_json_file=False):
-        self.data_config = DataConfig(
-            **self.storage_config,
-            dataset_name='test_tf_saver',
-            additional={
-                "framework" : "tensorflow"
-            },
-            attributes=[
-                DataAttribute('image', 'uint8', (2, 2), itemsize=32),
-                DataAttribute('target', 'uint8', (1), itemsize=32)
-            ]
-        )
+    def test_tf_saver(self, data_config=None, save_to_json_file=False):
+        if data_config is None:
+            self.data_config = DataConfig(
+                **self.storage_config,
+                dataset_name='test_tf_saver',
+                additional={
+                    "framework" : "tensorflow"
+                },
+                attributes=[
+                    DataAttribute('image', 'uint8', (2, 2), itemsize=32),
+                    DataAttribute('target', 'uint8', (1), itemsize=32)
+                ]
+            )
+        else:
+            self.data_config = data_config
+
         if save_to_json_file:
             self.data_config_file = 'data_config_file.json'
             self.data_config.to_json_file(self.data_config_file)
@@ -68,10 +72,64 @@ class TFDataTest(DataTest, unittest.TestCase):
         ):
             pass
 
+    def test_tf_loader_with_compressor(self):
+        from matorage.tensorflow import Dataset
+
+        data_config = DataConfig(
+            **self.storage_config,
+            dataset_name='test_tf_loader_with_compressor',
+            additional={
+                "framework" : "tensorflow"
+            },
+            compressor={
+                "complevel" : 4,
+                "complib" : "zlib"
+            },
+            attributes=[
+                DataAttribute('image', 'uint8', (2, 2), itemsize=32),
+                DataAttribute('target', 'uint8', (1), itemsize=32)
+            ]
+        )
+
+        self.test_tf_saver(data_config=data_config)
+
+        self.dataset = Dataset(config=data_config)
+
+        for batch_idx, (image, target) in enumerate(
+                tqdm(self.dataset.dataloader, total=2)
+        ):
+            pass
+
     def test_tf_index(self):
         from matorage.tensorflow import Dataset
 
         self.test_tf_loader()
+
+        dataset = Dataset(config=self.data_config, index=True)
+
+        assert tf.reduce_all(tf.equal(dataset[0][0], tf.constant([[1, 2], [3, 4]], dtype=tf.uint8)))
+        assert tf.reduce_all(tf.equal(dataset[0][1], tf.constant([0], dtype=tf.uint8)))
+
+    def test_tf_index_with_compressor(self):
+        from matorage.tensorflow import Dataset
+
+        data_config = DataConfig(
+            **self.storage_config,
+            dataset_name='test_tf_index_with_compressor',
+            additional={
+                "framework" : "tensorflow"
+            },
+            compressor={
+                "complevel" : 4,
+                "complib" : "zlib"
+            },
+            attributes=[
+                DataAttribute('image', 'uint8', (2, 2), itemsize=32),
+                DataAttribute('target', 'uint8', (1), itemsize=32)
+            ]
+        )
+
+        self.test_tf_saver(data_config=data_config)
 
         dataset = Dataset(config=self.data_config, index=True)
 

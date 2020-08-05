@@ -28,18 +28,22 @@ from matorage.testing_utils import require_torch
 @require_torch
 class TorchDataTest(DataTest, unittest.TestCase):
 
-    def test_torch_saver(self, save_to_json_file=False):
-        self.data_config = DataConfig(
-            **self.storage_config,
-            dataset_name='test_torch_saver',
-            additional={
-                "framework" : "pytorch"
-            },
-            attributes=[
-                DataAttribute('image', 'uint8', (2, 2), itemsize=32),
-                DataAttribute('target', 'uint8', (1), itemsize=32)
-            ]
-        )
+    def test_torch_saver(self, data_config=None, save_to_json_file=False):
+        if data_config is None:
+            self.data_config = DataConfig(
+                **self.storage_config,
+                dataset_name='test_torch_saver',
+                additional={
+                    "framework" : "pytorch"
+                },
+                attributes=[
+                    DataAttribute('image', 'uint8', (2, 2), itemsize=32),
+                    DataAttribute('target', 'uint8', (1), itemsize=32)
+                ]
+            )
+        else:
+            self.data_config = data_config
+
         if save_to_json_file:
             self.data_config_file = 'data_config_file.json'
             self.data_config.to_json_file(self.data_config_file)
@@ -68,10 +72,63 @@ class TorchDataTest(DataTest, unittest.TestCase):
         for batch_idx, (image, target) in enumerate(tqdm(loader)):
             pass
 
+    def test_torch_loader_with_compressor(self):
+        from matorage.torch import Dataset
+
+        data_config = DataConfig(
+            **self.storage_config,
+            dataset_name='test_torch_loader_with_compressor',
+            additional={
+                "framework" : "pytorch"
+            },
+            compressor={
+                "complevel" : 4,
+                "complib" : "zlib"
+            },
+            attributes=[
+                DataAttribute('image', 'uint8', (2, 2), itemsize=32),
+                DataAttribute('target', 'uint8', (1), itemsize=32)
+            ]
+        )
+
+        self.test_torch_saver(data_config=data_config)
+
+        self.dataset = Dataset(config=data_config)
+        loader = DataLoader(self.dataset, batch_size=64, num_workers=8, shuffle=True)
+
+        for batch_idx, (image, target) in enumerate(tqdm(loader)):
+            pass
+
     def test_torch_index(self):
         from matorage.torch import Dataset
 
         self.test_torch_saver()
+
+        dataset = Dataset(config=self.data_config, index=True)
+
+        assert torch.equal(dataset[0][0], torch.tensor([[1, 2], [3, 4]], dtype=torch.uint8))
+        assert torch.equal(dataset[0][1], torch.tensor([0], dtype=torch.uint8))
+
+    def test_torch_index_with_compressor(self):
+        from matorage.torch import Dataset
+
+        data_config = DataConfig(
+            **self.storage_config,
+            dataset_name='test_torch_index_with_compressor',
+            additional={
+                "framework" : "pytorch"
+            },
+            compressor={
+                "complevel" : 4,
+                "complib" : "zlib"
+            },
+            attributes=[
+                DataAttribute('image', 'uint8', (2, 2), itemsize=32),
+                DataAttribute('target', 'uint8', (1), itemsize=32)
+            ]
+        )
+
+        self.test_torch_saver(data_config=data_config)
 
         dataset = Dataset(config=self.data_config, index=True)
 
