@@ -28,7 +28,7 @@ from matorage.testing_utils import require_torch
 @require_torch
 class TorchDataTest(DataTest, unittest.TestCase):
 
-    def test_torch_saver(self):
+    def test_torch_saver(self, save_to_json_file=False):
         self.data_config = DataConfig(
             **self.storage_config,
             dataset_name='test_torch_saver',
@@ -40,6 +40,10 @@ class TorchDataTest(DataTest, unittest.TestCase):
                 DataAttribute('target', 'uint8', (1), itemsize=32)
             ]
         )
+        if save_to_json_file:
+            self.data_config_file = 'data_config_file.json'
+            self.data_config.to_json_file(self.data_config_file)
+
         self.data_saver = DataSaver(
             config=self.data_config
         )
@@ -73,3 +77,40 @@ class TorchDataTest(DataTest, unittest.TestCase):
 
         assert torch.equal(dataset[0][0], torch.tensor([[1, 2], [3, 4]], dtype=torch.uint8))
         assert torch.equal(dataset[0][1], torch.tensor([0], dtype=torch.uint8))
+
+    def test_saver_from_json_file(self):
+
+        self.test_torch_saver(save_to_json_file=True)
+
+        self.data_config = None
+        self.data_saver = None
+
+        self.data_config = DataConfig.from_json_file(self.data_config_file)
+
+        self.data_saver = DataSaver(
+            config=self.data_config
+        )
+
+        self.data_saver({
+            'image': np.asarray([
+                [[1, 2], [3, 4]],
+                [[5, 6], [7, 8]]
+            ]),
+            'target': np.asarray([0, 1])
+        })
+        self.data_saver.disconnect()
+
+    def test_loader_from_json_file(self):
+        from matorage.torch import Dataset
+
+        self.test_torch_saver(save_to_json_file=True)
+
+        self.data_config = None
+
+        self.data_config = DataConfig.from_json_file(self.data_config_file)
+
+        self.dataset = Dataset(config=self.data_config)
+        loader = DataLoader(self.dataset, batch_size=64, num_workers=8, shuffle=True)
+
+        for batch_idx, (image, target) in enumerate(tqdm(loader)):
+            pass

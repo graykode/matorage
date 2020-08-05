@@ -21,6 +21,7 @@ from matorage.nas import NAS
 
 class DataTest(unittest.TestCase):
     data_config = None
+    data_config_file = None
     data_saver = None
     dataset = None
     storage_config = {
@@ -58,3 +59,7 @@ class DataTest(unittest.TestCase):
         if self.dataset is not None:
             if os.path.exists(self.dataset.cache_path):
                 os.remove(self.dataset.cache_path)
+
+        if self.data_config_file is not None:
+            if os.path.exists(self.data_config_file):
+                os.remove(self.data_config_file)

@@ -27,7 +27,7 @@ from matorage.testing_utils import require_tf
 @require_tf
 class TFDataTest(DataTest, unittest.TestCase):
 
-    def test_tf_saver(self):
+    def test_tf_saver(self, save_to_json_file=False):
         self.data_config = DataConfig(
             **self.storage_config,
             dataset_name='test_tf_saver',
@@ -39,6 +39,10 @@ class TFDataTest(DataTest, unittest.TestCase):
                 DataAttribute('target', 'uint8', (1), itemsize=32)
             ]
         )
+        if save_to_json_file:
+            self.data_config_file = 'data_config_file.json'
+            self.data_config.to_json_file(self.data_config_file)
+
         self.data_saver = DataSaver(
             config=self.data_config
         )
@@ -73,3 +77,41 @@ class TFDataTest(DataTest, unittest.TestCase):
 
         assert tf.reduce_all(tf.equal(dataset[0][0], tf.constant([[1, 2], [3, 4]], dtype=tf.uint8)))
         assert tf.reduce_all(tf.equal(dataset[0][1], tf.constant([0], dtype=tf.uint8)))
+
+    def test_saver_from_json_file(self):
+
+        self.test_tf_saver(save_to_json_file=True)
+
+        self.data_config = None
+        self.data_saver = None
+
+        self.data_config = DataConfig.from_json_file(self.data_config_file)
+
+        self.data_saver = DataSaver(
+            config=self.data_config
+        )
+
+        self.data_saver({
+            'image': np.asarray([
+                [[1, 2], [3, 4]],
+                [[5, 6], [7, 8]]
+            ]),
+            'target': np.asarray([0, 1])
+        })
+        self.data_saver.disconnect()
+
+    def test_loader_from_json_file(self):
+        from matorage.tensorflow import Dataset
+
+        self.test_tf_saver(save_to_json_file=True)
+
+        self.data_config = None
+
+        self.data_config = DataConfig.from_json_file(self.data_config_file)
+
+        self.dataset = Dataset(config=self.data_config)
+
+        for batch_idx, (image, target) in enumerate(
+                tqdm(self.dataset.dataloader, total=2)
+        ):
+            pass

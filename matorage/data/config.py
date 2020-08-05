@@ -216,7 +216,7 @@ class DataConfig(StorageConfig):
         if not isinstance(self.additional, dict):
             raise TypeError("additional is not dict type")
 
-        key = self.dataset_name + json.dumps(self.additional)
+        key = self.dataset_name + json.dumps(self.additional, indent=4, sort_keys=True)
         return hashlib.md5(key.encode('utf-8')).hexdigest()
 
     def to_dict(self):
@@ -247,21 +247,8 @@ class DataConfig(StorageConfig):
 
         """
         config_dict = cls._dict_from_json_file(json_file)
-        metadata_dict = cls._load_metadata_from_bucket(config_dict)
 
-        if 'dataset_name' in config_dict:
-            del config_dict['dataset_name']
-        if 'additional' in config_dict:
-            del config_dict['additional']
-        if 'attributes' in metadata_dict:
-            metadata_dict['attributes'] = [
-                DataAttribute(**item) for item in metadata_dict['attributes']
-            ]
-
-        return cls(
-            **config_dict, **metadata_dict,
-            metadata=DataMetadata(**metadata_dict)
-        )
+        return cls(**config_dict)
 
     def set_indexer(self, index):
         self.metadata.indexer.update(index)
