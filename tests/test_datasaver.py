@@ -32,6 +32,19 @@ class DataSaverTest(DataTest, unittest.TestCase):
             attributes=DataAttribute('x', 'uint8', (1))
         )
 
+    def test_reload_dataconfig(self):
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name='test_reload_dataconfig',
+            attributes=DataAttribute('x', 'uint8', (1))
+        )
+        self.data_config_file = 'data_config_file.json'
+        self.data_config.to_json_file(self.data_config_file)
+
+        self.data_config = None
+
+        self.data_config = DataConfig.from_json_file(self.data_config_file)
+
     def test_dataconfig_two_attributes(self):
         self.data_config = DataConfig(
             **self.storage_config,
@@ -44,15 +57,14 @@ class DataSaverTest(DataTest, unittest.TestCase):
 
     def test_dataconfig_attributes_already_exist(self):
         with self.assertRaisesRegex(KeyError, 'is already exist in'):
-            for _ in range(2):
-                self.data_config = DataConfig(
-                    **self.storage_config,
-                    dataset_name='test_dataconfig_attributes_already_exist',
-                    attributes=[
-                        DataAttribute('x', 'uint8', (1)),
-                        DataAttribute('x', 'uint8', (1))
-                    ]
-                )
+            self.data_config = DataConfig(
+                **self.storage_config,
+                dataset_name='test_dataconfig_attributes_already_exist',
+                attributes=[
+                    DataAttribute('x', 'uint8', (1)),
+                    DataAttribute('x', 'uint8', (1))
+                ]
+            )
 
     def test_dataconfig_string_attribute(self):
         self.data_config = DataConfig(

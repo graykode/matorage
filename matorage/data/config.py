@@ -37,26 +37,29 @@ class DataConfig(StorageConfig):
 
     .. code-block:: python
 
-        from matorage import DataConfig
+        >>> from matorage import DataConfig, DataAttribute
 
-        data_config = DataConfig(
-            endpoint='127.0.0.1:9000',
-            access_key='minio',
-            secret_key='miniosecretkey',
-            dataset_name='mnist',
-            additional={
-                "framework" : "pytorch",
-                "mode" : "training"
-            },
-            compressor={
-                "complevel" : 0,
-                "complib" : "zlib"
-            },
-            attributes=[
-                DataAttribute('image', 'float32', (28, 28)),
-                DataAttribute('target', 'int64', (1, ))
-            ]
-        )
+        >>> data_config = DataConfig(
+                endpoint='127.0.0.1:9000',
+                access_key='minio',
+                secret_key='miniosecretkey',
+                dataset_name='mnist',
+                additional={
+                    "framework" : "pytorch",
+                    "mode" : "training"
+                },
+                compressor={
+                    "complevel" : 0,
+                    "complib" : "zlib"
+                },
+                attributes=[
+                    DataAttribute('image', 'float32', (28, 28)),
+                    DataAttribute('target', 'int64', (1, ))
+                ]
+            )
+
+        >>> data_config.to_json_file('data_config.json')
+        >>> data_config2 = DataConfig.from_json_file('data_config.json')
 
     If you have NAS(network access storage) settings, You can save/load faster by using the endpoint as a NAS folder path.
 
@@ -231,7 +234,32 @@ class DataConfig(StorageConfig):
         )
         output["dataset_name"] = self.metadata.dataset_name
         output["additional"] = self.metadata.additional
+        output["attributes"] = [
+            _attribute.to_dict() for _attribute in self.attributes
+        ]
+        output["compressor"] = self.metadata.compressor
         return output
+
+    @classmethod
+    def from_json_file(cls, json_file):
+        """
+        Constructs a `Config` from the path to a json file of parameters.
+
+        Args:
+            json_file (:obj:`string`):
+                Path to the JSON file containing the parameters.
+
+        Returns:
+            :obj:`DataConfig, ModelConfig`: An instance of a configuration object
+
+        """
+        config_dict = cls._dict_from_json_file(json_file)
+
+        config_dict['attributes'] = [
+            DataAttribute(**item) for item in config_dict['attributes']
+        ]
+
+        return cls(**config_dict)
 
     def set_indexer(self, index):
         self.metadata.indexer.update(index)
