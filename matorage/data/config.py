@@ -260,37 +260,3 @@ class DataConfig(StorageConfig):
             return 0
         else:
             return keys[-1]
-
-    @classmethod
-    def _load_metadata_from_bucket(cls, config_dict):
-        """
-        Load `metadata.json` from bucket name
-
-        Returns:
-            :obj: `dict`: metadata json
-        """
-        _bucket_name = hashlib.md5(
-            (config_dict['dataset_name'] + json.dumps(config_dict['additional'])).encode('utf-8')
-        ).hexdigest()
-
-        _client = Minio(config_dict['endpoint'],
-                            access_key=config_dict['access_key'],
-                            secret_key=config_dict['secret_key'],
-                            secure=config_dict['secure']) \
-            if not check_nas(config_dict['endpoint']) else NAS(config_dict['endpoint'])
-        if not _client.bucket_exists(_bucket_name):
-            raise AssertionError("{} with {} is not exist on {} or key is mismathced".format(
-                config_dict['dataset_name'], config_dict['additional'], config_dict['endpoint']
-            ))
-        objects = _client.list_objects(
-            _bucket_name,
-            prefix='metadata/'
-        )
-        _metadata = None
-        for obj in objects:
-            _metadata = _client.get_object(_bucket_name, obj.object_name)
-            break
-        if not _metadata:
-            raise AssertionError("metadata folder is not exist in minio storage")
-
-        return json.loads(_metadata.read().decode('utf-8'))
