@@ -31,7 +31,7 @@ class Uploader(MTRConnector):
     def do_job(self, local_file, remote_file):
 
         if isinstance(remote_file, str):
-            minio_key = os.path.basename(remote_file)
+            minio_key = remote_file
         try:
             if not self._inmemory:
                 self._client.fput_object(

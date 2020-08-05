@@ -262,9 +262,15 @@ class DataSaver(object):
 
         if not self.inmemory:
             self._file.close()
-            self._uploader.set_queue(local_file=self._file.filename, remote_file=self._filename)
+            self._uploader.set_queue(
+                local_file=self._file.filename,
+                remote_file=os.path.basename(self._filename)
+            )
         else:
-            self._uploader.set_queue(local_file=self._file.get_file_image(), remote_file=self._filename)
+            self._uploader.set_queue(
+                local_file=self._file.get_file_image(),
+                remote_file=os.path.basename(self._filename)
+            )
             self._file.close()
         # Set filename indexer
         _current_index = _last_index + _length
