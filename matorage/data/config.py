@@ -211,7 +211,7 @@ class DataConfig(StorageConfig):
                 DataAttribute(**item) for item in metadata_dict['attributes']
             ]
         else:
-            logger.error("{} {} is not exist!".format(self.dataset_name, str(self.additional)))
+            logger.warn("{} {} is not exist!".format(self.dataset_name, str(self.additional)))
 
     def _convert_type_flatten(self):
         for attribute in self.flatten_attributes:
