@@ -37,29 +37,29 @@ class DataConfig(StorageConfig):
 
     .. code-block:: python
 
-        >>> from matorage import DataConfig, DataAttribute
+        from matorage import DataConfig, DataAttribute
 
-        >>> data_config = DataConfig(
-                endpoint='127.0.0.1:9000',
-                access_key='minio',
-                secret_key='miniosecretkey',
-                dataset_name='mnist',
-                additional={
-                    "framework" : "pytorch",
-                    "mode" : "training"
-                },
-                compressor={
-                    "complevel" : 0,
-                    "complib" : "zlib"
-                },
-                attributes=[
-                    DataAttribute('image', 'float32', (28, 28)),
-                    DataAttribute('target', 'int64', (1, ))
-                ]
-            )
+        data_config = DataConfig(
+            endpoint='127.0.0.1:9000',
+            access_key='minio',
+            secret_key='miniosecretkey',
+            dataset_name='mnist',
+            additional={
+                "framework" : "pytorch",
+                "mode" : "training"
+            },
+            compressor={
+                "complevel" : 0,
+                "complib" : "zlib"
+            },
+            attributes=[
+                DataAttribute('image', 'float32', (28, 28)),
+                DataAttribute('target', 'int64', (1, ))
+            ]
+        )
 
-        >>> data_config.to_json_file('data_config.json')
-        >>> data_config2 = DataConfig.from_json_file('data_config.json')
+        data_config.to_json_file('data_config.json')
+        data_config2 = DataConfig.from_json_file('data_config.json')
 
     If you have NAS(network access storage) settings, You can save/load faster by using the endpoint as a NAS folder path.
 
