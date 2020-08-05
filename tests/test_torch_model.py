@@ -43,14 +43,18 @@ class Model(nn.Module):
 @require_torch
 class TorchModelTest(ModelTest, unittest.TestCase):
 
-    def test_torch_saver(self, save_to_json_file=False):
-        self.model_config = ModelConfig(
-            **self.storage_config,
-            model_name='test_torch_saver',
-            additional={
-                "framework" : "pytorch"
-            }
-        )
+    def test_torchmodel_saver(self, model_config=None, save_to_json_file=False):
+        if model_config is None:
+            self.model_config = ModelConfig(
+                **self.storage_config,
+                model_name='test_torchmodel_saver',
+                additional={
+                    "framework" : "pytorch"
+                }
+            )
+        else:
+            self.model_config = model_config
+
         if save_to_json_file:
             self.model_config_file = 'model_config_file.json'
             self.model_config.to_json_file(self.model_config_file)
@@ -64,9 +68,9 @@ class TorchModelTest(ModelTest, unittest.TestCase):
             "step" : 0
         }, model)
 
-    def test_saver_from_json_file(self):
+    def test_torchmodel_saver_from_json_file(self):
 
-        self.test_torch_saver(save_to_json_file=True)
+        self.test_torchmodel_saver(save_to_json_file=True)
 
         self.model_config = None
         self.model_manager = None
@@ -81,3 +85,53 @@ class TorchModelTest(ModelTest, unittest.TestCase):
         self.model_manager.save({
             "step": 0
         }, model)
+
+    def test_torchmodel_loader(self):
+
+        self.test_torchmodel_saver()
+
+        self.model_manager = ModelManager(
+            config=self.model_config
+        )
+
+        model = Model()
+        self.model_manager.load({
+            "step": 0
+        }, model)
+
+    def test_torchmodel_loader_with_compressor(self):
+
+        model_config = ModelConfig(
+            **self.storage_config,
+            model_name='test_torchmodel_loader_with_compressor',
+            additional={
+                "framework": "pytorch"
+            },
+            compressor={
+                "complevel": 4,
+                "complib": "zlib"
+            }
+        )
+
+        self.test_torchmodel_saver(model_config=model_config)
+
+        self.model_manager = ModelManager(
+            config=self.model_config
+        )
+
+        model = Model()
+        self.model_manager.load({
+            "step": 0
+        }, model)
+
+    def test_torchmodel_layer_loader(self):
+
+        self.test_torchmodel_saver()
+
+        self.model_manager = ModelManager(
+            config=self.model_config
+        )
+
+        self.model_manager.load({
+            "step": 0
+        }, 'f.weight')

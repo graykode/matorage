@@ -117,6 +117,11 @@ class Manager(object):
         """
         save weight of model
 
+        .. code-block:: python
+
+            model = Model()
+            model_manager.save({"step": 0}, model)
+
         Args:
         metadata (:obj:`dict or string`, **require**):
             Parameters for additional description of models. The key and value of the dictionay can be specified very freely.
@@ -144,14 +149,37 @@ class Manager(object):
         """
         load weight of model
 
+        .. code-block:: python
+
+            >>> model = Model()
+            >>> pretrained_model = model_manager.save({"step": 0}, model)
+            >>> print(pretrained_model)
+            >>> Model(
+                  (f): Linear(in_features=5, out_features=10, bias=True)
+                )
+
+            >>> weight = model_manager.save({"step": 0}, 'fc1.weight')
+            >>> print(weight)
+            >>> OrderedDict([('f.weight', tensor([[ 0.2679, -0.2147, -0.1927, -0.3263,  0.0930],
+                [ 0.0144,  0.2935,  0.3614, -0.0493, -0.3772],
+                [ 0.4101, -0.1864,  0.1076, -0.3900,  0.3613],
+                [-0.2831,  0.3692,  0.3367,  0.2491, -0.2971],
+                [-0.3019,  0.1682, -0.3951,  0.1528,  0.1778],
+                [-0.1593,  0.3315, -0.2286,  0.1294,  0.2087],
+                [-0.3394, -0.2706,  0.1515,  0.0357, -0.4252],
+                [ 0.2555, -0.4435, -0.3353,  0.2096, -0.3741],
+                [ 0.3950, -0.2630, -0.1730,  0.1393,  0.3678],
+                [ 0.3065, -0.0095,  0.0988,  0.4294,  0.3338]]))])
+
         Args:
         metadata (:obj:`dict or string`, **require**):
             Parameters for additional description of models. The key and value of the dictionay can be specified very freely.
-        model (:obj:``, **require**):
-            Pytorch or Tensorflow model.
+        model (:obj:`Model or string`, **require**):
+            Pytorch, Tensorflow model or string of layer name.
 
         Returns:
-            :obj: `None`:
+            :obj: `Model or OrderedDict`: If ``model`` is pytorch or tensorflow model type, return model.
+            however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
         """
         model_folder = self._hashmap_transfer(metadata)
 
@@ -160,7 +188,7 @@ class Manager(object):
             prefix=f"{model_folder}/"
         )
 
-        self._load_model(model_folder, layers, model)
+        return self._load_model(model_folder, layers, model)
 
     def _hashmap_transfer(self, metadata):
         """

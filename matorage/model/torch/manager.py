@@ -84,7 +84,11 @@ class ModelManager(Manager):
     def _load_model(self, model_folder, layers, model):
         weight = OrderedDict()
 
-        keys = list(model.state_dict().keys())
+        if isinstance(model, str):
+            keys = [model]
+        else:
+            keys = list(model.state_dict().keys())
+
         for layer in layers:
             name = os.path.basename(layer.object_name)
             if name in keys:
@@ -96,4 +100,8 @@ class ModelManager(Manager):
                 layer_image = h5py.File(io.BytesIO(layer_image), 'r')
                 weight[name] = torch.from_numpy(layer_image[self.type][:])
 
-        model.load_state_dict(weight)
+        if isinstance(model, str):
+            return weight
+        else:
+            model.load_state_dict(weight)
+            return model
