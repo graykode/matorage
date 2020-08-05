@@ -32,9 +32,8 @@ _MB = 1024 * _KB
 class Manager(object):
     type='model'
 
-    def __init__(self, config, inmemory=False, num_worker_threads=4, multipart_upload_size=5 * _MB):
+    def __init__(self, config, num_worker_threads=4, multipart_upload_size=5 * _MB):
         self.config = config
-        self.inmemory = inmemory
         self.num_worker_threads = num_worker_threads
         self.multipart_upload_size = multipart_upload_size
 
@@ -50,10 +49,8 @@ class Manager(object):
             bucket=self.config.bucket_name,
             num_worker_threads=self.num_worker_threads,
             multipart_upload_size=self.multipart_upload_size,
-            inmemory=self.inmemory
+            inmemory=True
         )
-
-        self._object_file_mapper = {}
 
     def set_default(self, obj):
         if isinstance(obj, set):
@@ -62,11 +59,6 @@ class Manager(object):
 
     def _uploader_closing(self):
         self._uploader.join_queue()
-
-        if not check_nas(self.config.endpoint):
-            for model_layer in list(self._object_file_mapper.keys()):
-                if os.path.exists(model_layer):
-                    os.remove(model_layer)
 
         _metadata_file = tempfile.mktemp('metadata.json')
         with open(_metadata_file, "w", encoding="utf-8") as writer:
@@ -104,41 +96,32 @@ class Manager(object):
 
     def _save_layer(self, model_folder, name, weight):
         _local_file = tempfile.mktemp(f"{name}.h5")
-        _driver, _driver_core_backing_store = self._set_driver()
 
         _file = tables.open_file(
             _local_file, 'w',
-            driver=_driver,
-            driver_core_backing_store=_driver_core_backing_store
+            driver='H5FD_CORE',
+            driver_core_backing_store=False
         )
         _file.create_carray(
             '/', self.type, obj=weight,
             filters=tables.Filters(**self.config.compressor)
         )
 
-        if not self.inmemory:
-            _file.close()
-            self._uploader.set_queue(
-                local_file=_local_file,
-                remote_file=f"{model_folder}/{name}"
-            )
-            self._object_file_mapper[name] = _local_file
-        else:
-            self._uploader.set_queue(
-                local_file=_file.get_file_image(),
-                remote_file=f"{model_folder}/{name}"
-            )
-            _file.close()
+        self._uploader.set_queue(
+            local_file=_file.get_file_image(),
+            remote_file=f"{model_folder}/{name}"
+        )
+        _file.close()
 
     def save(self, metadata, model):
         """
-        save model
+        save weight of model
 
         Args:
         metadata (:obj:`dict or string`, **require**):
             Parameters for additional description of models. The key and value of the dictionay can be specified very freely.
-        metadata (:obj:``, **require**):
-        Pytorch or Tensorflow model.
+        model (:obj:``, **require**):
+            Pytorch or Tensorflow model.
 
         Returns:
             :obj: `None`:
@@ -157,8 +140,27 @@ class Manager(object):
             self.config.metadata["model"].add(model_folder)
             self._save_with_clear(model_folder, model)
 
-    def load(self):
-        raise NotImplementedError
+    def load(self, metadata, model):
+        """
+        load weight of model
+
+        Args:
+        metadata (:obj:`dict or string`, **require**):
+            Parameters for additional description of models. The key and value of the dictionay can be specified very freely.
+        model (:obj:``, **require**):
+            Pytorch or Tensorflow model.
+
+        Returns:
+            :obj: `None`:
+        """
+        model_folder = self._hashmap_transfer(metadata)
+
+        layers = self._client.list_objects(
+            bucket_name=self.config.bucket_name,
+            prefix=f"{model_folder}/"
+        )
+
+        self._load_model(model_folder, layers, model)
 
     def _hashmap_transfer(self, metadata):
         """
@@ -174,20 +176,3 @@ class Manager(object):
 
         key = json.dumps(metadata, indent=4, sort_keys=True)
         return hashlib.md5(key.encode('utf-8')).hexdigest()
-
-    def _set_driver(self):
-        """
-        Setting HDF5 driver type
-
-        Returns:
-            :obj:`str` : HDF5 driver type string
-        """
-        if self.inmemory:
-            return 'H5FD_CORE', False
-        else:
-            if os.name == "posix":
-                return 'H5FD_SEC2', True
-            elif os.name == "nt":
-                return 'H5FD_WINDOWS', True
-            else:
-                raise ValueError("{} OS not supported!".format(os.name))
