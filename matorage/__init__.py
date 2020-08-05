@@ -18,10 +18,14 @@ from matorage.data.saver import DataSaver
 
 from matorage.config import StorageConfig
 
+from matorage.model.config import ModelConfig
+
 __all__ = [
     'StorageConfig',
 
     'DataAttribute',
     'DataConfig',
-    'DataSaver'
+    'DataSaver',
+
+    'ModelConfig',
 ]
