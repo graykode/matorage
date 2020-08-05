@@ -24,7 +24,7 @@ from minio import Minio
 
 from matorage.nas import NAS
 from matorage.utils import is_tf_available, is_torch_available, check_nas
-from matorage.data.uploader import DataUploader
+from matorage.uploader import Uploader
 
 _KB = 1024
 """The size of a Kilobyte in bytes"""
@@ -139,7 +139,7 @@ class DataSaver(object):
         ) if not check_nas(self.config.endpoint) else NAS(self.config.endpoint)
         self._check_and_create_bucket()
 
-        self._uploader = DataUploader(
+        self._uploader = Uploader(
             client=self._client,
             bucket=self.config.bucket_name,
             num_worker_threads=self.num_worker_threads,

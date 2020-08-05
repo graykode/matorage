@@ -17,14 +17,14 @@ from minio import ResponseError
 
 from matorage.connector import MTRConnector
 
-class DataDownloader(MTRConnector):
+class Downloader(MTRConnector):
     r""" File Storage downloader class with multi thread.
         MinIO is thread-safety, according to document.
         Although Python Global Interpreter Lock(GIL), multi thread can benefit greatly from file IO.
     """
 
     def __init__(self, client, bucket, num_worker_threads):
-        super(DataDownloader, self).__init__(client, bucket, num_worker_threads)
+        super(Downloader, self).__init__(client, bucket, num_worker_threads)
 
     def do_job(self, local_file, remote_file):
         if isinstance(remote_file, str):

@@ -23,7 +23,7 @@ from os.path import expanduser
 
 from matorage.nas import NAS
 from matorage.utils import logger, check_nas
-from matorage.data.downloader import DataDownloader
+from matorage.downloader import Downloader
 
 class MTRData(object):
     r"""Parent Dataset class for Tensorflow and Pytorch Dataset
@@ -138,7 +138,7 @@ class MTRData(object):
             :obj: `None`:
         """
         _client = self._create_client()
-        _downloader = DataDownloader(
+        _downloader = Downloader(
             client=_client,
             bucket=self.config.bucket_name,
             num_worker_threads=self.num_worker_threads

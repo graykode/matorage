@@ -18,13 +18,13 @@ from minio import ResponseError
 
 from matorage.connector import MTRConnector
 
-class DataUploader(MTRConnector):
+class Uploader(MTRConnector):
     r""" File Storage uploader class with multi thread.
         MinIO is thread-safety, according to document.
         Although Python Global Interpreter Lock(GIL), multi thread can benefit greatly from file IO.
     """
     def __init__(self, client, bucket, num_worker_threads, multipart_upload_size, inmemory=False):
-        super(DataUploader, self).__init__(client, bucket, num_worker_threads)
+        super(Uploader, self).__init__(client, bucket, num_worker_threads)
         self._multipart_upload_size = multipart_upload_size
         self._inmemory = inmemory
 
