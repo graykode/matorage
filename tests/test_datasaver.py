@@ -32,6 +32,13 @@ class DataSaverTest(DataTest, unittest.TestCase):
             attributes=DataAttribute('x', 'uint8', (1))
         )
 
+    def test_dataconfig_one_attribute_with_tuple_attributes(self):
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name='test_dataconfig_one_attribute_with_tuple_attributes',
+            attributes=('x', 'uint8', (1))
+        )
+
     def test_reload_dataconfig(self):
         self.data_config = DataConfig(
             **self.storage_config,
@@ -52,6 +59,16 @@ class DataSaverTest(DataTest, unittest.TestCase):
             attributes=[
                 DataAttribute('x', 'uint8', (1)),
                 DataAttribute('y', 'uint8', (1))
+            ]
+        )
+
+    def test_dataconfig_two_attribute_with_tuple_attributes(self):
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name='test_dataconfig_two_attribute_with_tuple_attributes',
+            attributes=[
+                ('x', 'uint8', (1)),
+                ('y', 'uint8', (1))
             ]
         )
 

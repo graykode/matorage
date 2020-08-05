@@ -145,9 +145,19 @@ class DataConfig(StorageConfig):
         if self.attributes is None:
             raise ValueError("attributes is empty")
         if isinstance(self.attributes, tuple):
-            self.attributes = list(self.attributes)
+            self.attributes = DataAttribute(
+                    name=self.attributes[0],
+                    type=self.attributes[1],
+                    shape=self.attributes[2]
+                )
         if isinstance(self.attributes, DataAttribute):
             self.attributes = [self.attributes]
+
+        for i, attr in enumerate(self.attributes):
+            if isinstance(attr, tuple):
+                self.attributes[i] = DataAttribute(
+                    attr[0], attr[1], attr[2]
+                )
 
         attribute_names = set()
         for attribute in self.attributes:
