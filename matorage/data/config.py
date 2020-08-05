@@ -233,23 +233,6 @@ class DataConfig(StorageConfig):
         output["additional"] = self.metadata.additional
         return output
 
-    @classmethod
-    def from_json_file(cls, json_file):
-        """
-        Constructs a `Config` from the path to a json file of parameters.
-
-        Args:
-            json_file (:obj:`string`):
-                Path to the JSON file containing the parameters.
-
-        Returns:
-            :obj:`DataConfig`: An instance of a configuration object
-
-        """
-        config_dict = cls._dict_from_json_file(json_file)
-
-        return cls(**config_dict)
-
     def set_indexer(self, index):
         self.metadata.indexer.update(index)
 

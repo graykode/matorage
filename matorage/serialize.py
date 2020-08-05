@@ -59,6 +59,23 @@ class Serialize(object):
         return json.dumps(self.to_dict(), indent=4, sort_keys=True) + "\n"
 
     @classmethod
+    def from_json_file(cls, json_file):
+        """
+        Constructs a `Config` from the path to a json file of parameters.
+
+        Args:
+            json_file (:obj:`string`):
+                Path to the JSON file containing the parameters.
+
+        Returns:
+            :obj:`DataConfig, ModelConfig`: An instance of a configuration object
+
+        """
+        config_dict = cls._dict_from_json_file(json_file)
+
+        return cls(**config_dict)
+
+    @classmethod
     def _dict_from_json_file(cls, json_file):
         with open(json_file, "r", encoding="utf-8") as reader:
             text = reader.read()
