@@ -178,14 +178,15 @@ class Manager(object):
             Pytorch, Tensorflow model or string of layer name.
 
         Returns:
-            :obj: `Model or OrderedDict`: If ``model`` is pytorch or tensorflow model type, return model.
+            :obj: `None or OrderedDict`: If ``model`` is pytorch or tensorflow model type, weight is loaded into the model and return None.
             however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
         """
         model_folder = self._hashmap_transfer(metadata)
 
         layers = self._client.list_objects(
             bucket_name=self.config.bucket_name,
-            prefix=f"{model_folder}/"
+            prefix=f"{model_folder}/",
+            recursive=True
         )
 
         return self._load_model(model_folder, layers, model)
