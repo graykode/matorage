@@ -18,6 +18,8 @@ import numpy as np
 from tqdm import tqdm
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
 
 from tests.test_model import ModelTest
 
@@ -42,6 +44,11 @@ class Model(nn.Module):
 
 @require_torch
 class TorchModelTest(ModelTest, unittest.TestCase):
+
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
 
     def test_torchmodel_saver(self, model_config=None, save_to_json_file=False):
         if model_config is None:
@@ -135,3 +142,76 @@ class TorchModelTest(ModelTest, unittest.TestCase):
         self.model_manager.load({
             "step": 0
         }, 'f.weight')
+
+    def test_mnist_eval(self, model, device):
+        test_dataset = datasets.MNIST(
+            '/tmp/data',
+            train=False,
+            transform=self.transform
+        )
+        test_loader = DataLoader(test_dataset, batch_size=64, num_workers=4)
+
+        model.eval()
+        test_loss = 0
+        correct = 0
+        with torch.no_grad():
+            for image, target in test_loader:
+                image, target = image.to(device), target.to(device)
+                output = model(image)
+                test_loss += F.nll_loss(output, target, reduction='sum').item()
+                pred = output.argmax(dim=1, keepdim=True)
+                correct += pred.eq(target.view_as(pred)).sum().item()
+
+        test_loss /= len(test_loader.dataset)
+        return correct
+
+    def test_mnist_reloaded(self):
+        import torch.optim as optim
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        train_dataset = datasets.MNIST(
+            '/tmp/data',
+            train=True,
+            download=True,
+            transform=self.transform
+        )
+
+        model = Model().to(device)
+        optimizer = optim.Adam(model.parameters(), lr=0.01)
+        criterion = torch.nn.CrossEntropyLoss()
+
+        train_loader = DataLoader(train_dataset, batch_size=64, num_workers=4)
+
+        for batch_idx, (image, target) in enumerate(tqdm(train_loader)):
+            image, target = image.to(device), target.to(device)
+            optimizer.zero_grad()
+            output = model(image)
+            loss = criterion(output, target)
+            loss.backward()
+            optimizer.step()
+
+        self.model_config = ModelConfig(
+            endpoint='127.0.0.1:9000',
+            access_key='minio',
+            secret_key='miniosecretkey',
+            model_name='testmodel',
+            additional={
+                "version": "1.0.1"
+            }
+        )
+        self.model_manager = ModelManager(config=self.model_config)
+
+        self.model_manager.save({
+            "epoch": 1
+        }, model)
+
+        pretrained_model = Model().to(device)
+        correct = self.test_mnist_eval(model=pretrained_model, device=device)
+
+        self.model_manager.load({
+            "epoch": 1
+        }, pretrained_model)
+        pretrained_correct = self.test_mnist_eval(model=pretrained_model, device=device)
+
+        assert correct < pretrained_correct
