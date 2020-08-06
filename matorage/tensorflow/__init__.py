@@ -15,6 +15,10 @@
 # Create path shortcut
 from matorage.data.tensorflow.v2.dataset import Dataset
 
+from matorage.model.tensorflow.v2.manager import ModelManager
+
 __all__ = [
     'Dataset',
+
+    'ModelManager',
 ]
