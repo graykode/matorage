@@ -83,7 +83,7 @@ class ModelConfig(StorageConfig):
             "model_name" : self.model_name,
             "additional" : self.additional,
             "compressor" : self.compressor,
-            "model" : set()
+            "model" : {}
         }
 
         self._check_all()
@@ -125,7 +125,6 @@ class ModelConfig(StorageConfig):
 
             self.compressor = metadata_dict['compressor']
             self.metadata = metadata_dict
-            self.metadata["model"] = set(self.metadata["model"])
         else:
             logger.warn("{} {} is not exist!".format(self.model_name, str(self.additional)))
 

@@ -142,7 +142,7 @@ class Manager(object):
             ))
             self._save_with_clear(model_folder, model, overwrite=True)
         else:
-            self.config.metadata["model"].add(model_folder)
+            self.config.metadata["model"].update({model_folder : metadata})
             self._save_with_clear(model_folder, model)
 
     def load(self, metadata, model):
