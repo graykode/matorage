@@ -56,7 +56,7 @@ class ModelManager(Manager):
         ])
         model.build(input_shape=(None, 5))
 
-        model_manager.save({ "step" :100 }, model)
+        model_manager.save(model, step=100)
 
     Note:
         Unlike Dataset, model weight is loaded entirely into cpu memory.

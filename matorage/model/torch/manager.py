@@ -55,7 +55,7 @@ class ModelManager(Manager):
             def forward(self, x):
                 return self.f(x)
 
-        model_manager.save({ "step" :100 }, model)
+        model_manager.save(model, step=100)
 
     Note:
         Unlike Dataset, model weight is loaded entirely into cpu memory.

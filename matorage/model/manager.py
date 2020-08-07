@@ -113,26 +113,29 @@ class Manager(object):
         )
         _file.close()
 
-    def save(self, metadata, model):
+    def save(self, model, **kwargs):
         """
         save weight of model
 
         .. code-block:: python
 
             model = Model()
-            model_manager.save({"step": 0}, model)
+            model_manager.save(model, step=0)
 
         Args:
-        metadata (:obj:`dict or string`, **require**):
-            Parameters for additional description of models. The key and value of the dictionay can be specified very freely.
-        model (:obj:``, **require**):
-            Pytorch or Tensorflow model.
+        model (:obj:`model or string`, **require**):
+            Pytorch, Tensorflow model type or layer name string type.
 
         Returns:
             :obj: `None`:
         """
         if not self._client.bucket_exists(self.config.bucket_name):
             self._client.make_bucket(self.config.bucket_name)
+
+        if not isinstance(kwargs, dict):
+            metadata = 0
+        else:
+            metadata = kwargs
 
         model_folder = self._hashmap_transfer(metadata)
 
@@ -145,22 +148,22 @@ class Manager(object):
             self.config.metadata["model"].update({model_folder : metadata})
             self._save_with_clear(model_folder, model)
 
-    def load(self, metadata, model):
+    def load(self, model, **kwargs):
         """
         load weight of model
 
         .. code-block:: python
 
             >>> model = Model()
-            >>> pretrained_model = model_manager.save({"step": 0}, model)
+            >>> pretrained_model = model_manager.save(model, step=0)
             >>> print(pretrained_model)
             >>> Model(
                   (f): Linear(in_features=5, out_features=10, bias=True)
                 )
 
-            >>> weight = model_manager.save({"step": 0}, 'fc1.weight')
+            >>> weight = model_manager.save('fc1.weight', step=0)
             >>> print(weight)
-            >>> OrderedDict([('f.weight', tensor([[ 0.2679, -0.2147, -0.1927, -0.3263,  0.0930],
+            >>> OrderedDict([('fc1.weight', tensor([[ 0.2679, -0.2147, -0.1927, -0.3263,  0.0930],
                 [ 0.0144,  0.2935,  0.3614, -0.0493, -0.3772],
                 [ 0.4101, -0.1864,  0.1076, -0.3900,  0.3613],
                 [-0.2831,  0.3692,  0.3367,  0.2491, -0.2971],
@@ -172,15 +175,18 @@ class Manager(object):
                 [ 0.3065, -0.0095,  0.0988,  0.4294,  0.3338]]))])
 
         Args:
-        metadata (:obj:`dict or string`, **require**):
-            Parameters for additional description of models. The key and value of the dictionay can be specified very freely.
-        model (:obj:`Model or string`, **require**):
-            Pytorch, Tensorflow model or string of layer name.
+        model (:obj:`model or string`, **require**):
+            Pytorch, Tensorflow model type or layer name string type.
 
         Returns:
             :obj: `None or OrderedDict`: If ``model`` is pytorch or tensorflow model type, weight is loaded into the model and return None.
             however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
         """
+        if not isinstance(kwargs, dict):
+            metadata = 0
+        else:
+            metadata = kwargs
+
         model_folder = self._hashmap_transfer(metadata)
 
         layers = self._client.list_objects(

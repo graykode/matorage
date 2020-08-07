@@ -71,9 +71,7 @@ class TorchModelTest(ModelTest, unittest.TestCase):
         )
 
         model = Model()
-        self.model_manager.save({
-            "step" : 0
-        }, model)
+        self.model_manager.save(model, step=0)
 
     def test_torchmodel_saver_from_json_file(self):
 
@@ -89,9 +87,7 @@ class TorchModelTest(ModelTest, unittest.TestCase):
         )
 
         model = Model()
-        self.model_manager.save({
-            "step": 0
-        }, model)
+        self.model_manager.save(model, step=0)
 
     def test_torchmodel_loader(self):
 
@@ -102,9 +98,7 @@ class TorchModelTest(ModelTest, unittest.TestCase):
         )
 
         model = Model()
-        self.model_manager.load({
-            "step": 0
-        }, model)
+        self.model_manager.load(model, step=0)
 
     def test_torchmodel_loader_with_compressor(self):
 
@@ -127,9 +121,7 @@ class TorchModelTest(ModelTest, unittest.TestCase):
         )
 
         model = Model()
-        self.model_manager.load({
-            "step": 0
-        }, model)
+        self.model_manager.load(model, step=0)
 
     def test_torchmodel_layer_loader(self):
 
@@ -139,9 +131,7 @@ class TorchModelTest(ModelTest, unittest.TestCase):
             config=self.model_config
         )
 
-        self.model_manager.load({
-            "step": 0
-        }, 'f.weight')
+        self.model_manager.load('f.weight', step=0)
 
     def test_mnist_eval(self, model, device):
         test_dataset = datasets.MNIST(
@@ -202,16 +192,12 @@ class TorchModelTest(ModelTest, unittest.TestCase):
         )
         self.model_manager = ModelManager(config=self.model_config)
 
-        self.model_manager.save({
-            "epoch": 1
-        }, model)
+        self.model_manager.save(model, epoch=1)
 
         pretrained_model = Model().to(device)
         correct = self.test_mnist_eval(model=pretrained_model, device=device)
 
-        self.model_manager.load({
-            "epoch": 1
-        }, pretrained_model)
+        self.model_manager.load(pretrained_model, epoch=1)
         pretrained_correct = self.test_mnist_eval(model=pretrained_model, device=device)
 
         assert correct < pretrained_correct

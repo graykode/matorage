@@ -63,9 +63,7 @@ class TFModelTest(ModelTest, unittest.TestCase):
             config=self.model_config
         )
 
-        self.model_manager.save({
-            "step" : 0
-        }, self.model)
+        self.model_manager.save(self.model, step=0)
 
     def test_tfmodel_saver_from_json_file(self):
 
@@ -80,9 +78,7 @@ class TFModelTest(ModelTest, unittest.TestCase):
             config=self.model_config
         )
 
-        self.model_manager.save({
-            "step": 0
-        }, self.model)
+        self.model_manager.save(self.model, step=0)
 
     def test_mnist_train_process(self):
         (train_images, train_labels), _ = tf.keras.datasets.mnist.load_data()
@@ -104,9 +100,7 @@ class TFModelTest(ModelTest, unittest.TestCase):
         )
         self.model_manager = ModelManager(config=self.model_config)
 
-        self.model_manager.save({
-            "epoch": 1
-        }, model)
+        self.model_manager.save(model, epoch=1)
 
     def test_mnist_eval_process(self):
         _, (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
@@ -128,9 +122,7 @@ class TFModelTest(ModelTest, unittest.TestCase):
         )
         self.model_manager = ModelManager(config=self.model_config)
 
-        self.model_manager.load({
-            "epoch": 1
-        }, model)
+        self.model_manager.load(model, epoch=1)
         _, pretrained_correct = model.evaluate(test_images, test_labels, verbose=2)
 
         assert correct < pretrained_correct
