@@ -19,6 +19,7 @@ from matorage.data.saver import DataSaver
 from matorage.config import StorageConfig
 
 from matorage.model.config import ModelConfig
+from matorage.optimizer.config import OptimizerConfig
 
 __all__ = [
     'StorageConfig',
@@ -28,4 +29,5 @@ __all__ = [
     'DataSaver',
 
     'ModelConfig',
+    'OptimizerConfig',
 ]

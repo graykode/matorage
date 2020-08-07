@@ -93,10 +93,6 @@ class TorchModelTest(ModelTest, unittest.TestCase):
 
         self.test_torchmodel_saver()
 
-        self.model_manager = ModelManager(
-            config=self.model_config
-        )
-
         model = Model()
         self.model_manager.load(model, step=0)
 

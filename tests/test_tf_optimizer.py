@@ -11,15 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# Create path shortcut
-from matorage.data.torch.dataset import Dataset
-
-from matorage.model.torch.manager import ModelManager
-from matorage.optimizer.torch.manager import OptimizerManager
-
-__all__ = [
-    'Dataset',
-    'ModelManager',
-    'OptimizerManager',
-]
