@@ -108,11 +108,10 @@ class OptimizerManager(Manager):
     def _load_model(self, step, layers, optimizer):
         assert isinstance(optimizer, OptimizerV2)
         assert isinstance(self.config.metadata, dict)
-        assert str(step) in self.config.metadata["optimizer"]
 
         step = str(step)
         if step not in self.config.metadata['optimizer']:
-            raise KeyError("{} are available".format(list(self.config.metadata['optimizer'].keys())))
+            raise KeyError("Available only in {}".format(list(self.config.metadata['optimizer'].keys())))
 
         _ordered_weight = {}
         for layer in layers:

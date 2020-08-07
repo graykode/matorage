@@ -110,7 +110,7 @@ class OptimizerManager(Manager):
         step = str(step)
 
         if step not in self.config.metadata['optimizer']:
-            raise KeyError("{} are available".format(list(self.config.metadata['optimizer'].keys())))
+            raise KeyError("Available only in {}".format(list(self.config.metadata['optimizer'].keys())))
         weight['param_groups'] = self.config.metadata['optimizer'][step]['param_groups']
         weight['state'] = defaultdict(lambda : defaultdict())
 
