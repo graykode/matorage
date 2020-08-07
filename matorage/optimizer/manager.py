@@ -100,10 +100,16 @@ class Manager(object):
             filters=tables.Filters(**self.config.compressor)
         )
 
-        self._uploader.set_queue(
-            local_file=_file.get_file_image(),
-            remote_file=f"{step}/{group}/{name}"
-        )
+        if group:
+            self._uploader.set_queue(
+                local_file=_file.get_file_image(),
+                remote_file=f"{step}/{group}/{name}"
+            )
+        else:
+            self._uploader.set_queue(
+                local_file=_file.get_file_image(),
+                remote_file=f"{step}/{name}"
+            )
         _file.close()
 
     def save(self, optimizer):

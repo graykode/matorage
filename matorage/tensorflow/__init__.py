@@ -16,9 +16,11 @@
 from matorage.data.tensorflow.v2.dataset import Dataset
 
 from matorage.model.tensorflow.v2.manager import ModelManager
+from matorage.optimizer.tensorflow.v2.manager import OptimizerManager
 
 __all__ = [
     'Dataset',
 
     'ModelManager',
+    'OptimizerManager',
 ]
