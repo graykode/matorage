@@ -52,11 +52,6 @@ class Manager(object):
             inmemory=True
         )
 
-    def set_default(self, obj):
-        if isinstance(obj, set):
-            return list(obj)
-        raise TypeError
-
     def _uploader_closing(self):
         self._uploader.join_queue()
 
@@ -66,8 +61,7 @@ class Manager(object):
                 json.dumps(
                     self.config.metadata,
                     indent=4,
-                    sort_keys=True,
-                    default=self.set_default
+                    sort_keys=True
                 ) + "\n"
             )
 

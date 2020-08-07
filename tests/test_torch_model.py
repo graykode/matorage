@@ -182,9 +182,7 @@ class TorchModelTest(ModelTest, unittest.TestCase):
             optimizer.step()
 
         self.model_config = ModelConfig(
-            endpoint='127.0.0.1:9000',
-            access_key='minio',
-            secret_key='miniosecretkey',
+            **self.storage_config,
             model_name='testmodel',
             additional={
                 "version": "1.0.1"
