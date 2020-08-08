@@ -16,8 +16,8 @@ Deep Learning framework(Pytorch, Tensorflow V2, Keras).
 
 ## Features
 
-- Boilerplate data pipeline!
-- remove pre-processing time on training!
+- Boilerplate data pipeline
+- remove pre-processing time on training
 - manager your trained model & optimizer
 
 **For researchers who need to focus on model training**:
@@ -33,7 +33,7 @@ Deep Learning framework(Pytorch, Tensorflow V2, Keras).
 - High availability guaranteed through backend storage.
 - Easily create pipeline from user endpoints data.
 
-## Quick Start with Pytorch Example!
+## Quick Start with Pytorch Example
 
 For an example of tensorflow, refer to the detailed document.
 If you want to see the full code, see below
@@ -58,7 +58,7 @@ $ pip install matorage
 
 #### 1. Set up Minio Server with docker
 
-quick start with NAS(network access storage) using docker!
+quick start with NAS(network access storage) using docker
 It can be managed through the web through the address http://127.0.0.1:9000/, and security is managed through ``MINIO_ACCESS_KEY`` and ``MINIO_SECRET_KEY``.
 
 ```bash
