@@ -184,3 +184,7 @@ class Manager(object):
         )
 
         return self._load_model(step, layers, optimizer)
+
+    @property
+    def get_optimizer(self):
+        return self.config.metadata["optimizer"]

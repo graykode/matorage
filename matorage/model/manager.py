@@ -205,3 +205,7 @@ class Manager(object):
 
         key = json.dumps(metadata, indent=4, sort_keys=True)
         return hashlib.md5(key.encode('utf-8')).hexdigest()
+
+    @property
+    def get_model(self):
+        return self.config.metadata["model"]
