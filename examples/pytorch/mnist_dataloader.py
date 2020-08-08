@@ -73,15 +73,38 @@ if __name__ == '__main__':
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    storage_config = {
+        'endpoint': '127.0.0.1:9000',
+        'access_key': 'minio',
+        'secret_key': 'miniosecretkey',
+        'secure': False
+    }
+
     model = Model().to(device)
     if args.train:
         optimizer = optim.Adam(model.parameters(), lr=0.01)
         criterion = torch.nn.CrossEntropyLoss()
 
+        model_config = ModelConfig(
+            **storage_config,
+            model_name='mnist_example',
+            additional={
+                'framework' : 'pytorch'
+            }
+        )
+        model_manager = ModelManager(config=model_config)
+
+        optimizer_config = OptimizerConfig(
+            **storage_config,
+            optimizer_name='mnist_example',
+            additional={
+                'framework' : 'pytorch'
+            }
+        )
+        optimizer_manager = OptimizerManager(config=optimizer_config)
+
         traindata_config = DataConfig(
-            endpoint='127.0.0.1:9000',
-            access_key='minio',
-            secret_key='miniosecretkey',
+            **storage_config,
             dataset_name='mnist',
             additional={
                 "mode": "train",
@@ -93,9 +116,7 @@ if __name__ == '__main__':
 
     if args.test:
         testdata_config = DataConfig(
-            endpoint='127.0.0.1:9000',
-            access_key='minio',
-            secret_key='miniosecretkey',
+            **storage_config,
             dataset_name='mnist',
             additional={
                 "mode": "test",
@@ -110,6 +131,8 @@ if __name__ == '__main__':
     for epoch in range(5):
         if args.train:
             train(model, train_loader, optimizer, criterion, device)
+            model_manager.save(model, epoch=(epoch + 1))
+            optimizer_manager.save(optimizer)
         if args.test:
             test(model, test_loader, device)
 

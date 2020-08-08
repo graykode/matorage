@@ -72,11 +72,16 @@ if __name__ == '__main__':
     parser.add_argument('--test', action='store_true', default=False)
     args = parser.parse_args()
 
+    storage_config = {
+        'endpoint': '127.0.0.1:9000',
+        'access_key': 'minio',
+        'secret_key': 'miniosecretkey',
+        'secure': False
+    }
+
     if args.train:
         traindata_config = DataConfig(
-            endpoint='127.0.0.1:9000',
-            access_key='minio',
-            secret_key='miniosecretkey',
+            **storage_config,
             dataset_name='mnist',
             additional={
                 "mode": "train",
@@ -85,11 +90,28 @@ if __name__ == '__main__':
         )
         train_dataset = Dataset(config=traindata_config, shuffle=True, batch_size=64, clear=True)
 
+        model_config = ModelConfig(
+            **storage_config,
+            model_name='mnist_example',
+            additional={
+                'framework' : 'tensorflow'
+            }
+        )
+        model_manager = ModelManager(config=model_config)
+
+        optimizer_config = OptimizerConfig(
+            **storage_config,
+            optimizer_name='mnist_example',
+            additional={
+                'framework' : 'tensorflow'
+            }
+        )
+        optimizer_manager = OptimizerManager(config=optimizer_config)
+
+
     if args.test:
         testdata_config = DataConfig(
-            endpoint='127.0.0.1:9000',
-            access_key='minio',
-            secret_key='miniosecretkey',
+            **storage_config,
             dataset_name='mnist',
             additional={
                 "mode": "test",
@@ -109,9 +131,11 @@ if __name__ == '__main__':
                 tqdm(train_dataset.dataloader, total=60000 // 64)
             ):
                 train_step(image, target)
+            model_manager.save(model, epoch=(e + 1))
+            optimizer_manager.save(optimizer)
         if args.test:
             for batch_idx, (image, target) in enumerate(
-                tqdm(test_dataset.dataloader, total=10000//64)
+                tqdm(test_dataset.dataloader, total=10000 // 64)
             ):
                 test_step(image, target)
         print(
