@@ -1,11 +1,11 @@
 # Copyright 2020-present Tae Hwan Jung
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,19 +24,21 @@ from matorage.optimizer.config import OptimizerConfig
 from matorage.optimizer.tensorflow.v2.manager import OptimizerManager
 from matorage.testing_utils import require_tf
 
+
 @require_tf
 class TFOptimizerTest(OptimizerTest, unittest.TestCase):
-
     def create_model(self):
-        model = tf.keras.models.Sequential([
-            keras.layers.Dense(512, activation='relu', input_shape=(784,)),
-            keras.layers.Dropout(0.2),
-            keras.layers.Dense(10)
-        ])
+        model = tf.keras.models.Sequential(
+            [
+                keras.layers.Dense(512, activation="relu", input_shape=(784,)),
+                keras.layers.Dropout(0.2),
+                keras.layers.Dense(10),
+            ]
+        )
         model.compile(
-            optimizer='adam',
+            optimizer="adam",
             loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
-            metrics=['accuracy']
+            metrics=["accuracy"],
         )
         return model
 
@@ -52,21 +54,17 @@ class TFOptimizerTest(OptimizerTest, unittest.TestCase):
         if optimizer_config is None:
             self.optimizer_config = OptimizerConfig(
                 **self.storage_config,
-                optimizer_name='test_optimizer_saver',
-                additional={
-                    "framework" : "tensorflow"
-                }
+                optimizer_name="test_optimizer_saver",
+                additional={"framework": "tensorflow"}
             )
         else:
             self.optimizer_config = optimizer_config
 
         if save_to_json_file:
-            self.optimizer_config_file = 'model_config_file.json'
+            self.optimizer_config_file = "model_config_file.json"
             self.optimizer_config.to_json_file(self.optimizer_config_file)
 
-        self.optimizer_manager = OptimizerManager(
-            config=self.optimizer_config
-        )
+        self.optimizer_manager = OptimizerManager(config=self.optimizer_config)
 
         self.optimizer_manager.save(self.model.optimizer)
 
@@ -77,11 +75,11 @@ class TFOptimizerTest(OptimizerTest, unittest.TestCase):
         self.optimizer_config = None
         self.optimizer_manager = None
 
-        self.optimizer_config = OptimizerConfig.from_json_file(self.optimizer_config_file)
-
-        self.optimizer_manager = OptimizerManager(
-            config=self.optimizer_config
+        self.optimizer_config = OptimizerConfig.from_json_file(
+            self.optimizer_config_file
         )
+
+        self.optimizer_manager = OptimizerManager(config=self.optimizer_config)
 
         self.optimizer_manager.save(self.model.optimizer)
 
@@ -104,8 +102,10 @@ class TFOptimizerTest(OptimizerTest, unittest.TestCase):
         for i in range(1, len(after_optim_weight)):
             assert not np.array_equal(after_optim_weight, before_optim_weight)
 
+
 def suite():
     return unittest.TestSuite(unittest.makeSuite(TFOptimizerTest))
 
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')
+
+if __name__ == "__main__":
+    unittest.main(defaultTest="suite")

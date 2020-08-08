@@ -1,11 +1,11 @@
 # Copyright 2020-present Tae Hwan Jung
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,7 @@ from collections import defaultdict, OrderedDict
 from torch.optim.optimizer import Optimizer
 
 from matorage.optimizer.manager import Manager
+
 
 class OptimizerManager(Manager):
 
@@ -67,12 +68,14 @@ class OptimizerManager(Manager):
     """
 
     def __init__(self, config, num_worker_threads=4, multipart_upload_size=5 * _MB):
-        super(OptimizerManager, self).__init__(config, num_worker_threads, multipart_upload_size)
+        super(OptimizerManager, self).__init__(
+            config, num_worker_threads, multipart_upload_size
+        )
 
     def _get_step(self, optimizer):
-        state = optimizer.state_dict()['state']
+        state = optimizer.state_dict()["state"]
         if state:
-            step = list(state.values())[0]['step']
+            step = list(state.values())[0]["step"]
             return step
         else:
             return None
@@ -80,12 +83,14 @@ class OptimizerManager(Manager):
     def _set_metadata(self, metadata, optimizer, step):
         assert isinstance(optimizer, Optimizer)
         optimizer = optimizer.state_dict()
-        metadata["optimizer"].update({
-            str(step): {
-                'framework' : 'pytorch',
-                'param_groups': optimizer['param_groups'],
+        metadata["optimizer"].update(
+            {
+                str(step): {
+                    "framework": "pytorch",
+                    "param_groups": optimizer["param_groups"],
+                }
             }
-        })
+        )
 
     def _save_optimizer(self, step, optimizer):
         assert isinstance(optimizer, Optimizer)
@@ -97,10 +102,7 @@ class OptimizerManager(Manager):
                 elif isinstance(param_dict_value, int):
                     param_dict_value = np.asarray([param_dict_value])
                 self._save_param(
-                    step,
-                    group=param_name,
-                    name=param_dict_key,
-                    weight=param_dict_value
+                    step, group=param_name, name=param_dict_key, weight=param_dict_value
                 )
 
     def _load_model(self, step, layers, optimizer):
@@ -109,25 +111,28 @@ class OptimizerManager(Manager):
         weight = OrderedDict()
         step = str(step)
 
-        if step not in self.config.metadata['optimizer']:
-            raise KeyError("Available only in {}".format(list(self.config.metadata['optimizer'].keys())))
-        weight['param_groups'] = self.config.metadata['optimizer'][step]['param_groups']
-        weight['state'] = defaultdict(lambda : defaultdict())
+        if step not in self.config.metadata["optimizer"]:
+            raise KeyError(
+                "Available only in {}".format(
+                    list(self.config.metadata["optimizer"].keys())
+                )
+            )
+        weight["param_groups"] = self.config.metadata["optimizer"][step]["param_groups"]
+        weight["state"] = defaultdict(lambda: defaultdict())
 
         for layer in layers:
             name = layer.object_name
             layer_image = self._client.get_object(
-                bucket_name=self.config.bucket_name,
-                object_name=name
+                bucket_name=self.config.bucket_name, object_name=name
             ).read()
 
-            layer_image = h5py.File(io.BytesIO(layer_image), 'r')
-            step, param_name, param_dict_key = name.split('/')
-            if layer_image[self.type][:].shape == (1, ):
+            layer_image = h5py.File(io.BytesIO(layer_image), "r")
+            step, param_name, param_dict_key = name.split("/")
+            if layer_image[self.type][:].shape == (1,):
                 value = layer_image[self.type][0]
             else:
                 value = torch.from_numpy(layer_image[self.type][:])
-            weight['state'][param_name][param_dict_key] = value
+            weight["state"][param_name][param_dict_key] = value
 
         optimizer.load_state_dict(weight)
 
@@ -150,7 +155,7 @@ class OptimizerManager(Manager):
             :obj: `None`:
         """
         super(OptimizerManager, self).save(optimizer)
-        
+
     def load(self, optimizer, step):
         """
         load weight of optimizer

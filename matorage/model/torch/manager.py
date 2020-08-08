@@ -1,11 +1,11 @@
 # Copyright 2020-present Tae Hwan Jung
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import torch
 from collections import OrderedDict
 
 from matorage.model.manager import Manager
+
 
 class ModelManager(Manager):
 
@@ -86,7 +87,9 @@ class ModelManager(Manager):
     """
 
     def __init__(self, config, num_worker_threads=4, multipart_upload_size=5 * _MB):
-        super(ModelManager, self).__init__(config, num_worker_threads, multipart_upload_size)
+        super(ModelManager, self).__init__(
+            config, num_worker_threads, multipart_upload_size
+        )
 
     def _save_model(self, model_folder, model):
         for name, weight in model.state_dict().items():
@@ -105,17 +108,17 @@ class ModelManager(Manager):
             if name in keys:
                 layer_image = self._client.get_object(
                     bucket_name=self.config.bucket_name,
-                    object_name=f"{model_folder}/{name}"
+                    object_name=f"{model_folder}/{name}",
                 ).read()
 
-                layer_image = h5py.File(io.BytesIO(layer_image), 'r')
+                layer_image = h5py.File(io.BytesIO(layer_image), "r")
                 weight[name] = torch.from_numpy(layer_image[self.type][:])
 
         if isinstance(model, str):
             return weight
         else:
             model.load_state_dict(weight)
-            
+
     def save(self, model, **kwargs):
         """
         save weight of model
@@ -138,7 +141,7 @@ class ModelManager(Manager):
             :obj: `None`:
         """
         super(ModelManager, self).save(model, **kwargs)
-            
+
     def load(self, model, **kwargs):
         """
         load weight of model

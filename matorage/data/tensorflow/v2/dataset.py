@@ -1,11 +1,11 @@
 # Copyright 2020-present Tae Hwan Jung
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,7 @@ import tensorflow_io as tfio
 
 from matorage.data.data import MTRData
 from matorage.utils import logger
+
 
 class Dataset(MTRData):
     """
@@ -80,9 +81,9 @@ class Dataset(MTRData):
 
         # class parameters
         self._batch_size = batch_size
-        self._shuffle = kwargs.pop('shuffle', False)
-        self._seed = kwargs.pop('seed', 0)
-        self.index = kwargs.pop('index', False)
+        self._shuffle = kwargs.pop("shuffle", False)
+        self._seed = kwargs.pop("seed", 0)
+        self.index = kwargs.pop("index", False)
 
         super(Dataset, self).__init__(config, **kwargs)
 
@@ -91,8 +92,7 @@ class Dataset(MTRData):
             if self._shuffle:
                 _dataset = _dataset.shuffle(len(self.filenames), seed=self._seed)
             self._dataloader = _dataset.interleave(
-                self._get_item_with_download,
-                cycle_length=len(self.filenames)
+                self._get_item_with_download, cycle_length=len(self.filenames)
             )
 
     def __getitem__(self, idx):
@@ -105,18 +105,19 @@ class Dataset(MTRData):
                 tfio.IODataset.from_hdf5(
                     filename,
                     dataset=f"/{_attr_name}",
-                    spec=tf.as_dtype(_attr_value["type"])
+                    spec=tf.as_dtype(_attr_value["type"]),
                 ).map(
-                    lambda x: tf.reshape(x, _attr_value["shape"]) \
-                        if not _attr_value["shape"] == [1] else x[0]
+                    lambda x: tf.reshape(x, _attr_value["shape"])
+                    if not _attr_value["shape"] == [1]
+                    else x[0]
                 )
             )
         _tfiodataset = tf.data.Dataset.zip(tuple(_tfios))
         if self._shuffle:
             _tfiodataset = _tfiodataset.shuffle(1000, seed=self._seed)
-        _tfiodataset = _tfiodataset.batch(self._batch_size, drop_remainder=True).prefetch(
-            tf.data.experimental.AUTOTUNE
-        )
+        _tfiodataset = _tfiodataset.batch(
+            self._batch_size, drop_remainder=True
+        ).prefetch(tf.data.experimental.AUTOTUNE)
         return _tfiodataset
 
     def _reshape_convert_tensor(self, numpy_array, attr_name):

@@ -1,11 +1,11 @@
 # Copyright 2020-present Tae Hwan Jung
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ from matorage.optimizer.config import OptimizerConfig
 from matorage.optimizer.torch.manager import OptimizerManager
 from matorage.testing_utils import require_torch
 
+
 @require_torch
 class Model(nn.Module):
     def __init__(self):
@@ -42,19 +43,16 @@ class Model(nn.Module):
         x = self.fc3(x)
         return x
 
+
 @require_torch
 class TorchOptimizerTest(OptimizerTest, unittest.TestCase):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,))
-    ])
+    transform = transforms.Compose(
+        [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+    )
 
     train_dataset = datasets.MNIST(
-        '/tmp/data',
-        train=True,
-        download=True,
-        transform=transform
+        "/tmp/data", train=True, download=True, transform=transform
     )
 
     def test_optimizer_saver(self, optimizer_config=None, save_to_json_file=False):
@@ -76,16 +74,14 @@ class TorchOptimizerTest(OptimizerTest, unittest.TestCase):
         if optimizer_config is None:
             self.optimizer_config = OptimizerConfig(
                 **self.storage_config,
-                optimizer_name='testoptimizer',
-                additional={
-                    "version": "1.0.1"
-                }
+                optimizer_name="testoptimizer",
+                additional={"version": "1.0.1"}
             )
         else:
             self.optimizer_config = optimizer_config
 
         if save_to_json_file:
-            self.optimizer_config_file = 'optimizer_config_file.json'
+            self.optimizer_config_file = "optimizer_config_file.json"
             self.optimizer_config.to_json_file(self.optimizer_config_file)
 
         self.optimizer_manager = OptimizerManager(config=self.optimizer_config)
@@ -98,11 +94,11 @@ class TorchOptimizerTest(OptimizerTest, unittest.TestCase):
         self.optimizer_config = None
         self.optimizer_manager = None
 
-        self.optimizer_config = OptimizerConfig.from_json_file(self.optimizer_config_file)
-
-        self.optimizer_manager = OptimizerManager(
-            config=self.optimizer_config
+        self.optimizer_config = OptimizerConfig.from_json_file(
+            self.optimizer_config_file
         )
+
+        self.optimizer_manager = OptimizerManager(config=self.optimizer_config)
 
         model = Model().to(self.device)
         optimizer = optim.Adam(model.parameters(), lr=0.01)
@@ -130,8 +126,10 @@ class TorchOptimizerTest(OptimizerTest, unittest.TestCase):
 
         self.optimizer_manager.load(optimizer, step=938)
 
+
 def suite():
     return unittest.TestSuite(unittest.makeSuite(TorchOptimizerTest))
 
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')
+
+if __name__ == "__main__":
+    unittest.main(defaultTest="suite")

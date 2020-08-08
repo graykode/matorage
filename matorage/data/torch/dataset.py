@@ -1,11 +1,11 @@
 # Copyright 2020-present Tae Hwan Jung
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@ import torch
 import tables
 
 from matorage.data.data import MTRData
+
 
 class Dataset(torch.utils.data.Dataset, MTRData):
     """
@@ -96,7 +97,7 @@ class Dataset(torch.utils.data.Dataset, MTRData):
                 try:
                     return_tensor[_attr_name] = self._reshape_convert_tensor(
                         numpy_array=_file.root[_attr_name][_relative_index],
-                        attr_name=_attr_name
+                        attr_name=_attr_name,
                     )
                     if list(return_tensor[_attr_name].size()) == [1]:
                         return_tensor[_attr_name] = return_tensor[_attr_name].item()
@@ -105,9 +106,11 @@ class Dataset(torch.utils.data.Dataset, MTRData):
 
             return list(return_tensor.values())
         else:
-            raise ValueError("objectname({}) is not exist in {}".format(
-                _objectname, self._object_file_mapper
-            ))
+            raise ValueError(
+                "objectname({}) is not exist in {}".format(
+                    _objectname, self._object_file_mapper
+                )
+            )
 
     def _exit(self):
         """
@@ -150,13 +153,14 @@ class Dataset(torch.utils.data.Dataset, MTRData):
         _driver, _driver_core_backing_store = self._set_driver()
         for _remote, _local in self._object_file_mapper.items():
             _file = tables.open_file(
-                _local, 'r',
+                _local,
+                "r",
                 driver=_driver,
-                driver_core_backing_store=_driver_core_backing_store
+                driver_core_backing_store=_driver_core_backing_store,
             )
             self.open_files[_remote] = {
-                "file" : _file,
-                "attr_names" : list(_file.get_node("/")._v_children.keys())
+                "file": _file,
+                "attr_names": list(_file.get_node("/")._v_children.keys()),
             }
 
     def _set_driver(self):
@@ -168,8 +172,8 @@ class Dataset(torch.utils.data.Dataset, MTRData):
         """
 
         if os.name == "posix":
-            return 'H5FD_SEC2', True
+            return "H5FD_SEC2", True
         elif os.name == "nt":
-            return 'H5FD_WINDOWS', True
+            return "H5FD_WINDOWS", True
         else:
             raise ValueError("{} OS not supported!".format(os.name))

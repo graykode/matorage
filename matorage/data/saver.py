@@ -1,11 +1,11 @@
 # Copyright 2020-present Tae Hwan Jung
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,7 @@ _KB = 1024
 
 _MB = 1024 * _KB
 """The size of a Megabyte in bytes"""
+
 
 class DataSaver(object):
     """
@@ -111,10 +112,13 @@ class DataSaver(object):
 
     """
 
-    def __init__(self, config,
-                 multipart_upload_size=5*_MB,
-                 num_worker_threads=4,
-                 inmemory=False):
+    def __init__(
+        self,
+        config,
+        multipart_upload_size=5 * _MB,
+        num_worker_threads=4,
+        inmemory=False,
+    ):
 
         self.config = config
 
@@ -132,12 +136,16 @@ class DataSaver(object):
 
         self._disconnected = False
 
-        self._client = Minio(
-            endpoint=self.config.endpoint,
-            access_key=self.config.access_key,
-            secret_key=self.config.secret_key,
-            secure=self.config.secure,
-        ) if not check_nas(self.config.endpoint) else NAS(self.config.endpoint)
+        self._client = (
+            Minio(
+                endpoint=self.config.endpoint,
+                access_key=self.config.access_key,
+                secret_key=self.config.secret_key,
+                secure=self.config.secure,
+            )
+            if not check_nas(self.config.endpoint)
+            else NAS(self.config.endpoint)
+        )
         self._check_and_create_bucket()
 
         self._uploader = Uploader(
@@ -145,7 +153,7 @@ class DataSaver(object):
             bucket=self.config.bucket_name,
             num_worker_threads=self.num_worker_threads,
             multipart_upload_size=self.multipart_upload_size,
-            inmemory=self.inmemory
+            inmemory=self.inmemory,
         )
 
         atexit.register(self._exit)
@@ -168,7 +176,9 @@ class DataSaver(object):
         bzs = list(self._datas.values())[0].shape[0]
 
         per_one_batch_data_size = array_size // bzs
-        per_one_file_batch_size = max(1,self.config.max_object_size // per_one_batch_data_size)
+        per_one_file_batch_size = max(
+            1, self.config.max_object_size // per_one_batch_data_size
+        )
 
         for batch_idx in range(bzs):
             if self._get_current_stored_batch_size() < per_one_file_batch_size:
@@ -229,7 +239,9 @@ class DataSaver(object):
                 # this array is ground truth
                 array = array.reshape(-1, 1)
 
-            self._datas[name] = array.reshape(-1, reduce(lambda x, y: x * y, array.shape[1:]))
+            self._datas[name] = array.reshape(
+                -1, reduce(lambda x, y: x * y, array.shape[1:])
+            )
 
     def __call__(self, datas):
         """
@@ -265,22 +277,24 @@ class DataSaver(object):
             self._file.close()
             self._uploader.set_queue(
                 local_file=self._file.filename,
-                remote_file=os.path.basename(self._filename)
+                remote_file=os.path.basename(self._filename),
             )
         else:
             self._uploader.set_queue(
                 local_file=self._file.get_file_image(),
-                remote_file=os.path.basename(self._filename)
+                remote_file=os.path.basename(self._filename),
             )
             self._file.close()
         # Set filename indexer
         _current_index = _last_index + _length
-        self.config.set_indexer({
-            _current_index : {
-                "name" : os.path.basename(self._filename),
-                "length" : _length
+        self.config.set_indexer(
+            {
+                _current_index: {
+                    "name": os.path.basename(self._filename),
+                    "length": _length,
+                }
             }
-        })
+        )
 
     def _create_name(self, length=16):
         return tempfile.mktemp("{}.h5".format(uuid.uuid4().hex[:length]))
@@ -326,19 +340,21 @@ class DataSaver(object):
         self._filename = self._create_name()
         self._filelist.append(self._filename)
         file = tb.open_file(
-            self._filename, 'a',
+            self._filename,
+            "a",
             driver=_driver,
-            driver_core_backing_store=_driver_core_backing_store
+            driver_core_backing_store=_driver_core_backing_store,
         )
 
         # create expandable array
         earray = {}
         for _earray in self.config.flatten_attributes:
             earray[_earray.name] = file.create_earray(
-                file.root, _earray.name,
+                file.root,
+                _earray.name,
                 _earray.type,
                 shape=tuple([0]) + _earray.shape,
-                filters=self.filter
+                filters=self.filter,
             )
 
         return (file, earray)
@@ -357,12 +373,12 @@ class DataSaver(object):
             :obj:`str` : HDF5 driver type string
         """
         if self.inmemory:
-            return 'H5FD_CORE', False
+            return "H5FD_CORE", False
         else:
             if os.name == "posix":
-                return 'H5FD_SEC2', True
+                return "H5FD_SEC2", True
             elif os.name == "nt":
-                return 'H5FD_WINDOWS', True
+                return "H5FD_WINDOWS", True
             else:
                 raise ValueError("{} OS not supported!".format(os.name))
 
@@ -385,12 +401,10 @@ class DataSaver(object):
 
         # metadata set
         key = uuid.uuid4().hex[:16]
-        _metadata_file = tempfile.mktemp(f'{key}.json')
+        _metadata_file = tempfile.mktemp(f"{key}.json")
         self.config.metadata.to_json_file(_metadata_file)
         self._client.fput_object(
-            self.config.bucket_name,
-            f'metadata/{key}.json',
-            _metadata_file
+            self.config.bucket_name, f"metadata/{key}.json", _metadata_file
         )
         os.remove(_metadata_file)
 

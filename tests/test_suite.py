@@ -1,4 +1,3 @@
-
 # Original Code
 # https://github.com/PyTables/PyTables/blob/master/tables/tests/test_suite.py
 # See https://github.com/graykode/matorage/blob/0.1.0/NOTICE
@@ -20,15 +19,13 @@ import unittest
 
 def suite():
     test_modules = [
-        'tests.test_datasaver',
-
-        'tests.test_torch_data',
-        'tests.test_torch_model',
-        'tests.test_torch_optimizer',
-
-        'tests.test_tf_data',
-        'tests.test_tf_model',
-        'tests.test_tf_optimizer',
+        "tests.test_datasaver",
+        "tests.test_torch_data",
+        "tests.test_torch_model",
+        "tests.test_torch_optimizer",
+        "tests.test_tf_data",
+        "tests.test_tf_model",
+        "tests.test_tf_optimizer",
     ]
 
     alltests = unittest.TestSuite()
@@ -40,6 +37,7 @@ def suite():
         test_suite = sys.modules[name].suite
         alltests.addTest(test_suite())
     return alltests
+
 
 def test(verbose=False):
     result = unittest.TextTestRunner(verbosity=1 + int(verbose)).run(suite())

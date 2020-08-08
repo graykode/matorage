@@ -1,11 +1,11 @@
 # Copyright 2020-present Tae Hwan Jung
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ from tensorflow.python.keras import __version__ as keras_version
 from tensorflow.python.keras.saving.hdf5_format import preprocess_weights_for_loading
 
 from matorage.model.manager import Manager
+
 
 class ModelManager(Manager):
 
@@ -85,7 +86,9 @@ class ModelManager(Manager):
     """
 
     def __init__(self, config, num_worker_threads=4, multipart_upload_size=5 * _MB):
-        super(ModelManager, self).__init__(config, num_worker_threads, multipart_upload_size)
+        super(ModelManager, self).__init__(
+            config, num_worker_threads, multipart_upload_size
+        )
 
     def _save_model(self, model_folder, model):
         for layer in model.weights:
@@ -101,25 +104,22 @@ class ModelManager(Manager):
 
         for layer in layers:
             name = layer.object_name
-            if name.find('/') > -1:
-                name = name[name.find('/') + 1:]
+            if name.find("/") > -1:
+                name = name[name.find("/") + 1 :]
 
             if name in keys:
                 layer_image = self._client.get_object(
                     bucket_name=self.config.bucket_name,
-                    object_name=f"{model_folder}/{name}"
+                    object_name=f"{model_folder}/{name}",
                 ).read()
 
-                layer_image = h5py.File(io.BytesIO(layer_image), 'r')
+                layer_image = h5py.File(io.BytesIO(layer_image), "r")
                 weight[name] = tf.convert_to_tensor(layer_image[self.type][:])
 
         if isinstance(model, str):
             return weight
         else:
-            self._load_state_dict(
-                model=model,
-                weight_dict=weight
-            )
+            self._load_state_dict(model=model, weight_dict=weight)
 
     def _load_state_dict(self, model, weight_dict):
         original_keras_version = keras_version
@@ -130,20 +130,31 @@ class ModelManager(Manager):
             weight_names = [l.name for l in layer.weights]
             if len(weight_names) == 0:
                 continue
-            weight_values = [np.asarray(weight_dict[weight_name]) for weight_name in weight_names]
+            weight_values = [
+                np.asarray(weight_dict[weight_name]) for weight_name in weight_names
+            ]
 
             symbolic_weights = layer.trainable_weights + layer.non_trainable_weights
             weight_values = preprocess_weights_for_loading(
-                layer, weight_values, original_keras_version, original_backend)
+                layer, weight_values, original_keras_version, original_backend
+            )
 
             if len(weight_values) != len(symbolic_weights):
-                raise ValueError('Layer #' + str(k) + ' (named "' + layer.name +
-                                 '" in the current model) was found to '
-                                 'correspond to layer ' + layer.name + ' in the save file. '
-                                                                 'However the new layer ' + layer.name + ' expects ' +
-                                 str(len(symbolic_weights)) +
-                                 ' weights, but the saved weights have ' +
-                                 str(len(weight_values)) + ' elements.')
+                raise ValueError(
+                    "Layer #"
+                    + str(k)
+                    + ' (named "'
+                    + layer.name
+                    + '" in the current model) was found to '
+                    "correspond to layer " + layer.name + " in the save file. "
+                    "However the new layer "
+                    + layer.name
+                    + " expects "
+                    + str(len(symbolic_weights))
+                    + " weights, but the saved weights have "
+                    + str(len(weight_values))
+                    + " elements."
+                )
             weight_value_tuples += zip(symbolic_weights, weight_values)
         K.batch_set_value(weight_value_tuples)
 

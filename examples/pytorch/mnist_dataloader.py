@@ -1,11 +1,11 @@
 # Copyright 2020-present Tae Hwan Jung
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,6 +24,7 @@ from torch.utils.data import DataLoader
 from matorage import *
 from matorage.torch import *
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -38,6 +39,7 @@ class Model(nn.Module):
         x = self.fc3(x)
         return x
 
+
 def train(model, train_loader, optimizer, criterion, device):
     for batch_idx, (image, target) in enumerate(tqdm(train_loader)):
         image, target = image.to(device), target.to(device)
@@ -47,6 +49,7 @@ def train(model, train_loader, optimizer, criterion, device):
         loss.backward()
         optimizer.step()
 
+
 def test(model, test_loader, device):
     model.eval()
     test_loss = 0
@@ -55,29 +58,35 @@ def test(model, test_loader, device):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            test_loss += F.nll_loss(output, target, reduction='sum').item()
+            test_loss += F.nll_loss(output, target, reduction="sum").item()
             pred = output.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
 
-    print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
+    print(
+        "Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)".format(
+            test_loss,
+            correct,
+            len(test_loader.dataset),
+            100.0 * correct / len(test_loader.dataset),
+        )
+    )
 
-if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
-    parser.add_argument('--train', action='store_true')
-    parser.add_argument('--test', action='store_true')
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description="PyTorch MNIST Example")
+    parser.add_argument("--train", action="store_true")
+    parser.add_argument("--test", action="store_true")
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     storage_config = {
-        'endpoint': '127.0.0.1:9000',
-        'access_key': 'minio',
-        'secret_key': 'miniosecretkey',
-        'secure': False
+        "endpoint": "127.0.0.1:9000",
+        "access_key": "minio",
+        "secret_key": "miniosecretkey",
+        "secure": False,
     }
 
     model = Model().to(device)
@@ -87,41 +96,33 @@ if __name__ == '__main__':
 
         model_config = ModelConfig(
             **storage_config,
-            model_name='mnist_example',
-            additional={
-                'framework' : 'pytorch'
-            }
+            model_name="mnist_example",
+            additional={"framework": "pytorch"},
         )
         model_manager = ModelManager(config=model_config)
 
         optimizer_config = OptimizerConfig(
             **storage_config,
-            optimizer_name='mnist_example',
-            additional={
-                'framework' : 'pytorch'
-            }
+            optimizer_name="mnist_example",
+            additional={"framework": "pytorch"},
         )
         optimizer_manager = OptimizerManager(config=optimizer_config)
 
         traindata_config = DataConfig(
             **storage_config,
-            dataset_name='mnist',
-            additional={
-                "mode": "train",
-                "framework": "pytorch"
-            },
+            dataset_name="mnist",
+            additional={"mode": "train", "framework": "pytorch"},
         )
         train_dataset = Dataset(config=traindata_config, clear=True)
-        train_loader = DataLoader(train_dataset, batch_size=64, num_workers=8, shuffle=True)
+        train_loader = DataLoader(
+            train_dataset, batch_size=64, num_workers=8, shuffle=True
+        )
 
     if args.test:
         testdata_config = DataConfig(
             **storage_config,
-            dataset_name='mnist',
-            additional={
-                "mode": "test",
-                "framework": "pytorch"
-            },
+            dataset_name="mnist",
+            additional={"mode": "test", "framework": "pytorch"},
         )
         test_dataset = Dataset(config=testdata_config, clear=True)
         test_loader = DataLoader(test_dataset, batch_size=64, num_workers=8)

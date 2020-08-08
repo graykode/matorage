@@ -1,11 +1,11 @@
 # Copyright 2020-present Tae Hwan Jung
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,7 @@
 import copy
 
 from matorage.serialize import Serialize
+
 
 class DataMetadata(Serialize):
     r""" Metadata of dataset configuration classes.
@@ -37,15 +38,12 @@ class DataMetadata(Serialize):
     """
 
     def __init__(self, **kwargs):
-        self.endpoint = kwargs['endpoint']
+        self.endpoint = kwargs["endpoint"]
         self.dataset_name = kwargs.pop("dataset_name", None)
         self.additional = kwargs.pop("additional", {})
 
         self.attributes = kwargs.pop("attributes", None)
-        self.compressor = kwargs.pop("compressor", {
-            "complevel": 0,
-            "complib": "zlib"
-        })
+        self.compressor = kwargs.pop("compressor", {"complevel": 0, "complib": "zlib"})
 
         self.indexer = {}
 
@@ -61,7 +59,10 @@ class DataMetadata(Serialize):
             output["attributes"] = [
                 _attribute.to_dict() for _attribute in self.attributes
             ]
-        if hasattr(self.__class__, "flatten_attributes") or "flatten_attributes" in output:
+        if (
+            hasattr(self.__class__, "flatten_attributes")
+            or "flatten_attributes" in output
+        ):
             output["flatten_attributes"] = [
                 _attribute.to_dict() for _attribute in self.flatten_attributes
             ]

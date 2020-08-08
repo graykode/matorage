@@ -1,11 +1,11 @@
 # Copyright 2020-present Tae Hwan Jung
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ from matorage.utils import check_nas, logger
 from matorage.config import StorageConfig
 from matorage.data.metadata import DataMetadata
 from matorage.data.attribute import DataAttribute
+
 
 class DataConfig(StorageConfig):
     """
@@ -121,10 +122,7 @@ class DataConfig(StorageConfig):
         self.dataset_name = kwargs.pop("dataset_name", None)
         self.additional = kwargs.pop("additional", {})
         self.attributes = kwargs.pop("attributes", None)
-        self.compressor = kwargs.pop("compressor", {
-            "complevel" : 0,
-            "complib" : "zlib"
-        })
+        self.compressor = kwargs.pop("compressor", {"complevel": 0, "complib": "zlib"})
         self.max_object_size = kwargs.pop("max_object_size", 10 * _MB)
 
         self.bucket_name = self._hashmap_transfer()
@@ -146,24 +144,24 @@ class DataConfig(StorageConfig):
             raise ValueError("attributes is empty")
         if isinstance(self.attributes, tuple):
             self.attributes = DataAttribute(
-                    name=self.attributes[0],
-                    type=self.attributes[1],
-                    shape=self.attributes[2]
-                )
+                name=self.attributes[0],
+                type=self.attributes[1],
+                shape=self.attributes[2],
+            )
         if isinstance(self.attributes, DataAttribute):
             self.attributes = [self.attributes]
 
         for i, attr in enumerate(self.attributes):
             if isinstance(attr, tuple):
-                self.attributes[i] = DataAttribute(
-                    attr[0], attr[1], attr[2]
-                )
+                self.attributes[i] = DataAttribute(attr[0], attr[1], attr[2])
 
         attribute_names = set()
         for attribute in self.attributes:
             assert isinstance(attribute.type, tables.atom.Atom)
             if attribute.name in attribute_names:
-                raise KeyError("{} is already exist in {}".format(attribute.name, attribute_names))
+                raise KeyError(
+                    "{} is already exist in {}".format(attribute.name, attribute_names)
+                )
             else:
                 attribute_names.add(attribute.name)
 
@@ -171,11 +169,17 @@ class DataConfig(StorageConfig):
         self.flatten_attributes = copy.deepcopy(self.attributes)
         self._convert_type_flatten()
 
-        if self.compressor['complevel'] < 0  or 9 < self.compressor['complevel']:
-            raise ValueError("Compressor level is {} must be 0-9 interger".format(self.compressor['level']))
-        if self.compressor['complib'] not in ('zlib', 'lzo', 'bzip2', 'blosc'):
-            raise ValueError("compressor mode {} is not valid. select in "
-                             "zlib, lzo, bzip2, blosc".format(self.compressor['lib']))
+        if self.compressor["complevel"] < 0 or 9 < self.compressor["complevel"]:
+            raise ValueError(
+                "Compressor level is {} must be 0-9 interger".format(
+                    self.compressor["level"]
+                )
+            )
+        if self.compressor["complib"] not in ("zlib", "lzo", "bzip2", "blosc"):
+            raise ValueError(
+                "compressor mode {} is not valid. select in "
+                "zlib, lzo, bzip2, blosc".format(self.compressor["lib"])
+            )
 
     def _check_bucket(self):
         """
@@ -185,15 +189,18 @@ class DataConfig(StorageConfig):
         Returns:
             :obj: `None`:
         """
-        _client = Minio(self.endpoint,
-                            access_key=self.access_key,
-                            secret_key=self.secret_key,
-                            secure=self.secure) if not check_nas(self.endpoint) else NAS(self.endpoint)
-        if _client.bucket_exists(self.bucket_name):
-            objects = _client.list_objects(
-                self.bucket_name,
-                prefix='metadata/'
+        _client = (
+            Minio(
+                self.endpoint,
+                access_key=self.access_key,
+                secret_key=self.secret_key,
+                secure=self.secure,
             )
+            if not check_nas(self.endpoint)
+            else NAS(self.endpoint)
+        )
+        if _client.bucket_exists(self.bucket_name):
+            objects = _client.list_objects(self.bucket_name, prefix="metadata/")
             _metadata = None
             for obj in objects:
                 _metadata = _client.get_object(self.bucket_name, obj.object_name)
@@ -201,17 +208,23 @@ class DataConfig(StorageConfig):
             if not _metadata:
                 return
 
-            metadata_dict = json.loads(_metadata.read().decode('utf-8'))
-            if self.endpoint != metadata_dict['endpoint']:
-                raise ValueError("Already created endpoint({}) doesn't current endpoint str({})"
-                                 " It may occurs permission denied error".format(metadata_dict['endpoint'], self.endpoint))
+            metadata_dict = json.loads(_metadata.read().decode("utf-8"))
+            if self.endpoint != metadata_dict["endpoint"]:
+                raise ValueError(
+                    "Already created endpoint({}) doesn't current endpoint str({})"
+                    " It may occurs permission denied error".format(
+                        metadata_dict["endpoint"], self.endpoint
+                    )
+                )
 
-            self.compressor = metadata_dict['compressor']
+            self.compressor = metadata_dict["compressor"]
             self.attributes = [
-                DataAttribute(**item) for item in metadata_dict['attributes']
+                DataAttribute(**item) for item in metadata_dict["attributes"]
             ]
         else:
-            logger.warn("{} {} is not exist!".format(self.dataset_name, str(self.additional)))
+            logger.warn(
+                "{} {} is not exist!".format(self.dataset_name, str(self.additional))
+            )
 
     def _convert_type_flatten(self):
         for attribute in self.flatten_attributes:
@@ -225,12 +238,14 @@ class DataConfig(StorageConfig):
             :obj: `str`:
         """
         if not isinstance(self.dataset_name, str):
-            raise ValueError("dataset_name {} is empty or not str type".format(self.dataset_name))
+            raise ValueError(
+                "dataset_name {} is empty or not str type".format(self.dataset_name)
+            )
         if not isinstance(self.additional, dict):
             raise TypeError("additional is not dict type")
 
         key = self.dataset_name + json.dumps(self.additional, indent=4, sort_keys=True)
-        return hashlib.md5(key.encode('utf-8')).hexdigest()
+        return hashlib.md5(key.encode("utf-8")).hexdigest()
 
     def to_dict(self):
         """
@@ -239,14 +254,10 @@ class DataConfig(StorageConfig):
         Returns:
             :obj:`Dict[str, any]`: Dictionary of all the attributes that make up this configuration instance,
         """
-        output = copy.deepcopy(
-            self.__class__.__base__(**self.__dict__).__dict__
-        )
+        output = copy.deepcopy(self.__class__.__base__(**self.__dict__).__dict__)
         output["dataset_name"] = self.metadata.dataset_name
         output["additional"] = self.metadata.additional
-        output["attributes"] = [
-            _attribute.to_dict() for _attribute in self.attributes
-        ]
+        output["attributes"] = [_attribute.to_dict() for _attribute in self.attributes]
         output["compressor"] = self.metadata.compressor
         return output
 
@@ -265,8 +276,8 @@ class DataConfig(StorageConfig):
         """
         config_dict = cls._dict_from_json_file(json_file)
 
-        config_dict['attributes'] = [
-            DataAttribute(**item) for item in config_dict['attributes']
+        config_dict["attributes"] = [
+            DataAttribute(**item) for item in config_dict["attributes"]
         ]
 
         return cls(**config_dict)
