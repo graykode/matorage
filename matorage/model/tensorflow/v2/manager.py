@@ -160,8 +160,8 @@ class ModelManager(Manager):
             >>> model_manager.save(model, epoch=0, step=0)
 
         Args:
-        model (:obj:`torch.nn.Module`, **require**):
-            Pytorch model (``torch.nn.Module`` type)
+        model (:obj:`tf.keras.Model`, **require**):
+            Tensorflow model (``tf.keras.Model`` type)
 
         Returns:
             :obj: `None`:
@@ -201,11 +201,11 @@ class ModelManager(Manager):
                      0.07418892, -0.0714546 ]], dtype=float32)>)])
 
         Args:
-        model (:obj:`torch.nn.Module` or `string`, **require**):
-            Pytorch model(``torch.nn.Module`` type) or layer name(string type).
+        model (:obj:`tf.keras.Model` or `string`, **require**):
+            Tensorflow model(``tf.keras.Model`` type) or layer name(string type).
 
         Returns:
-            :obj: `None or OrderedDict`: If ``model`` is pytorch model, weight is loaded into the model and return None.
+            :obj: `None or OrderedDict`: If ``model`` is tensorflow model, weight is loaded into the model and return None.
             however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
         """
         return super(ModelManager, self).load(model, **kwargs)
