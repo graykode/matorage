@@ -1,0 +1,36 @@
+language: python
+python:
+  - "3.6"
+env:
+  - PYTORCH_VERSION="1.0.0" TORCHVISION_VERSION="0.2.2" TORCH=true
+  - PYTORCH_VERSION="1.1.0" TORCHVISION_VERSION="0.3.0" TORCH=true
+  - PYTORCH_VERSION="1.2.0" TORCHVISION_VERSION="0.4.0" TORCH=true
+  - PYTORCH_VERSION="1.3.0" TORCHVISION_VERSION="0.4.1" TORCH=true
+  - PYTORCH_VERSION="1.4.0" TORCHVISION_VERSION="0.5.0" TORCH=true
+  - PYTORCH_VERSION="1.5.0" TORCHVISION_VERSION="0.6.0" TORCH=true
+  - PYTORCH_VERSION="1.6.0" TORCHVISION_VERSION="0.7.0" TORCH=true
+  - TF_VERSION="2.2" TF_IO_VERSION="0.13" TF=true
+
+# command to install dependencies
+install:
+  - pip install -U pip
+  - pip install -r requirements.txt
+  - python setup.py install
+  - if [[ $TORCH ]]; then
+      pip install torch==${PYTORCH_VERSION};
+      pip install torchvision==${TORCHVISION_VERSION};
+    else
+      pip install tensorflow==${TF_VERSION};
+      pip install tensorflow_io==${TF_IO_VERSION};
+    fi
+
+script:
+  - if [[ $TORCH ]]; then
+      python -c "import torch; print('PyTorch Version:', torch.__version__)";
+      python -c "import torchvision; print('TorchVision Version:', torchvision.__version__)";
+    else
+      python -c "import tensorflow as tf; print('Tensorflow Version:', tf.__version__)";
+      python -c "import tensorflow_io as tfio; print('Tensorflow IO Version:', tfio.__version__)";
+    fi
+  - python setup.py install;
+  - python -m unittest tests/test_suite.py;
