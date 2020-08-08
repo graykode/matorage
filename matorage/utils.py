@@ -35,9 +35,18 @@ try:
     USE_TORCH = os.environ.get("USE_TORCH", "AUTO").upper()
     if USE_TORCH in ("1", "ON", "YES", "AUTO") and USE_TF not in ("1", "ON", "YES"):
         import torch
+        import torchvision
+
+        assert hasattr(torch, "__version__") and version.parse(
+            torch.__version__
+        ) >= version.parse("1.0.0")
+        assert hasattr(torchvision, "__version__") and version.parse(
+            torch.__version__
+        ) >= version.parse("0.2.0")
 
         _torch_available = True  # pylint: disable=invalid-name
         logger.info("PyTorch version {} available.".format(torch.__version__))
+        logger.info("PyTorch Vision version {} available.".format(torchvision.__version__))
     else:
         logger.info("Disabling PyTorch because USE_TF is set")
         _torch_available = False
