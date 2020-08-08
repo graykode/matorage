@@ -129,8 +129,10 @@ class ModelManager(Manager):
             >>> model_manager.save(model, epoch=0, step=0)
 
         Args:
-        model (:obj:`torch.nn.Module`, **require**):
-            Pytorch model (``torch.nn.Module`` type)
+            model (:obj:`torch.nn.Module`, **require**):
+                Pytorch model (``torch.nn.Module`` type)
+            kwargs (:obj:`**kwargs`, **require**):
+                metadata about step or epoch for model.
 
         Returns:
             :obj: `None`:
@@ -143,6 +145,7 @@ class ModelManager(Manager):
 
         .. code-block:: python
 
+            # Load entire model
             >>> model = Model()
             >>> model_manager.load(model, step=0)
             >>> model
@@ -157,7 +160,7 @@ class ModelManager(Manager):
               )
             )
 
-            # Load sub-layer
+            # Load sub-layer model
             >>> class SubModel(nn.Module):
             >>>   def __init__(self):
             >>>     super(SubModel, self).__init__()
@@ -191,8 +194,10 @@ class ModelManager(Manager):
                 [ 0.3065, -0.0095,  0.0988,  0.4294,  0.3338]]))])
 
         Args:
-        model (:obj:`torch.nn.Module` or `string`, **require**):
-            Pytorch model(``torch.nn.Module`` type) or layer name(string type).
+            model (:obj:`torch.nn.Module` or `string`, **require**):
+                Pytorch model(``torch.nn.Module`` type) or layer name(string type).
+            kwargs (:obj:`**kwargs`, **require**):
+                metadata about step or epoch for model.
 
         Returns:
             :obj: `None or OrderedDict`: If ``model`` is pytorch model, weight is loaded into the model and return None.

@@ -160,8 +160,10 @@ class ModelManager(Manager):
             >>> model_manager.save(model, epoch=0, step=0)
 
         Args:
-        model (:obj:`tf.keras.Model`, **require**):
-            Tensorflow model (``tf.keras.Model`` type)
+            model (:obj:`tf.keras.Model`, **require**):
+                Tensorflow model (``tf.keras.Model`` type)
+            kwargs (:obj:`**kwargs`, **require**):
+                metadata about step or epoch for model.
 
         Returns:
             :obj: `None`:
@@ -174,9 +176,10 @@ class ModelManager(Manager):
 
         .. code-block:: python
 
+            # Load entire model
             >>> model_manager.load(model, step=0)
 
-            # Load sub-layer
+            # Load sub-layer model
             >>> submodel = Sequential([
             >>>   Sequential([
             >>>     layers.Dense(10),
@@ -201,8 +204,10 @@ class ModelManager(Manager):
                      0.07418892, -0.0714546 ]], dtype=float32)>)])
 
         Args:
-        model (:obj:`tf.keras.Model` or `string`, **require**):
-            Tensorflow model(``tf.keras.Model`` type) or layer name(string type).
+            model (:obj:`tf.keras.Model` or `string`, **require**):
+                Tensorflow model(``tf.keras.Model`` type) or layer name(string type).
+            kwargs (:obj:`**kwargs`, **require**):
+                metadata about step or epoch for model.
 
         Returns:
             :obj: `None or OrderedDict`: If ``model`` is tensorflow model, weight is loaded into the model and return None.
