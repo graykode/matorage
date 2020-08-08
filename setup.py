@@ -13,12 +13,14 @@
 # limitations under the License.
 
 from setuptools import setup
-from sutils import find_name, get_setuptools
+from sutils import find_name, get_setuptools, check_torch_tf_version
 
 project_name = "matorage"
 version = "0.1.0"
 
 if __name__ == "__main__":
+    check_torch_tf_version()
+
     project_name = find_name()
     setup(
         # Project Name, Version
@@ -28,10 +30,16 @@ if __name__ == "__main__":
         license="Apache License, Version 2.0",
         author="TaeHwan-Jung",
         author_email="nlkey2022@gmail.com",
-        description="",
-        url="",
+        description="matorage is Matrix or Tensor(multidimensional matrix) "
+                    "Object Storage with high availability "
+                    "distributed systems for Deep Learning framework.",
+        url="https://github.com/graykode/matorage",
         # Platform, Requires
         python_requires=">=3.5",
         platforms=["any"],
+        project_urls={
+            "Documentation": "https://matorage.readthedocs.io/en/stable/",
+            "Source Code": "https://github.com/graykode/matorage",
+        },
         **get_setuptools()
     )

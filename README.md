@@ -1,9 +1,4 @@
-# matorage
-
-Efficiently store/load and manage models and training data needed for deep learning learning with matorage!
-
-Matorage is Tensor(multidimensional matrix) Object Storage Manager with high availability distributed systems for
-Deep Learning framework(Pytorch, Tensorflow V2, Keras).
+# [matorage](https://matorage.readthedocs.io/en/stable/?badge=stable)
 
 <p align="center">
 <a href="https://travis-ci.com/github/graykode/matorage"><img alt="Build Status" src="https://travis-ci.com/graykode/matorage.svg?branch=master"></a>
@@ -13,6 +8,11 @@ Deep Learning framework(Pytorch, Tensorflow V2, Keras).
 <a href="https://pepy.tech/project/matorage"><img alt="Downloads" src="https://static.pepy.tech/badge/matorage"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
+
+**Efficiently store/load and manage models and training data needed for deep learning learning with matorage!**
+
+Matorage is Tensor(multidimensional matrix) Object Storage Manager with high availability distributed systems for
+Deep Learning framework(Pytorch, Tensorflow V2, Keras).
 
 ## Features
 
@@ -217,5 +217,4 @@ optimizer_manager.load(optimizer, step=938)
 ### Author
 
 [Tae Hwan Jung(@graykode)](https://github.com/graykode/matorage>)
-
 We are looking for a contributor.
