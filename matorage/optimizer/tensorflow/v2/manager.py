@@ -133,3 +133,46 @@ class OptimizerManager(Manager):
         _metadata_config = ast.literal_eval(self.config.metadata["optimizer"][str(step)]["config"])
         optimizer.from_config(_metadata_config)
         optimizer.set_weights(new_weight)
+
+    def save(self, optimizer):
+        """
+        save weight of optimizer
+
+        .. code-block:: python
+
+            >>> model = Model()
+            >>> optimizer = optim.Adam(model.parameters(), lr=0.01)
+            # model training...
+            >>> optimizer_manager.save(optimizer)
+
+        Args:
+        optimizer (:obj:`tf.keras.optimizers.Optimizer`, **require**):
+            Tensorflow optimizer.
+
+        Returns:
+            :obj: `None`:
+        """
+        super(OptimizerManager, self).save(optimizer)
+
+    def load(self, optimizer, step):
+        """
+        load weight of optimizer
+
+        .. code-block:: python
+
+            >>> optimizer_manager = OptimizerManager(config=optimizer_config)
+            >>> optimizer = optim.Adam(model.parameters(), lr=0.01)
+            >>> optimizer_manager.load(optimizer, step=938)
+
+        Args:
+        optimizer (:obj:`tf.keras.optimizers.Optimizer`, **require**):
+            Tensorflow optimizer.
+        step (:obj:`integer`, **require**):
+            optimizer step.
+
+        Returns:
+            :obj: `None or OrderedDict`: If ``optimizer`` is tensorflow optimizer type,
+            weight is loaded into the optimizer and return None.
+            however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
+        """
+        return super(OptimizerManager, self).load(optimizer, step)

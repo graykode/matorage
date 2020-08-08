@@ -41,6 +41,10 @@ Guides
 
    model
 
+   optimizer
+
+   model_optim_qa
+
 Examples
 ------------------
 

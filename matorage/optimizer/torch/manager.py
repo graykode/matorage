@@ -130,3 +130,46 @@ class OptimizerManager(Manager):
             weight['state'][param_name][param_dict_key] = value
 
         optimizer.load_state_dict(weight)
+
+    def save(self, optimizer):
+        """
+        save weight of optimizer
+
+        .. code-block:: python
+
+            >>> model = Model()
+            >>> optimizer = optim.Adam(model.parameters(), lr=0.01)
+            # model training...
+            >>> optimizer_manager.save(optimizer)
+
+        Args:
+        optimizer (:obj:`torch.optim`, **require**):
+            Pytorch optimizer.
+
+        Returns:
+            :obj: `None`:
+        """
+        super(OptimizerManager, self).save(optimizer)
+        
+    def load(self, optimizer, step):
+        """
+        load weight of optimizer
+
+        .. code-block:: python
+
+            >>> optimizer_manager = OptimizerManager(config=optimizer_config)
+            >>> optimizer = optim.Adam(model.parameters(), lr=0.01)
+            >>> optimizer_manager.load(optimizer, step=938)
+
+        Args:
+        optimizer (:obj:`torch.optim`, **require**):
+            Pytorch optimizer.
+        step (:obj:`integer`, **require**):
+            optimizer step.
+
+        Returns:
+            :obj: `None or OrderedDict`: If ``optimizer`` is pytorch optimizer type,
+            weight is loaded into the optimizer and return None.
+            however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
+        """
+        return super(OptimizerManager, self).load(optimizer, step)

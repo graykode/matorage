@@ -113,22 +113,6 @@ class Manager(object):
         _file.close()
 
     def save(self, optimizer):
-        """
-        save weight of optimizer
-
-        .. code-block:: python
-
-            model = Model()
-            optimizer = optim.Adam(model.parameters(), lr=0.01)
-            optimizer_manager.save(optimizer, step=0)
-
-        Args:
-        optimizer (:obj:`torch.optim or tf.keras.optimizers`, **require**):
-            Pytorch or Tensorflow optimizer.
-
-        Returns:
-            :obj: `None`:
-        """
         if not self._client.bucket_exists(self.config.bucket_name):
             self._client.make_bucket(self.config.bucket_name)
 
@@ -154,29 +138,6 @@ class Manager(object):
             self._save_with_clear(step, optimizer)
 
     def load(self, optimizer, step):
-        """
-        load weight of optimizer
-
-        .. code-block:: python
-
-            >>> model = Model()
-            >>> optimizer = optim.Adam(model.parameters(), lr=0.01)
-            >>> optimizer_manager.load(optimizer, step=938)
-            >>> print(optimizer)
-            >>>
-
-        Args:
-        optimizer (:obj:`torch.optim or tf.keras.optimizers`, **require**):
-            Pytorch or Tensorflow optimizer.
-        step (:obj:`integer`, **require**):
-            optimizer step.
-
-        Returns:
-            :obj: `None or OrderedDict`: If ``optimizer`` is pytorch or tensorflow optimizer type,
-            weight is loaded into the optimizer and return None.
-            however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
-        """
-
         layers = self._client.list_objects(
             bucket_name=self.config.bucket_name,
             prefix=f"{step}/",
@@ -186,5 +147,34 @@ class Manager(object):
         return self._load_model(step, layers, optimizer)
 
     @property
-    def get_optimizer(self):
+    def get_metadata(self):
+        """
+        Get all optimizers according to metadata by step.
+
+        .. code-block:: python
+
+            >>> optimizer_manager = OptimizerManager(config=optimizer_config)
+            >>> optimizer_manager.save(optimizer)
+            >>> optimizer_manager.get_metadata
+            {'938':
+                {
+                    'framework': 'pytorch',
+                    'param_groups': [
+                        {
+                            'lr': 0.01, 'betas': [0.9, 0.999], 'eps': 1e-08,
+                            'weight_decay': 0, 'amsgrad': False,
+                            'params': [
+                                140516594711520, 140516594711760,
+                                140517867028384, 140516594711680,
+                                140516594693376, 140516594612336
+                            ]
+                        }
+                    ]
+                }
+            }
+
+
+        Returns:
+            :obj: `dict`: optimizer of metadata
+        """
         return self.config.metadata["optimizer"]
