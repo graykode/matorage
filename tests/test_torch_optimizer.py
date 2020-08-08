@@ -129,3 +129,9 @@ class TorchOptimizerTest(OptimizerTest, unittest.TestCase):
         optimizer = optim.Adam(model.parameters(), lr=0.01)
 
         self.optimizer_manager.load(optimizer, step=938)
+
+def suite():
+    return unittest.TestSuite(unittest.makeSuite(TorchOptimizerTest))
+
+if __name__ == '__main__':
+    unittest.main(defaultTest='suite')

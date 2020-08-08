@@ -103,3 +103,9 @@ class TFOptimizerTest(OptimizerTest, unittest.TestCase):
         assert len(before_optim_weight) == len(after_optim_weight)
         for i in range(1, len(after_optim_weight)):
             assert not np.array_equal(after_optim_weight, before_optim_weight)
+
+def suite():
+    return unittest.TestSuite(unittest.makeSuite(TFOptimizerTest))
+
+if __name__ == '__main__':
+    unittest.main(defaultTest='suite')

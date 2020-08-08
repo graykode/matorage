@@ -510,3 +510,9 @@ class DataSaverTest(DataTest, unittest.TestCase):
         self.data_saver({
             'x' : x
         })
+
+def suite():
+    return unittest.TestSuite(unittest.makeSuite(DataSaverTest))
+
+if __name__ == '__main__':
+    unittest.main(defaultTest='suite')

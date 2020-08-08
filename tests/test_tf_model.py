@@ -80,6 +80,7 @@ class TFModelTest(ModelTest, unittest.TestCase):
 
         self.model_manager.save(self.model, step=0)
 
+    @unittest.skip("skip")
     def test_mnist_train_process(self):
         (train_images, train_labels), _ = tf.keras.datasets.mnist.load_data()
 
@@ -102,6 +103,7 @@ class TFModelTest(ModelTest, unittest.TestCase):
 
         self.model_manager.save(model, epoch=1)
 
+    @unittest.skip("skip")
     def test_mnist_eval_process(self):
         _, (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
 
@@ -142,3 +144,9 @@ class TFModelTest(ModelTest, unittest.TestCase):
         )
         process_eval.start()
         process_eval.join()
+
+def suite():
+    return unittest.TestSuite(unittest.makeSuite(TFModelTest))
+
+if __name__ == '__main__':
+    unittest.main(defaultTest='suite')

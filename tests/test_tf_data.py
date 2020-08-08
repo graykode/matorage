@@ -173,3 +173,9 @@ class TFDataTest(DataTest, unittest.TestCase):
                 tqdm(self.dataset.dataloader, total=2)
         ):
             pass
+
+def suite():
+    return unittest.TestSuite(unittest.makeSuite(TFDataTest))
+
+if __name__ == '__main__':
+    unittest.main(defaultTest='suite')

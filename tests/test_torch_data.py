@@ -171,3 +171,9 @@ class TorchDataTest(DataTest, unittest.TestCase):
 
         for batch_idx, (image, target) in enumerate(tqdm(loader)):
             pass
+
+def suite():
+    return unittest.TestSuite(unittest.makeSuite(TorchDataTest))
+
+if __name__ == '__main__':
+    unittest.main(defaultTest='suite')
