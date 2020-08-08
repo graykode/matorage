@@ -137,6 +137,8 @@ class Manager(object):
             )
             self._save_with_clear(step, optimizer)
 
+        logger.info('optimizer with {} is saved'.format(str(step)))
+
     def load(self, optimizer, step):
         layers = self._client.list_objects(
             bucket_name=self.config.bucket_name,
@@ -144,6 +146,7 @@ class Manager(object):
             recursive=True
         )
 
+        logger.info('optimizer with {} is loaded'.format(str(step)))
         return self._load_model(step, layers, optimizer)
 
     @property

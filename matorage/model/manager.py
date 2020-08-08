@@ -127,6 +127,8 @@ class Manager(object):
             self.config.metadata["model"].update({model_folder : metadata})
             self._save_with_clear(model_folder, model)
 
+        logger.info('model with {} is saved'.format(str(metadata)))
+
     def load(self, model, **kwargs):
         if not isinstance(kwargs, dict):
             metadata = 0
@@ -141,6 +143,7 @@ class Manager(object):
             recursive=True
         )
 
+        logger.info('model with {} is loaded'.format(str(metadata)))
         return self._load_model(model_folder, layers, model)
 
     def _hashmap_transfer(self, metadata):
