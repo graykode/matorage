@@ -53,8 +53,8 @@ class DataConfig(StorageConfig):
                 "complib" : "zlib"
             },
             attributes=[
-                DataAttribute('image', 'float32', (28, 28)),
-                DataAttribute('target', 'int64', (1, ))
+                ('image', 'float32', (28, 28)),
+                ('target', 'int64', (1, ))
             ]
         )
 
@@ -80,8 +80,8 @@ class DataConfig(StorageConfig):
                 "complib" : "zlib"
             },
             attributes=[
-                DataAttribute('image', 'float32', (28, 28)),
-                DataAttribute('target', 'int64', (1, ))
+                ('image', 'float32', (28, 28)),
+                ('target', 'int64', (1, ))
             ]
         )
 

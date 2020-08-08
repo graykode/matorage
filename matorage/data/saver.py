@@ -85,7 +85,8 @@ class DataSaver(object):
         .. code-block:: python
 
             import numpy as np
-            from matorage import DataConfig, DataSaver, DataAttribute
+            from tqdm import tqdm
+            from matorage import DataConfig, DataSaver
 
             data_config = DataConfig(
                 endpoint='127.0.0.1:9000',
@@ -93,7 +94,7 @@ class DataSaver(object):
                 secret_key='miniosecretkey',
                 dataset_name='array_test',
                 attributes=[
-                    DataAttribute('array', 'uint8', (3, 224, 224)),
+                    ('array', 'uint8', (3, 224, 224)),
                 ]
             )
 
@@ -235,7 +236,7 @@ class DataSaver(object):
 
         Args:
             datas (:obj:`Dict[str, numpy.ndarray]`, **require**):
-                `value` is `numpy.ndarray` type with (Batch size, *) shape.
+                `value` is `numpy.ndarray` type with ``(B, d_1, d_2, ..., d_k)`` shape(B is batch size).
 
         .. code-block:: python
 

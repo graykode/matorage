@@ -55,6 +55,8 @@ class MTRData(object):
         self.clear = clear
         self.index = index
 
+        self._check_bucket()
+
         # merge all metadatas and load in memory.
         self.merged_indexer = self._merge_metadata()
         self.end_indices = list(self.merged_indexer.keys())
@@ -81,6 +83,13 @@ class MTRData(object):
                 self._object_file_mapper = json.load(f)
         else:
             self._object_file_mapper = {}
+
+    def _check_bucket(self):
+        _client = self._create_client()
+        if not _client.bucket_exists(self.config.bucket_name):
+            raise ValueError("dataset {} with {} is not exist".format(
+                self.config.dataset_name, str(self.config.additional))
+            )
 
     def _create_client(self):
         return Minio(
