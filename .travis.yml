@@ -11,6 +11,17 @@ env:
   - PYTORCH_VERSION="1.6.0" TORCHVISION_VERSION="0.7.0" TORCH=true
   - TF_VERSION="2.2" TF_IO_VERSION="0.13" TF=true
 
+services:
+  - docker
+
+before_install:
+  - docker pull minio/minio
+  - docker run -it -p 9000:9000 --restart always -e \
+    "MINIO_ACCESS_KEY=minio" -e \
+    "MINIO_SECRET_KEY=miniosecretkey" \
+    -v ~/shared:/container/vol \
+    minio/minio gateway nas /container/vol
+
 # command to install dependencies
 install:
   - pip install -U pip
