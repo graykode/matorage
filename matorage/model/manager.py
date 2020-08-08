@@ -108,21 +108,6 @@ class Manager(object):
         _file.close()
 
     def save(self, model, **kwargs):
-        """
-        save weight of model
-
-        .. code-block:: python
-
-            model = Model()
-            model_manager.save(model, step=0)
-
-        Args:
-        model (:obj:`model or string`, **require**):
-            Pytorch, Tensorflow model type or layer name string type.
-
-        Returns:
-            :obj: `None`:
-        """
         if not self._client.bucket_exists(self.config.bucket_name):
             self._client.make_bucket(self.config.bucket_name)
 
@@ -143,39 +128,6 @@ class Manager(object):
             self._save_with_clear(model_folder, model)
 
     def load(self, model, **kwargs):
-        """
-        load weight of model
-
-        .. code-block:: python
-
-            >>> model = Model()
-            >>> pretrained_model = model_manager.save(model, step=0)
-            >>> print(pretrained_model)
-            >>> Model(
-                  (f): Linear(in_features=5, out_features=10, bias=True)
-                )
-
-            >>> weight = model_manager.save('fc1.weight', step=0)
-            >>> print(weight)
-            >>> OrderedDict([('fc1.weight', tensor([[ 0.2679, -0.2147, -0.1927, -0.3263,  0.0930],
-                [ 0.0144,  0.2935,  0.3614, -0.0493, -0.3772],
-                [ 0.4101, -0.1864,  0.1076, -0.3900,  0.3613],
-                [-0.2831,  0.3692,  0.3367,  0.2491, -0.2971],
-                [-0.3019,  0.1682, -0.3951,  0.1528,  0.1778],
-                [-0.1593,  0.3315, -0.2286,  0.1294,  0.2087],
-                [-0.3394, -0.2706,  0.1515,  0.0357, -0.4252],
-                [ 0.2555, -0.4435, -0.3353,  0.2096, -0.3741],
-                [ 0.3950, -0.2630, -0.1730,  0.1393,  0.3678],
-                [ 0.3065, -0.0095,  0.0988,  0.4294,  0.3338]]))])
-
-        Args:
-        model (:obj:`model or string`, **require**):
-            Pytorch, Tensorflow model type or layer name string type.
-
-        Returns:
-            :obj: `None or OrderedDict`: If ``model`` is pytorch or tensorflow model type, weight is loaded into the model and return None.
-            however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
-        """
         if not isinstance(kwargs, dict):
             metadata = 0
         else:
@@ -207,5 +159,28 @@ class Manager(object):
         return hashlib.md5(key.encode('utf-8')).hexdigest()
 
     @property
-    def get_model(self):
-        return self.config.metadata["model"]
+    def get_metadata(self):
+        """
+        Get all models according to metadata(ex. step, epoch)
+
+        .. code-block:: python
+
+            >>> model_manager.save(model, step=100)
+            >>> model_manager.save(model, step=200)
+            >>> model_manager.get_metadata
+            {
+                'additional': {'version': '1.0.1'},
+                'compressor': {'complevel': 0, 'complib': 'zlib'},
+                'endpoint': '127.0.0.1:9000',
+                'model':
+                {
+                    'ad44168f1343bc77b4d9ad6f1fef50b6': {'step': 100},
+                    'af0677ecf0d15d17d10204be9ff2f9f5': {'step': 200}
+                },
+                'model_name': 'testmodel'
+            }
+
+        Returns:
+            :obj: `dict`: model of metadata
+        """
+        return self.config.metadata

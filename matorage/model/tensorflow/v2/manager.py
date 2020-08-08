@@ -37,7 +37,9 @@ class ModelManager(Manager):
 
     .. code-block:: python
 
+        from matorage import ModelConfig
         from matorage.tensorflow import ModelManager
+        from tensorflow.keras import layers, Sequential
 
         model_config = ModelConfig(
             endpoint='127.0.0.1:9000',
@@ -52,7 +54,14 @@ class ModelManager(Manager):
         model_manager = ModelManager(config=model_config)
 
         model = Sequential([
-            layers.Dense(10)
+            Sequential([
+                layers.Dense(10),
+                layers.ReLU()
+            ]),
+            Sequential([
+                layers.Dense(10),
+                layers.ReLU()
+            ])
         ])
         model.build(input_shape=(None, 5))
 
@@ -137,3 +146,66 @@ class ModelManager(Manager):
                                  str(len(weight_values)) + ' elements.')
             weight_value_tuples += zip(symbolic_weights, weight_values)
         K.batch_set_value(weight_value_tuples)
+
+    def save(self, model, **kwargs):
+        """
+        save weight of model
+
+        .. code-block:: python
+
+            >>> model_manager.save(model, step=0)
+
+            >>> model_manager.save(model, epoch=0)
+
+            >>> model_manager.save(model, epoch=0, step=0)
+
+        Args:
+        model (:obj:`torch.nn.Module`, **require**):
+            Pytorch model (``torch.nn.Module`` type)
+
+        Returns:
+            :obj: `None`:
+        """
+        super(ModelManager, self).save(model, **kwargs)
+
+    def load(self, model, **kwargs):
+        """
+        load weight of model
+
+        .. code-block:: python
+
+            >>> model_manager.load(model, step=0)
+
+            # Load sub-layer
+            >>> submodel = Sequential([
+            >>>   Sequential([
+            >>>     layers.Dense(10),
+            >>>     layers.ReLU()
+            >>>   ])
+            >>> ])
+            >>> submodel.build(input_shape=(None, 5))
+            >>> model_manager.load(submodel, step=0)
+
+            >>> model_manager.load('sequential/dense/kernel:0', step=0)
+            OrderedDict([('sequential/dense/kernel:0',
+            <tf.Tensor: shape=(5, 784), dtype=float32, numpy=
+            array([[ 0.08160326,  0.00161414, -0.00507049, ...,  0.02965256,
+                    -0.07447692,  0.02029154],
+                   [-0.06808375,  0.0112161 , -0.0640984 , ..., -0.05060118,
+                    -0.03650254,  0.01808494],
+                   [ 0.00063588,  0.00848304, -0.01014224, ...,  0.0616277 ,
+                    -0.05507688,  0.02844934],
+                   [-0.00206905,  0.04553737,  0.03098481, ..., -0.05891491,
+                     0.0705805 , -0.03912991],
+                   [ 0.04252511, -0.04907732, -0.07053198, ...,  0.00260394,
+                     0.07418892, -0.0714546 ]], dtype=float32)>)])
+
+        Args:
+        model (:obj:`torch.nn.Module` or `string`, **require**):
+            Pytorch model(``torch.nn.Module`` type) or layer name(string type).
+
+        Returns:
+            :obj: `None or OrderedDict`: If ``model`` is pytorch model, weight is loaded into the model and return None.
+            however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
+        """
+        return super(ModelManager, self).load(model, **kwargs)
