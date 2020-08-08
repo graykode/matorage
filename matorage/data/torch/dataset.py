@@ -43,7 +43,7 @@ class Dataset(torch.utils.data.Dataset, MTRData):
 
     .. code-block::
 
-        from matorage import DataConfig, DataAttribute
+        from matorage import DataConfig
         from matorage.torch import Dataset
         from torch.utils.data import DataLoader
 
@@ -53,15 +53,15 @@ class Dataset(torch.utils.data.Dataset, MTRData):
             secret_key='miniosecretkey',
             dataset_name='array_test',
             attributes=[
-                DataAttribute('array', 'uint8', (3, 224, 224)),
+                ('array', 'uint8', (3, 224, 224)),
             ]
         )
 
-        dataset = Dataset(config=traindata_config, clear=True)
+        dataset = Dataset(config=data_config, clear=True)
 
         # iterative mode
         for array in DataLoader(dataset):
-            array = array.to('cuda')
+            print(array)
 
         # index mode
         print(dataset[0])

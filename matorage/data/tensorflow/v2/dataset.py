@@ -52,7 +52,7 @@ class Dataset(MTRData):
 
     .. code-block::
 
-        from matorage import DataConfig, DataAttribute
+        from matorage import DataConfig
         from matorage.tensorflow import Dataset
 
         data_config = DataConfig(
@@ -61,11 +61,11 @@ class Dataset(MTRData):
             secret_key='miniosecretkey',
             dataset_name='array_test',
             attributes=[
-                DataAttribute('array', 'uint8', (3, 224, 224)),
+                ('array', 'uint8', (3, 224, 224)),
             ]
         )
 
-        dataset = Dataset(config=traindata_config, clear=True)
+        dataset = Dataset(config=data_config, clear=True)
 
         # iterative mode
         for array in dataset.dataloader:
@@ -77,13 +77,14 @@ class Dataset(MTRData):
     """
 
     def __init__(self, config, batch_size=1, **kwargs):
-        super(Dataset, self).__init__(config, **kwargs)
 
         # class parameters
         self._batch_size = batch_size
         self._shuffle = kwargs.pop('shuffle', False)
         self._seed = kwargs.pop('seed', 0)
         self.index = kwargs.pop('index', False)
+
+        super(Dataset, self).__init__(config, **kwargs)
 
         if not self.index:
             _dataset = tf.data.Dataset.from_tensor_slices(self.filenames)
