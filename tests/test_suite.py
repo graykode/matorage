@@ -6,27 +6,25 @@
 import sys
 import unittest
 
-# from tests.test_datasaver import DataSaverTest
-# from tests.test_torch_data import TorchDataTest
-# from tests.test_torch_model import TorchModelTest
-# from tests.test_torch_optimizer import TorchOptimizerTest
-#
-# from tests.test_datasaver import DataSaverTest
-# from tests.test_tf_data import TFDataTest
-# from tests.test_tf_model import TFModelTest
-# from tests.test_tf_optimizer import TFOptimizerTest
+from matorage.utils import is_torch_available, is_tf_available
 
 
 def suite():
     test_modules = [
         "tests.test_datasaver",
-        "tests.test_torch_data",
-        "tests.test_torch_model",
-        "tests.test_torch_optimizer",
-        "tests.test_tf_data",
-        "tests.test_tf_model",
-        "tests.test_tf_optimizer",
     ]
+    if is_torch_available():
+        test_modules.extend([
+            "tests.test_torch_data",
+            "tests.test_torch_model",
+            "tests.test_torch_optimizer",
+        ])
+    if is_tf_available():
+        test_modules.extend([
+            "tests.test_tf_data",
+            "tests.test_tf_model",
+            "tests.test_tf_optimizer",
+        ])
 
     alltests = unittest.TestSuite()
     for name in test_modules:
