@@ -6,6 +6,15 @@ Efficiently store/load and manage models and training data needed for deep learn
 Matorage is Tensor(multidimensional matrix) Object Storage Manager with high availability distributed systems for
 Deep Learning framework(Pytorch, Tensorflow V2, Keras).
 
+<p align="center">
+<a href="https://travis-ci.com/github/graykode/matorage"><img alt="Build Status" src="https://travis-ci.com/graykode/matorage.svg?branch=master"></a>
+<a href="https://matorage.readthedocs.io/en/stable/?badge=stable"><img alt="Documentation Status" src="https://readthedocs.org/projects/matorage/badge/?version=stable"></a>
+<a href="https://github.com/graykode/matorage/blob/master/LICENSE"><img alt="License: Apache 2.0" src="https://matorage.readthedocs.io/en/stable/_static/license.svg"></a>
+<a href="https://pypi.org/project/matorage/"><img alt="PyPI" src="https://img.shields.io/pypi/v/matorage"></a>
+<a href="https://pepy.tech/project/matorage"><img alt="Downloads" src="https://static.pepy.tech/badge/matorage"></a>
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+</p>
+
 Features
 ------
 
@@ -233,10 +242,3 @@ Author
 `Tae Hwan Jung(@graykode) <https://github.com/graykode/matorage>`_
 
 We are looking for a contributor.
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
