@@ -131,7 +131,7 @@ class ModelManager(Manager):
         Args:
             model (:obj:`torch.nn.Module`, **require**):
                 Pytorch model (``torch.nn.Module`` type)
-            kwargs (:obj:`**kwargs`, **require**):
+            kwargs (:obj:`**kwargs`, optional):
                 metadata about step or epoch for model.
 
         Returns:
@@ -196,7 +196,7 @@ class ModelManager(Manager):
         Args:
             model (:obj:`torch.nn.Module` or `string`, **require**):
                 Pytorch model(``torch.nn.Module`` type) or layer name(string type).
-            kwargs (:obj:`**kwargs`, **require**):
+            kwargs (:obj:`**kwargs`, optional):
                 metadata about step or epoch for model.
 
         Returns:

@@ -162,7 +162,7 @@ class ModelManager(Manager):
         Args:
             model (:obj:`tf.keras.Model`, **require**):
                 Tensorflow model (``tf.keras.Model`` type)
-            kwargs (:obj:`**kwargs`, **require**):
+            kwargs (:obj:`**kwargs`, optional):
                 metadata about step or epoch for model.
 
         Returns:
@@ -206,7 +206,7 @@ class ModelManager(Manager):
         Args:
             model (:obj:`tf.keras.Model` or `string`, **require**):
                 Tensorflow model(``tf.keras.Model`` type) or layer name(string type).
-            kwargs (:obj:`**kwargs`, **require**):
+            kwargs (:obj:`**kwargs`, optional):
                 metadata about step or epoch for model.
 
         Returns:
