@@ -117,7 +117,12 @@ class ModelConfig(StorageConfig):
                             secret_key=self.secret_key,
                             secure=self.secure) if not check_nas(self.endpoint) else NAS(self.endpoint)
         if _client.bucket_exists(self.bucket_name):
-            _metadata = _client.get_object(self.bucket_name, 'metadata.json')
+            try:
+                _metadata = _client.get_object(self.bucket_name, 'metadata.json')
+            except:
+                _client.remove_bucket(self.bucket_name)
+                raise FileNotFoundError("metadata.json is not in bucket name {}"
+                                        ", So this bucket will be removed".format(self.bucket_name))
 
             metadata_dict = json.loads(_metadata.read().decode('utf-8'))
             if self.endpoint != metadata_dict['endpoint']:
