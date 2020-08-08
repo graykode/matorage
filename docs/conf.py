@@ -10,9 +10,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- Project information -----------------------------------------------------
@@ -31,6 +31,10 @@ release = '0.1.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.viewcode',
+    'sphinxcontrib.napoleon',
+    'nbsphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -41,6 +45,14 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+# -- Autodoc configuration ---------------------------------------------------
+
+autodoc_default_options = {
+    'members': None,
+    'member-order': 'bysource',
+    'imported-members': None,
+    'exclude-members': 'LooseVersion, tf, keras, torch, tables, h5py, minio',
+}
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -63,8 +75,7 @@ html_theme_options = {
     'github_count': 'true',
     'fixed_sidebar': False,
     'sidebar_collapse': True,
-    'font_family': 'Raleway',
-    'navigation_depth' : 1
+    'font_family': 'Raleway'
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
