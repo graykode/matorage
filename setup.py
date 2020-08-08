@@ -16,7 +16,7 @@ from setuptools import setup
 from sutils import find_name, get_setuptools, check_torch_tf_version
 
 project_name = "matorage"
-version = "0.1.0"
+version = "0.1.0a"
 
 if __name__ == "__main__":
     check_torch_tf_version()

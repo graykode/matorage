@@ -38,8 +38,8 @@ Deep Learning framework(Pytorch, Tensorflow V2, Keras).
 For an example of tensorflow, refer to the detailed document.
 If you want to see the full code, see below
 
-- [Pytorch Mnist Example](https://github.com/graykode/matorage/tree/0.1.0/examples/pytorch>)
-- [Tensorflow Mnist Example](https://github.com/graykode/matorage/tree/0.1.0/examples/tensorflow>)
+- [Pytorch Mnist Example](https://github.com/graykode/matorage/tree/0.1.0/examples/pytorch)
+- [Tensorflow Mnist Example](https://github.com/graykode/matorage/tree/0.1.0/examples/tensorflow)
 - Content
     - [0. Install matorage with pip](https://github.com/graykode/matorage#0-install-matorage-with-pip)
     - [1. Set up Minio Server with docker](https://github.com/graykode/matorage#1-set-up-minio-server-with-docker)
@@ -47,6 +47,7 @@ If you want to see the full code, see below
     - [3. Load dataset from matorage](https://github.com/graykode/matorage#3-load-dataset-from-matorage)
     - [4. Save & Load Model when training](https://github.com/graykode/matorage#4-save--load-model-when-training)
     - [5. Save & Load Optimizer when training](https://github.com/graykode/matorage#5-save--load-optimizer-when-training)
+- [Unittest](https://github.com/graykode/matorage#unittest)
 
 #### 0. Install matorage with pip
 
@@ -206,6 +207,13 @@ When an empty optimizer is loaded with specific steps, the appropriate weight is
 ```python
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 optimizer_manager.load(optimizer, step=938)
+```
+
+
+### Unittest
+```bash
+$ git clone https://github.com/graykode/matorage
+$ pytest tests/test_suite.py
 ```
 
 
