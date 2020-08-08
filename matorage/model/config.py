@@ -68,6 +68,7 @@ class ModelConfig(StorageConfig):
 
     def __init__(self, **kwargs):
         super(ModelConfig, self).__init__(**kwargs)
+        self.type = 'model'
 
         self.model_name = kwargs.pop("model_name", None)
         self.additional = kwargs.pop("additional", {})
@@ -140,7 +141,7 @@ class ModelConfig(StorageConfig):
         if not isinstance(self.additional, dict):
             raise TypeError("additional is not dict type")
 
-        key = self.model_name + json.dumps(self.additional, indent=4, sort_keys=True)
+        key = self.type + self.model_name + json.dumps(self.additional, indent=4, sort_keys=True)
         return hashlib.md5(key.encode('utf-8')).hexdigest()
 
     def to_dict(self):
@@ -153,6 +154,7 @@ class ModelConfig(StorageConfig):
         output = copy.deepcopy(
             self.__class__.__base__(**self.__dict__).__dict__
         )
+        output["type"] = self.type
         output["model_name"] = self.model_name
         output["additional"] = self.additional
         output["compressor"] = self.metadata["compressor"]
