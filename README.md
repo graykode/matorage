@@ -107,6 +107,8 @@ from matorage import DataSaver
 traindata_saver = DataSaver(config=traindata_config)
 train_loader = DataLoader(dataset, batch_size=60, num_workers=8)
 for (image, target) in tqdm(train_loader):
+    # image shape : torch.Size([64, 1, 28, 28])
+    # target shape : torch.Size([64])
     traindata_saver({
         'image': image,
         'target': target
