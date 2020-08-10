@@ -185,6 +185,8 @@ When an empty model is loaded with specific steps or epochs, the appropriate wei
         print(model.state_dict())
         model_manager.load(model, epoch=1)
         print(model.state_dict())
+        # load a layer weight.
+        print(model_manager.load('net1.0.weight', step=0))
 
 5. Save & Load Optimizer when training
 ~~~~~~~~~~~~~~~~~~~~~
