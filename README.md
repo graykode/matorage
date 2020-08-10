@@ -1,8 +1,8 @@
-# [matorage](https://matorage.readthedocs.io/en/stable/?badge=stable)
+# [matorage](https://matorage.readthedocs.io/en/latest)
 
 <p align="center">
 <a href="https://travis-ci.com/github/graykode/matorage"><img alt="Build Status" src="https://travis-ci.com/graykode/matorage.svg?branch=master"></a>
-<a href="https://matorage.readthedocs.io/en/stable/?badge=stable"><img alt="Documentation Status" src="https://readthedocs.org/projects/matorage/badge/?version=stable"></a>
+<a href="https://matorage.readthedocs.io/en/latest/?badge=latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/matorage/badge/?version=latest"></a>
 <a href="https://github.com/graykode/matorage/blob/master/LICENSE"><img alt="License: Apache 2.0" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"></a>
 <a href="https://pypi.org/project/matorage/"><img alt="PyPI" src="https://img.shields.io/pypi/v/matorage"></a>
 <a href="https://pepy.tech/project/matorage"><img alt="Downloads" src="https://static.pepy.tech/badge/matorage"></a>
