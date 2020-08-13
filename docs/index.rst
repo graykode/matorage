@@ -1,30 +1,27 @@
 matorage documentation
 ====================================
 
-Efficiently store/load and manage models and training data needed for deep learning learning with matorage!
+**An efficient way to store/load and manage models for deep learning with matorage!**
 
-Matorage is Tensor(multidimensional matrix) Object Storage Manager with high availability distributed systems for
-Deep Learning framework(Pytorch, Tensorflow V2, Keras).
+Matorage is tensor(multidimensional matrix) object storage manager for deep learning framework(Pytorch, Tensorflow V2, Keras).
 
 Features
 ------
 
-- Boilerplate data pipeline!
-- remove pre-processing time on training!
-- manager your trained model & optimizer
+- Boilerplated data pipeline for dataset, model and optimizer.
+- High performance on tensor storage
 
 **For researchers who need to focus on model training**:
 
-- Help researchers manage training data and models easily.
-- By storing data in pre-processed Tensor(multidimensional matrix), they can focus only model training.
+- Support storing data in pre-processed Tensor(multidimensional matrix), eliminate training time.
 - Reduce storage space through multiple compression methods.
-- Manage data and models that occur during learning
+- Manage data and models while training
 
 **For AI Developer who need to focus on creating data pipeline:**
 
-- Enables concurrency data save & load
-- High availability guaranteed through backend storage.
-- Easily create pipeline from user endpoints data.
+- Concurrency data save & load
+- Compatible with object storage such as MinIO, S3
+- Generate pipeline from user endpoints data.
 
 Guides
 ------
