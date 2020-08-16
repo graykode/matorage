@@ -166,6 +166,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([["a", "b"], ["c", "d"], ["e", "f"]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_bool_attribute(self):
         self.data_config = DataConfig(
@@ -177,6 +178,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[True, False], [False, True], [True, True]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_int8_attribute(self):
         self.data_config = DataConfig(
@@ -188,6 +190,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[1, 2], [3, 4], [5, 6]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_int16_attribute(self):
         self.data_config = DataConfig(
@@ -199,6 +202,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[1, 2], [3, 4], [5, 6]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_int32_attribute(self):
         self.data_config = DataConfig(
@@ -210,6 +214,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[1, 2], [3, 4], [5, 6]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_int64_attribute(self):
         self.data_config = DataConfig(
@@ -221,6 +226,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[1, 2], [3, 4], [5, 6]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_uint8_attribute(self):
         self.data_config = DataConfig(
@@ -232,6 +238,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[1, 2], [3, 4], [5, 6]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_uint16_attribute(self):
         self.data_config = DataConfig(
@@ -243,6 +250,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[1, 2], [3, 4], [5, 6]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_uint32_attribute(self):
         self.data_config = DataConfig(
@@ -254,6 +262,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[1, 2], [3, 4], [5, 6]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_uint64_attribute(self):
         self.data_config = DataConfig(
@@ -265,6 +274,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[1, 2], [3, 4], [5, 6]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_float32_attribute(self):
         self.data_config = DataConfig(
@@ -276,6 +286,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_float64_attribute(self):
         self.data_config = DataConfig(
@@ -287,6 +298,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_inmemory(self):
         self.data_config = DataConfig(
@@ -298,6 +310,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
     def test_datasaver_zlib(self):
         for level in range(10):
@@ -311,6 +324,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
             x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
             self.assertEqual(x.shape, (3, 2))
             self.data_saver({"x": x})
+            self.data_saver.disconnect()
 
     def test_datasaver_lzo(self):
         for level in range(10):
@@ -324,6 +338,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
             x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
             self.assertEqual(x.shape, (3, 2))
             self.data_saver({"x": x})
+            self.data_saver.disconnect()
 
     def test_datasaver_bzip2(self):
         for level in range(10):
@@ -337,6 +352,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
             x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
             self.assertEqual(x.shape, (3, 2))
             self.data_saver({"x": x})
+            self.data_saver.disconnect()
 
     def test_datasaver_blosc(self):
         for level in range(10):
@@ -350,6 +366,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
             x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
             self.assertEqual(x.shape, (3, 2))
             self.data_saver({"x": x})
+            self.data_saver.disconnect()
 
     def test_datasaver_nas(self):
 
@@ -362,6 +379,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
+        self.data_saver.disconnect()
 
 
 def suite():
