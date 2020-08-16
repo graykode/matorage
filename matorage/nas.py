@@ -59,7 +59,7 @@ class NAS(object):
             ]
         return [Obj(o) for o in objects if o.startswith(prefix)]
 
-    def make_bucket(self, bucket_name):
+    def make_bucket(self, bucket_name, location):
         os.makedirs(os.path.join(self.path, bucket_name))
 
     def remove_bucket(self, bucket_name):

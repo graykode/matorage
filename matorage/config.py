@@ -49,3 +49,4 @@ class StorageConfig(Serialize):
         self.access_key = kwargs.pop("access_key", None)
         self.secret_key = kwargs.pop("secret_key", None)
         self.secure = kwargs.pop("secure", False)
+        self.region = kwargs.pop("region", None)

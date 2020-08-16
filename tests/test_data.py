@@ -66,3 +66,29 @@ class DataTest(unittest.TestCase):
         if self.data_config_file is not None:
             if os.path.exists(self.data_config_file):
                 os.remove(self.data_config_file)
+
+
+@unittest.skipIf(
+    'access_key' not in os.environ or 'secret_key' not in os.environ, 'S3 Skip'
+)
+class DataS3Test(unittest.TestCase):
+
+    data_config = None
+    data_config_file = None
+    data_saver = None
+    dataset = None
+    storage_config = None
+
+    def tearDown(self):
+        if self.data_saver is not None:
+            # delete bucket
+            client = Minio(**self.storage_config)
+            objects = client.list_objects(self.data_config.bucket_name, recursive=True)
+            for obj in objects:
+                client.remove_object(self.data_config.bucket_name, obj.object_name)
+            client.remove_bucket(self.data_config.bucket_name)
+
+            # remove on local file
+            for _file in self.data_saver.get_filelist:
+                if os.path.exists(_file):
+                    os.remove(_file)

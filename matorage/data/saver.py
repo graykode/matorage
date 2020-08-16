@@ -142,6 +142,7 @@ class DataSaver(object):
                 access_key=self.config.access_key,
                 secret_key=self.config.secret_key,
                 secure=self.config.secure,
+                region=self.config.region,
             )
             if not check_nas(self.config.endpoint)
             else NAS(self.config.endpoint)
@@ -192,7 +193,9 @@ class DataSaver(object):
 
     def _check_and_create_bucket(self):
         if not self._client.bucket_exists(self.config.bucket_name):
-            self._client.make_bucket(self.config.bucket_name)
+            self._client.make_bucket(
+                self.config.bucket_name, location=self.config.region
+            )
 
     def _check_attr_name(self, name):
         """

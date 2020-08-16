@@ -189,12 +189,44 @@ class DataConfig(StorageConfig):
         Returns:
             :obj: `None`:
         """
+
+        aws_region_list = [
+            'us-east-1',
+            'us-east-2',
+            'us-west-1',
+            'us-west-2',
+            'eu-west-1',
+            'eu-west-2',
+            'ca-central-1',
+            'eu-central-1',
+            'sa-east-1',
+            'cn-north-1',
+            'ap-southeast-1',
+            'ap-southeast-2',
+            'ap-northeast-1',
+            'ap-northeast-2',
+        ]
+
+        if "amazonaws.com" in self.endpoint:
+            if (self.region not in aws_region_list):
+                raise AssertionError(
+                    'AWS endpoint should has region argument from {}'.format(
+                        aws_region_list
+                    )
+                )
+            if f"s3.{self.region}.amazonaws.com" not in self.endpoint:
+                raise AssertionError('Endpoint has to be {}'.format(
+                        f"s3.{self.region}.amazonaws.com"
+                    )
+                )
+
         _client = (
             Minio(
                 self.endpoint,
                 access_key=self.access_key,
                 secret_key=self.secret_key,
                 secure=self.secure,
+                region=self.region,
             )
             if not check_nas(self.endpoint)
             else NAS(self.endpoint)
