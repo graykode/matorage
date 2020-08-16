@@ -44,6 +44,7 @@ class Manager(object):
                 access_key=self.config.access_key,
                 secret_key=self.config.secret_key,
                 secure=self.config.secure,
+                region=self.config.region,
             )
             if not check_nas(self.config.endpoint)
             else NAS(self.config.endpoint)
@@ -107,7 +108,9 @@ class Manager(object):
 
     def save(self, optimizer):
         if not self._client.bucket_exists(self.config.bucket_name):
-            self._client.make_bucket(self.config.bucket_name)
+            self._client.make_bucket(
+                self.config.bucket_name, location=self.config.region
+            )
 
         step = self._get_step(optimizer)
         if not step:

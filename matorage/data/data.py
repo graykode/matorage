@@ -111,6 +111,7 @@ class MTRData(object):
                 access_key=self.config.access_key,
                 secret_key=self.config.secret_key,
                 secure=self.config.secure,
+                region=self.config.region
             )
             if not check_nas(self.config.endpoint)
             else NAS(self.config.endpoint)
