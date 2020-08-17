@@ -122,7 +122,7 @@ class OptimizerConfig(StorageConfig):
                 access_key=self.access_key,
                 secret_key=self.secret_key,
                 secure=self.secure,
-                region=self.config.region
+                region=self.region
             )
             if not check_nas(self.endpoint)
             else NAS(self.endpoint)
