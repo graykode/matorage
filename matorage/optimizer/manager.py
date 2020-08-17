@@ -122,7 +122,7 @@ class Manager(object):
             return
 
         if step in self.config.metadata["optimizer"]:
-            logger.warn(
+            logger.info(
                 "{} {} is already exist, so optimizer will be overwrited.".format(
                     self.config.optimizer_name, str(self.config.additional)
                 )

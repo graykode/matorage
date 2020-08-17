@@ -15,8 +15,9 @@ services:
   - docker
 
 before_install:
+  - mkdir ~/shared
   - docker pull minio/minio
-  - docker run -d -p 9000:9000 --restart always -e "MINIO_ACCESS_KEY=minio" -e "MINIO_SECRET_KEY=miniosecretkey" minio/minio
+  - docker run -it -d -p 9000:9000 --restart always -e "MINIO_ACCESS_KEY=minio" -e "MINIO_SECRET_KEY=miniosecretkey" -v ~/shared:/container/vol minio/minio gateway nas /container/vol
 
 # command to install dependencies
 install:
@@ -40,4 +41,4 @@ script:
       python -c "import tensorflow_io as tfio; print('Tensorflow IO Version:', tfio.__version__)";
     fi
   - python setup.py install;
-  - python -m unittest tests/test_suite.py;
+  - python -m tests.test_suite;

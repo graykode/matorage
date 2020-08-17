@@ -117,7 +117,7 @@ class Manager(object):
         model_folder = self._hashmap_transfer(metadata)
 
         if model_folder in self.config.metadata["model"]:
-            logger.warn(
+            logger.info(
                 "{} {} is already exist, so model will be overwrited.".format(
                     self.config.model_name, str(self.config.additional)
                 )

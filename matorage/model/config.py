@@ -149,7 +149,7 @@ class ModelConfig(StorageConfig):
             self.compressor = metadata_dict["compressor"]
             self.metadata = metadata_dict
         else:
-            logger.warn(
+            logger.info(
                 "{} {} is not exist!".format(self.model_name, str(self.additional))
             )
 
