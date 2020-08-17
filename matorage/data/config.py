@@ -254,7 +254,7 @@ class DataConfig(StorageConfig):
                 DataAttribute(**item) for item in metadata_dict["attributes"]
             ]
         else:
-            logger.warn(
+            logger.info(
                 "{} {} is not exist!".format(self.dataset_name, str(self.additional))
             )
 
