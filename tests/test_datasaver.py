@@ -381,6 +381,19 @@ class DataSaverTest(DataTest, unittest.TestCase):
         self.data_saver({"x": x})
         self.data_saver.disconnect()
 
+    def test_datasaver_refresh(self):
+
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name="test_datasaver_refresh",
+            attributes=[DataAttribute("x", "float64", (2), itemsize=32)],
+        )
+        for refresh in [False, True]:
+            self.data_saver = DataSaver(config=self.data_config, refresh=refresh)
+            x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+            self.assertEqual(x.shape, (3, 2))
+            self.data_saver({"x": x})
+            self.data_saver.disconnect()
 
 @unittest.skipIf(
     'access_key' not in os.environ or 'secret_key' not in os.environ, 'S3 Skip'
