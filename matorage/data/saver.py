@@ -80,6 +80,9 @@ class DataSaver(object):
             Keep in mind that using memory is fast because it doesn't use disk IO, but it's not always good.
             If default option(False), then `HDF5_SEC2` driver will be used on posix OS(or `HDF5_WINDOWS` in Windows).
 
+        refresh (:obj:`boolean`, optional, defaults to `False`):
+            All existing data is erased and overwritten.
+
 
     Single Process example
 
@@ -118,6 +121,7 @@ class DataSaver(object):
         multipart_upload_size=5 * _MB,
         num_worker_threads=4,
         inmemory=False,
+        refresh=False,
     ):
 
         self.config = config
@@ -147,7 +151,7 @@ class DataSaver(object):
             if not check_nas(self.config.endpoint)
             else NAS(self.config.endpoint)
         )
-        self._check_and_create_bucket()
+        self._check_and_create_bucket(refresh=refresh)
 
         self._uploader = Uploader(
             client=self._client,
@@ -191,11 +195,15 @@ class DataSaver(object):
                 for name, array in self._datas.items():
                     self._earray[name].append(array[batch_idx, None])
 
-    def _check_and_create_bucket(self):
+    def _check_and_create_bucket(self, refresh):
         if not self._client.bucket_exists(self.config.bucket_name):
             self._client.make_bucket(
                 self.config.bucket_name, location=self.config.region
             )
+        elif refresh:
+            objects = self._client.list_objects(self.config.bucket_name, recursive=True)
+            for obj in objects:
+                self._client.remove_object(self.config.bucket_name, obj.object_name)
 
     def _check_attr_name(self, name):
         """
