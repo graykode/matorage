@@ -1,7 +1,7 @@
 matorage documentation
 ====================================
 
-**An efficient way to store/load and manage models for deep learning with matorage!**
+**An efficient way to store/load and manage dataset, model and optimizer for deep learning with matorage!**
 
 Matorage is tensor(multidimensional matrix) object storage manager for deep learning framework(Pytorch, Tensorflow V2, Keras).
 

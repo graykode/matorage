@@ -9,7 +9,7 @@
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
-**An efficient way to store/load and manage models for deep learning with matorage!**
+**An efficient way to store/load and manage dataset, model and optimizer for deep learning with matorage!**
 
 Matorage is tensor(multidimensional matrix) object storage manager for deep learning framework(Pytorch, Tensorflow V2, Keras).
 
