@@ -40,4 +40,4 @@ script:
       python -c "import tensorflow_io as tfio; print('Tensorflow IO Version:', tfio.__version__)";
     fi
   - python setup.py install;
-  - python -m unittest tests/test_suite.py;
+  - python -m tests.test_suite;
