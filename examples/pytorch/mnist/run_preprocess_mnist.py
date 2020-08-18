@@ -21,46 +21,25 @@ from torchvision import datasets, transforms
 from matorage import *
 
 
-def traindata_save(dataset):
-    traindata_config = DataConfig(
+def data_save(dataset, evaluate=False):
+    data_config = DataConfig(
         endpoint="127.0.0.1:9000",
         access_key="minio",
         secret_key="miniosecretkey",
         dataset_name="mnist",
-        additional={"mode": "train", "framework": "pytorch"},
-        attributes=[
-            DataAttribute("image", "float32", (1, 28, 28)),
-            DataAttribute("target", "int64", (1)),
-        ],
+        additional={
+            "mode": "train" if not evaluate else "test",
+            "framework": "pytorch",
+        },
+        attributes=[("image", "float32", (1, 28, 28)), ("target", "int64", (1)),],
     )
 
-    traindata_saver = DataSaver(config=traindata_config, refresh=True)
+    data_saver = DataSaver(config=data_config, refresh=True)
 
     train_loader = DataLoader(dataset, batch_size=60, num_workers=8)
     for (image, target) in tqdm(train_loader):
-        traindata_saver({"image": image, "target": target})
-    traindata_saver.disconnect()
-
-
-def testdata_save(dataset):
-    testdata_config = DataConfig(
-        endpoint="127.0.0.1:9000",
-        access_key="minio",
-        secret_key="miniosecretkey",
-        dataset_name="mnist",
-        additional={"mode": "test", "framework": "pytorch"},
-        attributes=[
-            DataAttribute("image", "float32", (1, 28, 28)),
-            DataAttribute("target", "int64", (1)),
-        ],
-    )
-
-    testdata_saver = DataSaver(config=testdata_config, refresh=True)
-
-    test_loader = DataLoader(dataset, batch_size=60, num_workers=8)
-    for (image, target) in tqdm(test_loader):
-        testdata_saver({"image": image, "target": target})
-    testdata_saver.disconnect()
+        data_saver({"image": image, "target": target})
+    data_saver.disconnect()
 
 
 if __name__ == "__main__":
@@ -77,13 +56,13 @@ if __name__ == "__main__":
     start = time.time()
 
     if args.train:
-        train_dataset = datasets.MNIST(
+        dataset = datasets.MNIST(
             "/tmp/data", train=True, download=True, transform=transform
         )
-        traindata_save(train_dataset)
+        data_save(dataset, evaluate=False)
     if args.test:
-        test_dataset = datasets.MNIST("/tmp/data", train=False, transform=transform)
-        testdata_save(test_dataset)
+        dataset = datasets.MNIST("/tmp/data", train=False, transform=transform)
+        data_save(dataset, evaluate=True)
 
     end = time.time()
     print(end - start)

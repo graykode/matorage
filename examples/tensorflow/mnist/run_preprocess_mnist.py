@@ -26,54 +26,30 @@ def normalize_img(image, label):
     return tf.cast(image, tf.float32) / 255.0, label
 
 
-def traindata_save(dataset):
-    traindata_config = DataConfig(
+def data_save(dataset, evaluate=False):
+    data_config = DataConfig(
         endpoint="127.0.0.1:9000",
         access_key="minio",
         secret_key="miniosecretkey",
         dataset_name="mnist",
-        additional={"mode": "train", "framework": "tensorflow"},
-        attributes=[
-            DataAttribute("image", "float32", (28, 28)),
-            DataAttribute("target", "int64", (1)),
-        ],
+        additional={
+            "mode": "train" if not evaluate else "test",
+            "framework": "tensorflow",
+        },
+        attributes=[("image", "float32", (28, 28)), ("target", "int64", (1)),],
     )
 
-    train_dataset = tf.data.Dataset.from_tensor_slices(dataset)
-    train_dataset = train_dataset.map(
+    total_dataset = len(dataset[0])
+    dataset = tf.data.Dataset.from_tensor_slices(dataset)
+    dataset = dataset.map(
         normalize_img, num_parallel_calls=tf.data.experimental.AUTOTUNE
     )
-    train_dataset = train_dataset.batch(60).prefetch(tf.data.experimental.AUTOTUNE)
+    dataset = dataset.batch(60).prefetch(tf.data.experimental.AUTOTUNE)
 
-    traindata_saver = DataSaver(config=traindata_config, refresh=True)
-    for (image, target) in tqdm(train_dataset, total=60000 // 60):
-        traindata_saver({"image": image, "target": target})
-    traindata_saver.disconnect()
-
-
-def testdata_save(dataset):
-    testdata_config = DataConfig(
-        endpoint="127.0.0.1:9000",
-        access_key="minio",
-        secret_key="miniosecretkey",
-        dataset_name="mnist",
-        additional={"mode": "test", "framework": "tensorflow"},
-        attributes=[
-            DataAttribute("image", "float32", (28, 28)),
-            DataAttribute("target", "int64", (1)),
-        ],
-    )
-
-    test_dataset = tf.data.Dataset.from_tensor_slices(dataset)
-    test_dataset = test_dataset.map(
-        normalize_img, num_parallel_calls=tf.data.experimental.AUTOTUNE
-    )
-    test_dataset = test_dataset.batch(60).prefetch(tf.data.experimental.AUTOTUNE)
-
-    testdata_saver = DataSaver(config=testdata_config, refresh=True)
-    for (image, target) in tqdm(test_dataset, total=10000 // 60):
-        testdata_saver({"image": image, "target": target})
-    testdata_saver.disconnect()
+    data_saver = DataSaver(config=data_config, refresh=True)
+    for (image, target) in tqdm(dataset, total=total_dataset // 60):
+        data_saver({"image": image, "target": target})
+    data_saver.disconnect()
 
 
 if __name__ == "__main__":
@@ -88,9 +64,9 @@ if __name__ == "__main__":
     start = time.time()
 
     if args.train:
-        traindata_save(train_dataset)
+        data_save(train_dataset, evaluate=False)
     if args.test:
-        testdata_save(test_dataset)
+        data_save(test_dataset, evaluate=True)
 
     end = time.time()
     print(end - start)
