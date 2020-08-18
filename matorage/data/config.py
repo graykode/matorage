@@ -22,6 +22,7 @@ import copy
 import json
 import tables
 import hashlib
+import tempfile
 from minio import Minio
 from functools import reduce
 
@@ -317,6 +318,9 @@ class DataConfig(StorageConfig):
     def set_indexer(self, index):
         self.metadata.indexer.update(index)
 
+    def set_files(self, files):
+        self.metadata.filetype.update(files)
+
     @property
     def get_length(self):
         """
@@ -330,3 +334,44 @@ class DataConfig(StorageConfig):
             return 0
         else:
             return keys[-1]
+
+    @property
+    def get_filetype_list(self):
+        """
+        Get list of key of filetype dataset in bucket of ``DataConfig``
+
+        Returns:
+            :obj: `list`: list of key of filetype dataset in bucket of ``DataConfig``
+        """
+        return list(self.metadata.filetype.keys())
+
+    def get_filetype_from_key(self, key):
+        """
+        download file in bucket of ``DataConfig``
+
+        Args:
+            data (:obj:`string`):
+                key name of file which you will download.
+
+        Returns:
+            :obj: `string`: local path of downloaded file in bucket of ``DataConfig``
+        """
+        _client = (
+            Minio(
+                self.endpoint,
+                access_key=self.access_key,
+                secret_key=self.secret_key,
+                secure=self.secure,
+                region=self.region,
+            )
+            if not check_nas(self.endpoint)
+            else NAS(self.endpoint)
+        )
+
+        _local_file = tempfile.mktemp(key)
+        _client.fget_object(
+            bucket_name=self.bucket_name,
+            object_name=key,
+            file_path=_local_file
+        )
+        return _local_file

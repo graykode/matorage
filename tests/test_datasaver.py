@@ -395,6 +395,31 @@ class DataSaverTest(DataTest, unittest.TestCase):
             self.data_saver({"x": x})
             self.data_saver.disconnect()
 
+    def test_datasaver_filetype(self):
+
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name="test_datasaver_filetype",
+            attributes=[DataAttribute("x", "float64", (2), itemsize=32)],
+        )
+        self.data_saver = DataSaver(config=self.data_config)
+        x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        self.assertEqual(x.shape, (3, 2))
+        self.data_saver({"x": x})
+
+        _file = open("test.txt", "w")
+        _file.write('this is test')
+        self.data_saver({"file": "test.txt"}, filetype=True)
+        _file.close()
+
+        self.data_saver.disconnect()
+        self.assertEqual(
+            self.data_config.get_filetype_list, ["file"]
+        )
+        _local_filepath = self.data_config.get_filetype_from_key("file")
+        with open(_local_filepath, 'r') as f:
+            self.assertEqual(f.read(), 'this is test')
+
 @unittest.skipIf(
     'access_key' not in os.environ or 'secret_key' not in os.environ, 'S3 Skip'
 )
@@ -418,6 +443,39 @@ class DataS3SaverTest(DataS3Test, unittest.TestCase):
         self.assertEqual(x.shape, (3, 2))
         self.data_saver({"x": x})
         self.data_saver.disconnect()
+
+    def test_datasaver_s3_filetype(self):
+
+        self.storage_config = {
+            'endpoint': 's3.us-east-1.amazonaws.com',
+            'access_key': os.environ['access_key'],
+            'secret_key': os.environ['secret_key'],
+            'region': 'us-east-1',
+            'secure': False,
+        }
+
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name="test_datasaver_s3_filetype",
+            attributes=[DataAttribute("x", "float64", (2), itemsize=32)],
+        )
+        self.data_saver = DataSaver(config=self.data_config)
+        x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        self.assertEqual(x.shape, (3, 2))
+        self.data_saver({"x": x})
+
+        _file = open("test.txt", "w")
+        _file.write('this is test')
+        self.data_saver({"file": "test.txt"}, filetype=True)
+        _file.close()
+
+        self.data_saver.disconnect()
+        self.assertEqual(
+            self.data_config.get_filetype_list, ["file"]
+        )
+        _local_filepath = self.data_config.get_filetype_from_key("file")
+        with open(_local_filepath, 'r') as f:
+            self.assertEqual(f.read(), 'this is test')
 
 
 def suite():
