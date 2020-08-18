@@ -34,7 +34,7 @@ def traindata_save(dataset):
         ],
     )
 
-    traindata_saver = DataSaver(config=traindata_config)
+    traindata_saver = DataSaver(config=traindata_config, refresh=True)
 
     train_loader = DataLoader(dataset, batch_size=60, num_workers=8)
     for (image, target) in tqdm(train_loader):
@@ -55,7 +55,7 @@ def testdata_save(dataset):
         ],
     )
 
-    testdata_saver = DataSaver(config=testdata_config)
+    testdata_saver = DataSaver(config=testdata_config, refresh=True)
 
     test_loader = DataLoader(dataset, batch_size=60, num_workers=8)
     for (image, target) in tqdm(test_loader):

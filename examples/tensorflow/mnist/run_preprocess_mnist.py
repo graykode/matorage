@@ -45,7 +45,7 @@ def traindata_save(dataset):
     )
     train_dataset = train_dataset.batch(60).prefetch(tf.data.experimental.AUTOTUNE)
 
-    traindata_saver = DataSaver(config=traindata_config)
+    traindata_saver = DataSaver(config=traindata_config, refresh=True)
     for (image, target) in tqdm(train_dataset, total=60000 // 60):
         traindata_saver({"image": image, "target": target})
     traindata_saver.disconnect()
@@ -70,7 +70,7 @@ def testdata_save(dataset):
     )
     test_dataset = test_dataset.batch(60).prefetch(tf.data.experimental.AUTOTUNE)
 
-    testdata_saver = DataSaver(config=testdata_config)
+    testdata_saver = DataSaver(config=testdata_config, refresh=True)
     for (image, target) in tqdm(test_dataset, total=10000 // 60):
         testdata_saver({"image": image, "target": target})
     testdata_saver.disconnect()
