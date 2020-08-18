@@ -319,7 +319,7 @@ class DataConfig(StorageConfig):
         self.metadata.indexer.update(index)
 
     def set_files(self, files):
-        self.metadata.filetype.update(files)
+        self.metadata.filetype.append(files)
 
     @property
     def get_length(self):
@@ -338,7 +338,7 @@ class DataConfig(StorageConfig):
     @property
     def get_filetype_list(self):
         """
-        Get list of key of filetype dataset in bucket of ``DataConfig``
+        Get list of filetype dataset in bucket of ``DataConfig``
 
         Returns:
             :obj: `list`: list of key of filetype dataset in bucket of ``DataConfig``
@@ -347,10 +347,10 @@ class DataConfig(StorageConfig):
 
     def get_filetype_from_key(self, key):
         """
-        download file in bucket of ``DataConfig``
+        Download filetype dataset from key in bucket of ``DataConfig``
 
         Args:
-            data (:obj:`string`):
+            key (:obj:`string`):
                 key name of file which you will download.
 
         Returns:

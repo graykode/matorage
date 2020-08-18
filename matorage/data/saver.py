@@ -182,9 +182,7 @@ class DataSaver(object):
                 remote_file=key,
             )
 
-            self.config.set_files({
-                key : filepath
-            })
+            self.config.set_files(key)
 
     def _append_numpy(self):
         """
@@ -267,6 +265,9 @@ class DataSaver(object):
         for name, array in self._datas.items():
             self._check_attr_name(name=name)
 
+            if isinstance(array, str):
+                raise TypeError("I suspect you need to set the filetype.")
+
             if is_tf_available() and not isinstance(array, np.ndarray):
                 array = array.numpy()
             if is_torch_available() and not isinstance(array, np.ndarray):
@@ -313,12 +314,11 @@ class DataSaver(object):
 
         .. code-block:: python
 
-            import os
             data_saver = DataSaver(config=data_config)
             data_saver({
                 'raw_image' : 'test.jpg'
             })
-            print(data_saver.get_files)
+            print(data_config.get_filetype_list)
 
         Returns:
             :None
@@ -450,7 +450,7 @@ class DataSaver(object):
     @property
     def get_downloaded_dataset(self):
         """
-        get downloaded dataset in local storage
+        get local paths of downloaded dataset in local storage
 
         Returns:
             :obj: `list`: local path of downloaded datasets
