@@ -282,7 +282,7 @@ class DataSaver(object):
 
     def _file_closing(self):
         _length = len(list(self._earray.values())[0])
-        _last_index = self.config.get_indexer_last
+        _last_index = self.config.get_length
 
         if not self.inmemory:
             self._file.close()

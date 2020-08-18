@@ -318,7 +318,13 @@ class DataConfig(StorageConfig):
         self.metadata.indexer.update(index)
 
     @property
-    def get_indexer_last(self):
+    def get_length(self):
+        """
+        Get length of dataset in ``DataConfig``
+
+        Returns:
+            :obj: `integer`: length of dataset
+        """
         keys = list(self.metadata.indexer.keys())
         if len(keys) == 0:
             return 0
