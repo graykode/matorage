@@ -163,10 +163,31 @@ class DataSaver(object):
 
         atexit.register(self._exit)
 
-    def _append_all(self):
+    def _append_file(self):
         """
-        append all array in `name` node.
-        datas is `dict` type. key is `str`, value is `numpy.ndarray`
+        upload file to key called `<bucket_name>/key`.
+        appended data is `Dict[str, str]`
+        **`value` is file path of `str` type**
+        example:
+        {
+            'key' : 'value.txt',
+        }
+
+        Returns:
+            :None
+        """
+        for key, filepath in self._datas.items():
+            self._uploader.set_queue(
+                local_file=filepath,
+                remote_file=key,
+            )
+
+            self.config.set_files(key)
+
+    def _append_numpy(self):
+        """
+        append numpy array in `name` node.
+        appended data is `Dict[str, numpy.ndarray]` type.
         **`value` is `numpy.ndarray` type with (B, *) shape, B means batch size**
         example:
             {
@@ -215,9 +236,23 @@ class DataSaver(object):
         if name not in self._earray.keys():
             raise KeyError("attribute name {} is not exist!".format(name))
 
-    def _check_datas(self):
+    def _check_data_filetype(self):
         """
-        Check data dictionary
+        Check data which is file type
+
+        Returns:
+            :None
+        """
+        if not isinstance(self._datas, dict):
+            raise TypeError("datas shoud be dict type.", self.__call__.__doc__)
+
+        for key, filepath in self._datas.items():
+            if not os.path.exists(filepath):
+                raise FileNotFoundError("{} is not found".format(filepath))
+
+    def _check_data_numpytype(self):
+        """
+        Check data which is numpy array type
 
         Returns:
             :None
@@ -229,6 +264,9 @@ class DataSaver(object):
         bzs = 0
         for name, array in self._datas.items():
             self._check_attr_name(name=name)
+
+            if isinstance(array, str):
+                raise TypeError("I suspect you need to set the filetype.")
 
             if is_tf_available() and not isinstance(array, np.ndarray):
                 array = array.numpy()
@@ -254,12 +292,15 @@ class DataSaver(object):
                 -1, reduce(lambda x, y: x * y, array.shape[1:])
             )
 
-    def __call__(self, datas):
+    def __call__(self, datas, filetype=False):
         """
 
         Args:
-            datas (:obj:`Dict[str, numpy.ndarray]`, **require**):
-                `value` is `numpy.ndarray` type with ``(B, d_1, d_2, ..., d_k)`` shape(B is batch size).
+            datas (:obj:`Dict[str, numpy.ndarray] or Dict[str, str]`, **require**):
+                if filetype is false, `datas` is `Dict[str, numpy.ndarray]` type, **`value` is `numpy.ndarray` type with (B, *) shape, B means batch size**.
+                else true, `datas` is `Dict[str, str]` type, **`value` is file path of `str` type**.
+            filetype (:obj:`boolean`, optional):
+                Indicates whether the type of data to be added to this bucket is a simple file type.
 
         .. code-block:: python
 
@@ -269,6 +310,16 @@ class DataSaver(object):
                 'target' : np.random.rand(16)
             })
 
+        When used as shown below, filetype data is saved with a key called `<bucket_name>/raw_image`.
+
+        .. code-block:: python
+
+            data_saver = DataSaver(config=data_config)
+            data_saver({
+                'raw_image' : 'test.jpg'
+            })
+            print(data_config.get_filetype_list)
+
         Returns:
             :None
         """
@@ -276,13 +327,16 @@ class DataSaver(object):
 
         self._datas = datas
 
-        self._check_datas()
-
-        self._append_all()
+        if not filetype:
+            self._check_data_numpytype()
+            self._append_numpy()
+        else:
+            self._check_data_filetype()
+            self._append_file()
 
     def _file_closing(self):
         _length = len(list(self._earray.values())[0])
-        _last_index = self.config.get_indexer_last
+        _last_index = self.config.get_length
 
         if not self.inmemory:
             self._file.close()
@@ -394,7 +448,13 @@ class DataSaver(object):
                 raise ValueError("{} OS not supported!".format(os.name))
 
     @property
-    def get_filelist(self):
+    def get_downloaded_dataset(self):
+        """
+        get local paths of downloaded dataset in local storage
+
+        Returns:
+            :obj: `list`: local path of downloaded datasets
+        """
         return self._filelist
 
     def disconnect(self):

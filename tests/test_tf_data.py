@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import json
 import unittest
 import numpy as np
 from tqdm import tqdm
@@ -160,6 +162,22 @@ class TFDataTest(DataTest, unittest.TestCase):
         ):
             pass
 
+    def test_tf_not_clear(self):
+        from matorage.tensorflow import Dataset
+
+        self.test_tf_loader()
+
+        if os.path.exists(self.dataset.cache_path):
+            with open(self.dataset.cache_path) as f:
+                _pre_file_mapper = json.load(f)
+
+        self.dataset = Dataset(config=self.data_config, clear=False)
+
+        if os.path.exists(self.dataset.cache_path):
+            with open(self.dataset.cache_path) as f:
+                _next_file_mapper = json.load(f)
+
+        self.assertEqual(_pre_file_mapper, _next_file_mapper)
 
 def suite():
     return unittest.TestSuite(unittest.makeSuite(TFDataTest))

@@ -55,7 +55,7 @@ class DataTest(unittest.TestCase):
             client.remove_bucket(self.data_config.bucket_name)
 
             # remove on local file
-            for _file in self.data_saver.get_filelist:
+            for _file in self.data_saver.get_downloaded_dataset:
                 if os.path.exists(_file):
                     os.remove(_file)
 
@@ -89,6 +89,6 @@ class DataS3Test(unittest.TestCase):
             client.remove_bucket(self.data_config.bucket_name)
 
             # remove on local file
-            for _file in self.data_saver.get_filelist:
+            for _file in self.data_saver.get_downloaded_dataset:
                 if os.path.exists(_file):
                     os.remove(_file)

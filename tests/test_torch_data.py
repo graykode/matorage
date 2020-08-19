@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import json
 import torch
 import unittest
 import numpy as np
@@ -158,6 +160,22 @@ class TorchDataTest(DataTest, unittest.TestCase):
         for batch_idx, (image, target) in enumerate(tqdm(loader)):
             pass
 
+    def test_torch_not_clear(self):
+        from matorage.torch import Dataset
+
+        self.test_torch_loader()
+
+        if os.path.exists(self.dataset.cache_path):
+            with open(self.dataset.cache_path) as f:
+                _pre_file_mapper = json.load(f)
+
+        self.dataset = Dataset(config=self.data_config, clear=False)
+
+        if os.path.exists(self.dataset.cache_path):
+            with open(self.dataset.cache_path) as f:
+                _next_file_mapper = json.load(f)
+
+        self.assertEqual(_pre_file_mapper, _next_file_mapper)
 
 def suite():
     return unittest.TestSuite(unittest.makeSuite(TorchDataTest))

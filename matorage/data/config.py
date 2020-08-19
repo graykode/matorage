@@ -22,6 +22,7 @@ import copy
 import json
 import tables
 import hashlib
+import tempfile
 from minio import Minio
 from functools import reduce
 
@@ -317,8 +318,17 @@ class DataConfig(StorageConfig):
     def set_indexer(self, index):
         self.metadata.indexer.update(index)
 
+    def set_files(self, files):
+        self.metadata.filetype.append(files)
+
     @property
-    def get_indexer_last(self):
+    def get_length(self):
+        """
+        Get length of dataset in ``DataConfig``
+
+        Returns:
+            :obj: `integer`: length of dataset
+        """
         keys = list(self.metadata.indexer.keys())
         if len(keys) == 0:
             return 0
