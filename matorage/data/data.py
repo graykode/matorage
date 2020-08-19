@@ -172,7 +172,7 @@ class MTRData(object):
             num_worker_threads=self.num_worker_threads,
         )
 
-        _remote_files = list(self.merged_indexer.values())
+        _remote_files = list(self.merged_indexer.values()) + list(self.config.metadata.filetype)
         for _remote_file in _remote_files:
             if not check_nas(self.config.endpoint):
                 _local_file = tempfile.mktemp(_remote_file)
@@ -188,7 +188,7 @@ class MTRData(object):
                     )
         _downloader.join_queue()
 
-        assert len(self._object_file_mapper) == len(self.merged_indexer)
+        assert len(self._object_file_mapper) == (len(self.merged_indexer) + len(self.config.metadata.filetype))
 
         if not os.path.exists(self.cache_path):
             with open(self.cache_path, "w") as f:
@@ -268,3 +268,28 @@ class MTRData(object):
                 "type": str(_attr.type.type),
             }
         return _attributes
+
+    @property
+    def get_filetype_list(self):
+        """
+        Get list of filetype dataset in bucket of ``DataConfig``
+
+        Returns:
+            :obj: `list`: list of key of filetype dataset in bucket of ``DataConfig``
+        """
+        return self.config.metadata.filetype
+
+    def get_filetype_from_key(self, filename):
+        """
+        Download filetype dataset from key in bucket of ``DataConfig``
+
+        Args:
+            filename (:obj:`string`):
+                file name
+
+        Returns:
+            :obj: `string`: local path of downloaded file in bucket of ``DataConfig``
+        """
+
+        assert filename in self._object_file_mapper
+        return self._object_file_mapper[filename]

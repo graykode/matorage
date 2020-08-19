@@ -396,6 +396,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
             self.data_saver.disconnect()
 
     def test_datasaver_filetype(self):
+        from matorage.torch import Dataset
 
         self.data_config = DataConfig(
             **self.storage_config,
@@ -413,10 +414,12 @@ class DataSaverTest(DataTest, unittest.TestCase):
         _file.close()
 
         self.data_saver.disconnect()
+
+        self.dataset = Dataset(config=self.data_config)
         self.assertEqual(
-            self.data_config.get_filetype_list, ["file"]
+            self.dataset.get_filetype_list, ["file"]
         )
-        _local_filepath = self.data_config.get_filetype_from_key("file")
+        _local_filepath = self.dataset.get_filetype_from_key("file")
         with open(_local_filepath, 'r') as f:
             self.assertEqual(f.read(), 'this is test')
 
@@ -445,6 +448,7 @@ class DataS3SaverTest(DataS3Test, unittest.TestCase):
         self.data_saver.disconnect()
 
     def test_datasaver_s3_filetype(self):
+        from matorage.torch import Dataset
 
         self.storage_config = {
             'endpoint': 's3.us-east-1.amazonaws.com',
@@ -470,10 +474,12 @@ class DataS3SaverTest(DataS3Test, unittest.TestCase):
         _file.close()
 
         self.data_saver.disconnect()
+
+        self.dataset = Dataset(config=self.data_config)
         self.assertEqual(
-            self.data_config.get_filetype_list, ["file"]
+            self.dataset.get_filetype_list, ["file"]
         )
-        _local_filepath = self.data_config.get_filetype_from_key("file")
+        _local_filepath = self.dataset.get_filetype_from_key("file")
         with open(_local_filepath, 'r') as f:
             self.assertEqual(f.read(), 'this is test')
 
