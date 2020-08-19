@@ -395,6 +395,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
             self.data_saver({"x": x})
             self.data_saver.disconnect()
 
+
     def test_datasaver_filetype(self):
         from matorage.torch import Dataset
 
@@ -422,6 +423,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
         _local_filepath = self.dataset.get_filetype_from_key("file")
         with open(_local_filepath, 'r') as f:
             self.assertEqual(f.read(), 'this is test')
+
 
 @unittest.skipIf(
     'access_key' not in os.environ or 'secret_key' not in os.environ, 'S3 Skip'
