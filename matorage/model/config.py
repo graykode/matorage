@@ -26,24 +26,6 @@ class ModelConfig(StorageConfig):
     """
     Model configuration classes. This class overrides ``StorageConfig``.
 
-
-    .. code-block:: python
-
-        from matorage import ModelConfig
-
-        model_config = ModelConfig(
-            endpoint='127.0.0.1:9000',
-            access_key='minio',
-            secret_key='miniosecretkey',
-            model_name='testmodel',
-            additional={
-                "version" : "1.0.1"
-            }
-        )
-
-        model_config.to_json_file('testmodel.json')
-        model_config2 = ModelConfig.from_json_file('testmodel.json')
-
     Args:
         endpoint (:obj:`string`, **require**):
             S3 object storage endpoint. or If use NAS setting, NAS folder path.
@@ -64,6 +46,23 @@ class ModelConfig(StorageConfig):
 
             - complevel (:obj:`integer`, defaults to 0) : compressor level(0~9). The larger the number, the more compressed it is.
             - complib (:obj:`string`, defaults to 'zlib') : compressor library. choose in zlib, lzo, bzip2, blosc
+
+    Examples::
+
+        from matorage import ModelConfig
+
+        model_config = ModelConfig(
+            endpoint='127.0.0.1:9000',
+            access_key='minio',
+            secret_key='miniosecretkey',
+            model_name='testmodel',
+            additional={
+                "version" : "1.0.1"
+            }
+        )
+
+        model_config.to_json_file('testmodel.json')
+        model_config2 = ModelConfig.from_json_file('testmodel.json')
 
     """
 
@@ -91,8 +90,6 @@ class ModelConfig(StorageConfig):
         """
         Check all class variable is fine.
 
-        Returns:
-            :obj: `None`:
         """
         self._check_bucket()
 
@@ -113,8 +110,6 @@ class ModelConfig(StorageConfig):
         Check bucket name is exist. If not exist, create new bucket
         If bucket and metadata sub folder exist, get metadata(attributes, compressor) from there.
 
-        Returns:
-            :obj: `None`:
         """
         _client = (
             Minio(

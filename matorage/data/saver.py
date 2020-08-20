@@ -35,7 +35,6 @@ _MB = 1024 * _KB
 
 class DataSaver(object):
     """
-    Dataset saver classes.
 
     This class must be created independently for the process. The independent process uses
     multiple threads to upload to storage and generates unique metadata information when upload is complete.
@@ -83,8 +82,9 @@ class DataSaver(object):
         refresh (:obj:`boolean`, optional, defaults to `False`):
             All existing data is erased and overwritten.
 
-
     Single Process example
+
+    Examples::
 
         .. code-block:: python
 
@@ -173,8 +173,6 @@ class DataSaver(object):
             'key' : 'value.txt',
         }
 
-        Returns:
-            :None
         """
         for key, filepath in self._datas.items():
             self._uploader.set_queue(
@@ -195,8 +193,6 @@ class DataSaver(object):
                 'target' : np.random.rand(16)
             }
 
-        Returns:
-            :None
         """
         array_size = self._get_array_size()
         bzs = list(self._datas.values())[0].shape[0]
@@ -230,8 +226,6 @@ class DataSaver(object):
         """
         check attribute names is exist
 
-        Returns:
-            :None
         """
         if name not in self._earray.keys():
             raise KeyError("attribute name {} is not exist!".format(name))
@@ -240,8 +234,6 @@ class DataSaver(object):
         """
         Check data which is file type
 
-        Returns:
-            :None
         """
         if not isinstance(self._datas, dict):
             raise TypeError("datas shoud be dict type.", self.__call__.__doc__)
@@ -254,8 +246,6 @@ class DataSaver(object):
         """
         Check data which is numpy array type
 
-        Returns:
-            :None
         """
 
         if not isinstance(self._datas, dict):
@@ -302,7 +292,7 @@ class DataSaver(object):
             filetype (:obj:`boolean`, optional):
                 Indicates whether the type of data to be added to this bucket is a simple file type.
 
-        .. code-block:: python
+        Examples::
 
             data_saver = DataSaver(config=data_config)
             data_saver({
@@ -312,7 +302,7 @@ class DataSaver(object):
 
         When used as shown below, filetype data is saved with a key called `<bucket_name>/raw_image`.
 
-        .. code-block:: python
+        Examples::
 
             data_saver = DataSaver(config=data_config)
             data_saver({
@@ -320,8 +310,6 @@ class DataSaver(object):
             })
             print(data_config.get_filetype_list)
 
-        Returns:
-            :None
         """
         self._disconnected = False
 
@@ -453,19 +441,24 @@ class DataSaver(object):
         get local paths of downloaded dataset in local storage
 
         Returns:
-            :obj: `list`: local path of downloaded datasets
+            :obj:`list`: local path of downloaded datasets
         """
         return self._filelist
 
     def disconnect(self):
         """
-        disconnecting datasaver
+        disconnecting datasaver. close all opened files and upload to backend storage.
+        Must be called after ``datasaver`` function to store data safely.
 
-        1. close all opened files.
-        2. upload to backend storage.
+        Examples::
 
-        Returns:
-            :obj: `None`:
+            data_saver = DataSaver(config=data_config)
+            data_saver({
+                'image' : np.random.rand(16, 28, 28),
+                'target' : np.random.rand(16)
+            })
+            data_saver.disconnect()
+
         """
         self._file_closing()
         self._uploader.join_queue()

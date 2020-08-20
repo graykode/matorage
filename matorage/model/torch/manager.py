@@ -32,7 +32,22 @@ class ModelManager(Manager):
     """
     Model Manager Pytorch classes. This class overrides ``Manager``.
 
-    .. code-block:: python
+    Note:
+        Unlike Dataset, model weight is loaded entirely into cpu memory.
+        Therefore, the `HDF5_CORE` driver using the memory option is default setting.
+
+    Args:
+        config (:obj:`matorage.ModelConfig`, **require**):
+            A ModelConfig instance object
+        num_worker_threads (:obj:`int`, optional, defaults to `4`):
+            Number of backend storage worker to upload or download.
+        multipart_upload_size (:obj:`integer`, optional, defaults to `5 * 1024 * 1024`):
+            size of the incompletely uploaded object.
+            You can sync files faster with `multipart upload in MinIO. <https://github.com/minio/minio-py/blob/master/minio/api.py#L1795>`_
+            This is because MinIO clients use multi-threading, which improves IO speed more
+            efficiently regardless of Python's Global Interpreter Lock(GIL).
+
+    Examples::
 
         from matorage import ModelConfig
         from matorage.torch import ModelManager
@@ -69,20 +84,6 @@ class ModelManager(Manager):
         model = Model()
         model_manager.save(model, step=100)
 
-    Note:
-        Unlike Dataset, model weight is loaded entirely into cpu memory.
-        Therefore, the `HDF5_CORE` driver using the memory option is default setting.
-
-    Args:
-        config (:obj:`matorage.ModelConfig`, **require**):
-            A ModelConfig instance object
-        num_worker_threads (:obj:`int`, optional, defaults to `4`):
-            Number of backend storage worker to upload or download.
-        multipart_upload_size (:obj:`integer`, optional, defaults to `5 * 1024 * 1024`):
-            size of the incompletely uploaded object.
-            You can sync files faster with `multipart upload in MinIO. <https://github.com/minio/minio-py/blob/master/minio/api.py#L1795>`_
-            This is because MinIO clients use multi-threading, which improves IO speed more
-            efficiently regardless of Python's Global Interpreter Lock(GIL).
 
     """
 
@@ -123,22 +124,18 @@ class ModelManager(Manager):
         """
         save weight of model
 
-        .. code-block:: python
-
-            >>> model_manager.save(model, step=0)
-
-            >>> model_manager.save(model, epoch=0)
-
-            >>> model_manager.save(model, epoch=0, step=0)
-
         Args:
             model (:obj:`torch.nn.Module`, **require**):
                 Pytorch model (``torch.nn.Module`` type)
             kwargs (:obj:`**kwargs`, optional):
                 metadata about step or epoch for model.
 
-        Returns:
-            :obj: `None`:
+        Examples::
+
+            >>> model_manager.save(model, step=0)
+            >>> model_manager.save(model, epoch=0)
+            >>> model_manager.save(model, epoch=0, step=0)
+
         """
         super(ModelManager, self).save(model, **kwargs)
 
@@ -146,7 +143,17 @@ class ModelManager(Manager):
         """
         load weight of model
 
-        .. code-block:: python
+        Args:
+            model (:obj:`torch.nn.Module` or `string`, **require**):
+                Pytorch model(``torch.nn.Module`` type) or layer name(string type).
+            kwargs (:obj:`**kwargs`, optional):
+                metadata about step or epoch for model.
+
+        Returns:
+            :obj:`None or OrderedDict`: If ``model`` is pytorch model, weight is loaded into the model and return None.
+            however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
+
+        Examples::
 
             # Load entire model
             >>> model = Model()
@@ -196,14 +203,5 @@ class ModelManager(Manager):
                 [ 0.3950, -0.2630, -0.1730,  0.1393,  0.3678],
                 [ 0.3065, -0.0095,  0.0988,  0.4294,  0.3338]]))])
 
-        Args:
-            model (:obj:`torch.nn.Module` or `string`, **require**):
-                Pytorch model(``torch.nn.Module`` type) or layer name(string type).
-            kwargs (:obj:`**kwargs`, optional):
-                metadata about step or epoch for model.
-
-        Returns:
-            :obj: `None or OrderedDict`: If ``model`` is pytorch model, weight is loaded into the model and return None.
-            however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
         """
         return super(ModelManager, self).load(model, **kwargs)

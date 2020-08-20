@@ -36,7 +36,22 @@ class ModelManager(Manager):
     """
     Model Manager Tensorflow classes. This class overrides ``Manager``.
 
-    .. code-block:: python
+    Note:
+        Unlike Dataset, model weight is loaded entirely into cpu memory.
+        Therefore, the `HDF5_CORE` driver using the memory option is default setting.
+
+    Args:
+        config (:obj:`matorage.ModelConfig`, **require**):
+            A ModelConfig instance object
+        num_worker_threads (:obj:`int`, optional, defaults to `4`):
+            Number of backend storage worker to upload or download.
+        multipart_upload_size (:obj:`integer`, optional, defaults to `5 * 1024 * 1024`):
+            size of the incompletely uploaded object.
+            You can sync files faster with `multipart upload in MinIO. <https://github.com/minio/minio-py/blob/master/minio/api.py#L1795>`_
+            This is because MinIO clients use multi-threading, which improves IO speed more
+            efficiently regardless of Python's Global Interpreter Lock(GIL).
+
+    Examples::
 
         from matorage import ModelConfig
         from matorage.tensorflow import ModelManager
@@ -67,21 +82,6 @@ class ModelManager(Manager):
         model.build(input_shape=(None, 5))
 
         model_manager.save(model, step=100)
-
-    Note:
-        Unlike Dataset, model weight is loaded entirely into cpu memory.
-        Therefore, the `HDF5_CORE` driver using the memory option is default setting.
-
-    Args:
-        config (:obj:`matorage.ModelConfig`, **require**):
-            A ModelConfig instance object
-        num_worker_threads (:obj:`int`, optional, defaults to `4`):
-            Number of backend storage worker to upload or download.
-        multipart_upload_size (:obj:`integer`, optional, defaults to `5 * 1024 * 1024`):
-            size of the incompletely uploaded object.
-            You can sync files faster with `multipart upload in MinIO. <https://github.com/minio/minio-py/blob/master/minio/api.py#L1795>`_
-            This is because MinIO clients use multi-threading, which improves IO speed more
-            efficiently regardless of Python's Global Interpreter Lock(GIL).
 
     """
 
@@ -162,22 +162,18 @@ class ModelManager(Manager):
         """
         save weight of model
 
-        .. code-block:: python
-
-            >>> model_manager.save(model, step=0)
-
-            >>> model_manager.save(model, epoch=0)
-
-            >>> model_manager.save(model, epoch=0, step=0)
-
         Args:
             model (:obj:`tf.keras.Model`, **require**):
                 Tensorflow model (``tf.keras.Model`` type)
             kwargs (:obj:`**kwargs`, optional):
                 metadata about step or epoch for model.
 
-        Returns:
-            :obj: `None`:
+        Examples::
+
+            >>> model_manager.save(model, step=0)
+            >>> model_manager.save(model, epoch=0)
+            >>> model_manager.save(model, epoch=0, step=0)
+
         """
         super(ModelManager, self).save(model, **kwargs)
 
@@ -185,7 +181,17 @@ class ModelManager(Manager):
         """
         load weight of model
 
-        .. code-block:: python
+        Args:
+            model (:obj:`tf.keras.Model` or `string`, **require**):
+                Tensorflow model(``tf.keras.Model`` type) or layer name(string type).
+            kwargs (:obj:`**kwargs`, optional):
+                metadata about step or epoch for model.
+
+        Returns:
+            :obj:`None or OrderedDict`: If ``model`` is tensorflow model, weight is loaded into the model and return None.
+            however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
+
+        Examples::
 
             # Load entire model
             >>> model_manager.load(model, step=0)
@@ -214,14 +220,5 @@ class ModelManager(Manager):
                    [ 0.04252511, -0.04907732, -0.07053198, ...,  0.00260394,
                      0.07418892, -0.0714546 ]], dtype=float32)>)])
 
-        Args:
-            model (:obj:`tf.keras.Model` or `string`, **require**):
-                Tensorflow model(``tf.keras.Model`` type) or layer name(string type).
-            kwargs (:obj:`**kwargs`, optional):
-                metadata about step or epoch for model.
-
-        Returns:
-            :obj: `None or OrderedDict`: If ``model`` is tensorflow model, weight is loaded into the model and return None.
-            however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
         """
         return super(ModelManager, self).load(model, **kwargs)

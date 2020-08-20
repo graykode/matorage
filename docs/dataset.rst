@@ -14,7 +14,6 @@ DataConfig
 
 .. autoclass:: matorage.DataConfig
    :members:
-   :inherited-members:
 
 DataSaver
 ~~~~~~~~~~~~~~~~~~~~~

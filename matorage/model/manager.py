@@ -168,7 +168,10 @@ class Manager(object):
         """
         Get all models according to metadata(ex. step, epoch)
 
-        .. code-block:: python
+        Returns:
+            :obj:`dict`: model of metadata
+
+        Examples::
 
             >>> model_manager.save(model, step=100)
             >>> model_manager.save(model, step=200)
@@ -185,7 +188,5 @@ class Manager(object):
                 'model_name': 'testmodel'
             }
 
-        Returns:
-            :obj: `dict`: model of metadata
         """
         return self.config.metadata

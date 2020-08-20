@@ -7,18 +7,21 @@ OptimizerConfig
 
 .. autoclass:: matorage.OptimizerConfig
    :members:
-   :inherited-members:
+
+Manager
+~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: matorage.optimizer.Manager
+   :members:
 
 torch.OptimizerManager
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: matorage.torch.OptimizerManager
    :members:
-   :inherited-members:
 
 tensorflow.OptimizerManager
 ~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: matorage.tensorflow.OptimizerManager
    :members:
-   :inherited-members:

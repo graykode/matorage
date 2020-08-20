@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from matorage.serialize import Serialize
+
 from matorage.data.config import DataConfig
 from matorage.data.attribute import DataAttribute
 from matorage.data.saver import DataSaver
@@ -22,6 +24,7 @@ from matorage.model.config import ModelConfig
 from matorage.optimizer.config import OptimizerConfig
 
 __all__ = [
+    "Serialize",
     "StorageConfig",
     "DataAttribute",
     "DataConfig",

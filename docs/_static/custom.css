@@ -47,3 +47,23 @@ div.document {
 .active:after {
   content: "\2796";
 }
+
+/* code from huggingface */
+
+/* Content bars */
+.body dl:not(.docutils) dt {
+    margin-bottom: 10px;
+    background-color: rgba(204, 204, 204, 0.2);
+    font-family: Calibre-Light, sans-serif;
+    border-top: none;
+    font-style: normal !important;
+}
+
+/* The literal code blocks */
+.body tt.literal, .body tt.literal, .body code.literal {
+    color: #6670FF;
+}
+
+div.sphinxsidebar {
+    width: 240px !important;
+}

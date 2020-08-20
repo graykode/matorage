@@ -20,16 +20,6 @@ class StorageConfig(Serialize):
     Storage connector configuration classes.
     For MinIO, see `this page <https://docs.min.io/docs/python-client-api-reference.html>`_ for more details.
 
-    .. code-block:: python
-
-        from matorage import StorageConfig
-
-        storage_config = StorageConfig(
-            endpoint='127.0.0.1:9000',
-            access_key='minio',
-            secret_key='miniosecretkey'
-        )
-
     Args:
         endpoint (:obj:`string`, **require**):
             S3 object storage endpoint. or If use NAS setting, NAS folder path.
@@ -39,6 +29,16 @@ class StorageConfig(Serialize):
             Secret key for the object storage endpoint. (Optional if you need anonymous access).
         secure (:obj:`boolean`, optional, defaults to `False`):
             Set this value to True to enable secure (HTTPS) access. (Optional defaults to False unlike the original MinIO).
+
+    Examples::
+
+        from matorage import StorageConfig
+        storage_config = StorageConfig(
+            endpoint='127.0.0.1:9000',
+            access_key='minio',
+            secret_key='miniosecretkey'
+        )
+
 
     """
 

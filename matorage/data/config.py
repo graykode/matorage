@@ -37,57 +37,6 @@ class DataConfig(StorageConfig):
     """
     Dataset configuration classes. This class overrides ``StorageConfig``.
 
-    .. code-block:: python
-
-        from matorage import DataConfig, DataAttribute
-
-        data_config = DataConfig(
-            endpoint='127.0.0.1:9000',
-            access_key='minio',
-            secret_key='miniosecretkey',
-            dataset_name='mnist',
-            additional={
-                "framework" : "pytorch",
-                "mode" : "training"
-            },
-            compressor={
-                "complevel" : 0,
-                "complib" : "zlib"
-            },
-            attributes=[
-                ('image', 'float32', (28, 28)),
-                ('target', 'int64', (1, ))
-            ]
-        )
-
-        data_config.to_json_file('data_config.json')
-        data_config2 = DataConfig.from_json_file('data_config.json')
-
-    If you have NAS(network access storage) settings, You can save/load faster by using the endpoint as a NAS folder path.
-
-    .. code-block:: python
-
-        from matorage import DataConfig
-
-        # NAS example
-        data_config = DataConfig(
-            endpoint='~/shared',
-            dataset_name='mnist',
-            additional={
-                "framework" : "pytorch",
-                "mode" : "training"
-            },
-            compressor={
-                "complevel" : 0,
-                "complib" : "zlib"
-            },
-            attributes=[
-                ('image', 'float32', (28, 28)),
-                ('target', 'int64', (1, ))
-            ]
-        )
-
-
     Args:
         endpoint (:obj:`string`, **require**):
             S3 object storage endpoint. or If use NAS setting, NAS folder path.
@@ -115,6 +64,56 @@ class DataConfig(StorageConfig):
         max_object_size (:obj:`integer`, optional, defaults to `10MB`):
             One object file is divided into `max_object_size` and stored.
 
+    Examples::
+
+        from matorage import DataConfig, DataAttribute
+        data_config = DataConfig(
+            endpoint='127.0.0.1:9000',
+            access_key='minio',
+            secret_key='miniosecretkey',
+            dataset_name='mnist',
+            additional={
+                "framework" : "pytorch",
+                "mode" : "training"
+            },
+            compressor={
+                "complevel" : 0,
+                "complib" : "zlib"
+            },
+            attributes=[
+                ('image', 'float32', (28, 28)),
+                ('target', 'int64', (1, ))
+            ]
+        )
+
+        data_config.to_json_file('data_config.json')
+        data_config2 = DataConfig.from_json_file('data_config.json')
+
+    If you have NAS(network access storage) settings, You can save/load faster by using the endpoint as a NAS folder path.
+
+    Examples::
+
+        from matorage import DataConfig
+
+        # NAS example
+        data_config = DataConfig(
+            endpoint='~/shared',
+            dataset_name='mnist',
+            additional={
+                "framework" : "pytorch",
+                "mode" : "training"
+            },
+            compressor={
+                "complevel" : 0,
+                "complib" : "zlib"
+            },
+            attributes=[
+                ('image', 'float32', (28, 28)),
+                ('target', 'int64', (1, ))
+            ]
+        )
+
+
     """
 
     def __init__(self, **kwargs):
@@ -136,8 +135,6 @@ class DataConfig(StorageConfig):
         """
         Check all class variable is fine.
 
-        Returns:
-            :obj: `None`:
         """
         self._check_bucket()
 
@@ -187,8 +184,6 @@ class DataConfig(StorageConfig):
         Check bucket name is exist. If not exist, create new bucket
         If bucket and metadata sub folder exist, get metadata(attributes, compressor) from there.
 
-        Returns:
-            :obj: `None`:
         """
 
         aws_region_list = [
@@ -304,7 +299,7 @@ class DataConfig(StorageConfig):
                 Path to the JSON file containing the parameters.
 
         Returns:
-            :obj:`DataConfig, ModelConfig`: An instance of a configuration object
+            :class:`DataConfig`: An instance of a configuration object
 
         """
         config_dict = cls._dict_from_json_file(json_file)
@@ -327,7 +322,8 @@ class DataConfig(StorageConfig):
         Get length of dataset in ``DataConfig``
 
         Returns:
-            :obj: `integer`: length of dataset
+            :obj:`integer`: length of dataset
+
         """
         keys = list(self.metadata.indexer.keys())
         if len(keys) == 0:

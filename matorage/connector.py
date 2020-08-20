@@ -47,8 +47,6 @@ class MTRConnector(object):
         Note:
             if `config.inmemory` mode is `False`, fileitem and filename is same.
 
-        Returns:
-            :None
         """
         self._queue.put((local_file, remote_file,))
 

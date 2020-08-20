@@ -34,23 +34,6 @@ class OptimizerManager(Manager):
     """
         Optimizer Manager Tensorflow classes. This class overrides ``Manager``.
 
-        .. code-block:: python
-
-            from matorage.tensorflow import OptimizerManager
-
-            optimizer_config = OptimizerConfig(
-                endpoint='127.0.0.1:9000',
-                access_key='minio',
-                secret_key='miniosecretkey',
-                optimizer_name='testoptimizer',
-                additional={
-                    "version" : "1.0.1"
-                }
-            )
-
-            optimizer_manager = OptimizerManager(config=optimizer_config)
-            model_manager.save(model, step=100)
-
         Note:
             Unlike Dataset, optimizer weight is loaded entirely into cpu memory.
             Therefore, the `HDF5_CORE` driver using the memory option is default setting.
@@ -65,6 +48,22 @@ class OptimizerManager(Manager):
                 You can sync files faster with `multipart upload in MinIO. <https://github.com/minio/minio-py/blob/master/minio/api.py#L1795>`_
                 This is because MinIO clients use multi-threading, which improves IO speed more
                 efficiently regardless of Python's Global Interpreter Lock(GIL).
+
+        Examples::
+
+            from matorage.tensorflow import OptimizerManager
+            optimizer_config = OptimizerConfig(
+                endpoint='127.0.0.1:9000',
+                access_key='minio',
+                secret_key='miniosecretkey',
+                optimizer_name='testoptimizer',
+                additional={
+                    "version" : "1.0.1"
+                }
+            )
+
+            optimizer_manager = OptimizerManager(config=optimizer_config)
+            model_manager.save(model, step=100)
 
         """
 
@@ -145,19 +144,17 @@ class OptimizerManager(Manager):
         """
         save weight of optimizer
 
-        .. code-block:: python
+        Args:
+            optimizer (:obj:`tf.keras.optimizers.Optimizer`, **require**):
+                Tensorflow optimizer.
+
+        Examples::
 
             >>> model = Model()
             >>> optimizer = optim.Adam(model.parameters(), lr=0.01)
             # model training...
             >>> optimizer_manager.save(optimizer)
 
-        Args:
-        optimizer (:obj:`tf.keras.optimizers.Optimizer`, **require**):
-            Tensorflow optimizer.
-
-        Returns:
-            :obj: `None`:
         """
         super(OptimizerManager, self).save(optimizer)
 
@@ -165,21 +162,22 @@ class OptimizerManager(Manager):
         """
         load weight of optimizer
 
-        .. code-block:: python
+        Args:
+            optimizer (:obj:`tf.keras.optimizers.Optimizer`, **require**):
+                Tensorflow optimizer.
+            step (:obj:`integer`, **require**):
+                optimizer step.
+
+        Returns:
+            :obj:`None or OrderedDict`: If ``optimizer`` is tensorflow optimizer type,
+            weight is loaded into the optimizer and return None.
+            however, If it is a string type with the name of the layer, it returns the weight of the ``OrderedDict`` type.
+
+        Examples::
 
             >>> optimizer_manager = OptimizerManager(config=optimizer_config)
             >>> optimizer = optim.Adam(model.parameters(), lr=0.01)
             >>> optimizer_manager.load(optimizer, step=938)
 
-        Args:
-        optimizer (:obj:`tf.keras.optimizers.Optimizer`, **require**):
-            Tensorflow optimizer.
-        step (:obj:`integer`, **require**):
-            optimizer step.
-
-        Returns:
-            :obj: `None or OrderedDict`: If ``optimizer`` is tensorflow optimizer type,
-            weight is loaded into the optimizer and return None.
-            however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
         """
         return super(OptimizerManager, self).load(optimizer, step)

@@ -25,8 +25,8 @@ class Dataset(torch.utils.data.Dataset, MTRData):
 
     This class is customized for the dataset of the PyTorch, so it is operated by the following procedure.
 
-    1. The ``_object_file_mapper`` manages the minio object as key and the downloaded local path as value.
-        When minio object is downloaded, it is recorded in _object_file_maper.
+    1. The ``_object_file_mapper`` manages the minio object as key and the downloaded local path as value. \
+    When minio object is downloaded, it is recorded in ``_object_file_maper``.
     2. We read ``_object_file_mapper`` and download only new objects that are not there.
     3. ``__getitem__`` brings numpy data in local data from data index.
 
@@ -42,7 +42,7 @@ class Dataset(torch.utils.data.Dataset, MTRData):
         index (:obj:`boolean`, optional, defaults to `False`):
             Setting for index mode.
 
-    .. code-block::
+    Examples::
 
         from matorage import DataConfig
         from matorage.torch import Dataset
@@ -116,8 +116,6 @@ class Dataset(torch.utils.data.Dataset, MTRData):
         """
         Close all opened files and remove.
 
-        Returns:
-            :obj: `None`:
         """
         super(Dataset, self)._exit()
         for _file in list(self.open_files.values()):
@@ -144,8 +142,6 @@ class Dataset(torch.utils.data.Dataset, MTRData):
         This function call from individuallly all processes.
         Because in Pytorch Multi Processing of DataLoader use `fork` mode.
 
-        Returns:
-            :None
         """
         if self.index:
             raise FileNotFoundError("index mode can't not open files.")

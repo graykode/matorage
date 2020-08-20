@@ -162,8 +162,6 @@ class MTRData(object):
         Download all object from bucket with multi thread.
         cache to `_object_file_mapper` downloaded object paths.
 
-        Returns:
-            :obj: `None`:
         """
         _client = self._create_client()
         _downloader = Downloader(
@@ -203,8 +201,6 @@ class MTRData(object):
         """
         Close all opened files and remove.
 
-        Returns:
-            :obj: `None`:
         """
 
         if self.clear and not check_nas(self.config.endpoint):
