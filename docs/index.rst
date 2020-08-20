@@ -33,6 +33,8 @@ Guides
 
    storage
 
+   serialize
+
    dataset
 
    dataset_qa

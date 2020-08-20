@@ -149,7 +149,10 @@ class Manager(object):
         """
         Get all optimizers according to metadata by step.
 
-        .. code-block:: python
+        Returns:
+            :obj:`dict`: optimizer of metadata
+
+        Examples::
 
             >>> optimizer_manager = OptimizerManager(config=optimizer_config)
             >>> optimizer_manager.save(optimizer)
@@ -171,8 +174,5 @@ class Manager(object):
                 }
             }
 
-
-        Returns:
-            :obj: `dict`: optimizer of metadata
         """
         return self.config.metadata["optimizer"]

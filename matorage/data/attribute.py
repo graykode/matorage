@@ -22,17 +22,6 @@ class DataAttribute(Serialize):
     """
     DataAttribute classes.
 
-    ::
-
-        >>> from matorage import DataAttribute
-        >>> attribute = DataAttribute('array', 'uint8', (2, 2))
-        >>> attribute.name
-        'array'
-        >>> attribute.shape
-        (2, 2)
-        >>> attribute.type
-        UInt8Atom(shape=(), dflt=0)
-
     Args:
         name (:obj:`string`, **require**):
             data attribute name .
@@ -43,6 +32,17 @@ class DataAttribute(Serialize):
             data attribute shape. For example, if you specify a shape with (2, 2), you can store an array of (B, 2, 2) shapes.
         itemsize (:obj:`integer`, optional, defaults to 0):
             itemsize(bytes) for string type attribute. Must be set for string type attribute.
+
+    Examples::
+
+        >>> from matorage import DataAttribute
+        >>> attribute = DataAttribute('array', 'uint8', (2, 2))
+        >>> attribute.name
+        'array'
+        >>> attribute.shape
+        (2, 2)
+        >>> attribute.type
+        UInt8Atom(shape=(), dflt=0)
 
     """
 
@@ -86,15 +86,16 @@ class DataAttribute(Serialize):
         """
         Serializes this instance to a Python dictionary.
 
-        ::
+        Returns:
+            :obj:`Dict[string, any]`: Dictionary of all the attributes that make up this configuration instance
+
+        Examples::
 
             >>> from matorage import DataAttribute
             >>> attribute = DataAttribute('array', 'uint8', (2, 2))
             >>> attribute.to_dict()
             {'name': 'array', 'type': 'uint8', 'shape': (2, 2)}
 
-        Returns:
-            :obj:`Dict[string, any]`: Dictionary of all the attributes that make up this configuration instance
         """
         output = copy.deepcopy(self.__dict__)
         if hasattr(self.__class__, "type") or "type" in output:

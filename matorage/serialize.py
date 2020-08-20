@@ -67,7 +67,7 @@ class Serialize(object):
                 Path to the JSON file containing the parameters.
 
         Returns:
-            :obj:`DataConfig, ModelConfig`: An instance of a configuration object
+            :class:`DataConfig ModelConfig`: An instance of a configuration object
 
         """
         config_dict = cls._dict_from_json_file(json_file)

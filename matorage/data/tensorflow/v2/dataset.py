@@ -27,8 +27,8 @@ class Dataset(MTRData):
 
     This class is customized for the dataset of the PyTorch, so it is operated by the following procedure.
 
-    1. The ``_object_file_mapper`` manages the minio object as key and the downloaded local path as value.
-        When minio object is downloaded, it is recorded in _object_file_maper.
+    1. The ``_object_file_mapper`` manages the minio object as key and the downloaded local path as value. \
+    When minio object is downloaded, it is recorded in ``_object_file_maper``.
     2. We read ``_object_file_mapper`` and download only new objects that are not there.
     3. if Tensorflow v2(2.2.0>=), we use ``tfio.IODataset.from_hdf5`` and parallel ``interleave`` more fast
 
@@ -51,7 +51,7 @@ class Dataset(MTRData):
         seed (:obj:`integer`, `optional`, defaults to `0`):
             random seed used to shuffle the sampler if ``shuffle=True``.
 
-    .. code-block::
+    Examples::
 
         from matorage import DataConfig
         from matorage.tensorflow import Dataset
@@ -150,6 +150,6 @@ class Dataset(MTRData):
         Get iterative dataloader
 
         Returns:
-            :obj:`InterleaveDataset`:
+            :obj:`InterleaveDataset`:iterative tf.data.dataset
         """
         return self._dataloader

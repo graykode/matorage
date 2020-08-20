@@ -33,7 +33,22 @@ class OptimizerManager(Manager):
     """
     Optimizer Manager Pytorch classes. This class overrides ``Manager``.
 
-    .. code-block:: python
+    Note:
+        Unlike Dataset, optimizer weight is loaded entirely into cpu memory.
+        Therefore, the `HDF5_CORE` driver using the memory option is default setting.
+
+    Args:
+        config (:obj:`matorage.OptimizerConfig`, **require**):
+            A OptimizerConfig instance object
+        num_worker_threads (:obj:`int`, optional, defaults to `4`):
+            Number of backend storage worker to upload or download.
+        multipart_upload_size (:obj:`integer`, optional, defaults to `5 * 1024 * 1024`):
+            size of the incompletely uploaded object.
+            You can sync files faster with `multipart upload in MinIO. <https://github.com/minio/minio-py/blob/master/minio/api.py#L1795>`_
+            This is because MinIO clients use multi-threading, which improves IO speed more
+            efficiently regardless of Python's Global Interpreter Lock(GIL).
+
+    Examples::
 
         from matorage.torch import OptimizerManager
 
@@ -49,21 +64,6 @@ class OptimizerManager(Manager):
 
         optimizer_manager = OptimizerManager(config=optimizer_config)
         model_manager.save(model, step=100)
-
-    Note:
-        Unlike Dataset, optimizer weight is loaded entirely into cpu memory.
-        Therefore, the `HDF5_CORE` driver using the memory option is default setting.
-
-    Args:
-        config (:obj:`matorage.OptimizerConfig`, **require**):
-            A OptimizerConfig instance object
-        num_worker_threads (:obj:`int`, optional, defaults to `4`):
-            Number of backend storage worker to upload or download.
-        multipart_upload_size (:obj:`integer`, optional, defaults to `5 * 1024 * 1024`):
-            size of the incompletely uploaded object.
-            You can sync files faster with `multipart upload in MinIO. <https://github.com/minio/minio-py/blob/master/minio/api.py#L1795>`_
-            This is because MinIO clients use multi-threading, which improves IO speed more
-            efficiently regardless of Python's Global Interpreter Lock(GIL).
 
     """
 
@@ -140,19 +140,17 @@ class OptimizerManager(Manager):
         """
         save weight of optimizer
 
-        .. code-block:: python
+        Args:
+            optimizer (:obj:`torch.optim`, **require**):
+                Pytorch optimizer.
+
+        Examples::
 
             >>> model = Model()
             >>> optimizer = optim.Adam(model.parameters(), lr=0.01)
             # model training...
             >>> optimizer_manager.save(optimizer)
 
-        Args:
-        optimizer (:obj:`torch.optim`, **require**):
-            Pytorch optimizer.
-
-        Returns:
-            :obj: `None`:
         """
         super(OptimizerManager, self).save(optimizer)
 
@@ -160,21 +158,22 @@ class OptimizerManager(Manager):
         """
         load weight of optimizer
 
-        .. code-block:: python
+        Args:
+            optimizer (:obj:`torch.optim`, **require**):
+                Pytorch optimizer.
+            step (:obj:`integer`, **require**):
+                optimizer step.
+
+        Returns:
+            :obj:`None or OrderedDict`: If ``optimizer`` is pytorch optimizer type,
+            weight is loaded into the optimizer and return None.
+            however, If it is a string type with the name of the layer, it returns the weight of the ``OrderedDict`` type.
+
+        Examples::
 
             >>> optimizer_manager = OptimizerManager(config=optimizer_config)
             >>> optimizer = optim.Adam(model.parameters(), lr=0.01)
             >>> optimizer_manager.load(optimizer, step=938)
 
-        Args:
-        optimizer (:obj:`torch.optim`, **require**):
-            Pytorch optimizer.
-        step (:obj:`integer`, **require**):
-            optimizer step.
-
-        Returns:
-            :obj: `None or OrderedDict`: If ``optimizer`` is pytorch optimizer type,
-            weight is loaded into the optimizer and return None.
-            however, If it is a string type with the name of the layer, it returns the weight of the OrderedDict type.
         """
         return super(OptimizerManager, self).load(optimizer, step)
