@@ -3,3 +3,14 @@ sphinxcontrib-napoleon
 alabaster
 nbsphinx
 pyyaml
+
+# module
+tables==3.6.1
+minio==5.0.10
+h5py
+pytest
+tqdm
+torch==1.6.0
+torchvision==0.7.0
+tensorflow==2.2
+tensorflow_io==0.13
