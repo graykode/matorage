@@ -31,13 +31,11 @@ from tqdm import tqdm, trange
 
 from transformers import (
     MODEL_FOR_QUESTION_ANSWERING_MAPPING,
-    WEIGHTS_NAME,
     AdamW,
     AutoConfig,
     AutoModelForQuestionAnswering,
     AutoTokenizer,
     get_linear_schedule_with_warmup,
-    squad_convert_examples_to_features,
 )
 from transformers.data.metrics.squad_metrics import (
     compute_predictions_log_probs,
@@ -54,6 +52,35 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
+
+from matorage import *
+from matorage.torch import *
+
+train_attributes = [
+    ("all_input_ids", "int64", (384,)),
+    ("all_attention_masks", "int64", (384,)),
+    ("all_token_type_ids", "int64", (384,)),
+    ("all_start_positions", "int64", (1,)),
+    ("all_end_positions", "int64", (1,)),
+    ("all_cls_index", "float32", (384,)),
+    ("all_p_mask", "float32", (1,)),
+]
+
+eval_attributes = [
+    ("all_input_ids", "int64", (384,)),
+    ("all_attention_masks", "int64", (384,)),
+    ("all_token_type_ids", "int64", (384,)),
+    ("all_feature_index", "int64", (1,)),
+    ("all_cls_index", "int64", (1,)),
+    ("all_p_mask", "float32", (384,)),
+]
+
+storage_config = {
+    "endpoint": "127.0.0.1:9000",
+    "access_key": "minio",
+    "secret_key": "miniosecretkey",
+    "secure": False,
+}
 
 MODEL_CONFIG_CLASSES = list(MODEL_FOR_QUESTION_ANSWERING_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
@@ -72,6 +99,32 @@ def to_list(tensor):
 
 
 def train(args, train_dataset, model, tokenizer):
+    model_config = ModelConfig(
+        **storage_config,
+        model_name="SQuAD_BERT",
+        additional={
+            "version": 1.1 if not args.version_2_with_negative else 2.0,
+            "model_name": args.model_name_or_path,
+            "doc_stride": args.doc_stride,
+            "max_seq_length": args.max_seq_length,
+            "max_query_length": args.max_query_length,
+        },
+    )
+    model_manager = ModelManager(config=model_config)
+
+    optimizer_config = OptimizerConfig(
+        **storage_config,
+        optimizer_name="SQuAD_BERT",
+        additional={
+            "version" : 1.1 if not args.version_2_with_negative else 2.0,
+            "model_name": args.model_name_or_path,
+            "doc_stride": args.doc_stride,
+            "max_seq_length": args.max_seq_length,
+            "max_query_length": args.max_query_length,
+        },
+    )
+    optimizer_manager = OptimizerManager(config=optimizer_config)
+
     """ Train the model """
     if args.local_rank in [-1, 0]:
         tb_writer = SummaryWriter()
@@ -239,18 +292,14 @@ def train(args, train_dataset, model, tokenizer):
 
                 # Save model checkpoint
                 if args.local_rank in [-1, 0] and args.save_steps > 0 and global_step % args.save_steps == 0:
-                    output_dir = os.path.join(args.output_dir, "checkpoint-{}".format(global_step))
                     # Take care of distributed/parallel training
                     model_to_save = model.module if hasattr(model, "module") else model
-                    model_to_save.save_pretrained(output_dir)
-                    tokenizer.save_pretrained(output_dir)
+                    model_manager.save(model_to_save, step=step)
 
-                    torch.save(args, os.path.join(output_dir, "training_args.bin"))
-                    logger.info("Saving model checkpoint to %s", output_dir)
+                    logger.info("Saving model checkpoint to matorage")
 
-                    torch.save(optimizer.state_dict(), os.path.join(output_dir, "optimizer.pt"))
-                    torch.save(scheduler.state_dict(), os.path.join(output_dir, "scheduler.pt"))
-                    logger.info("Saving optimizer and scheduler states to %s", output_dir)
+                    optimizer_manager.save(optimizer=optimizer, scheduler=scheduler)
+                    logger.info("Saving optimizer and scheduler states to matorage")
 
             if args.max_steps > 0 and global_step > args.max_steps:
                 epoch_iterator.close()
@@ -266,7 +315,7 @@ def train(args, train_dataset, model, tokenizer):
 
 
 def evaluate(args, model, tokenizer, prefix=""):
-    dataset, examples, features = load_and_cache_examples(args, tokenizer, evaluate=True, output_examples=True)
+    dataset, examples, features = load_from_matorage(args, evaluate=True)
 
     if not os.path.exists(args.output_dir) and args.local_rank in [-1, 0]:
         os.makedirs(args.output_dir)
@@ -399,76 +448,33 @@ def evaluate(args, model, tokenizer, prefix=""):
     results = squad_evaluate(examples, predictions)
     return results
 
-
-def load_and_cache_examples(args, tokenizer, evaluate=False, output_examples=False):
+def load_from_matorage(args, evaluate=False):
     if args.local_rank not in [-1, 0] and not evaluate:
         # Make sure only the first process in distributed training process the dataset, and the others will use the cache
         torch.distributed.barrier()
 
-    # Load data features from cache or dataset file
-    input_dir = args.data_dir if args.data_dir else "."
-    cached_features_file = os.path.join(
-        input_dir,
-        "cached_{}_{}_{}".format(
-            "dev" if evaluate else "train",
-            list(filter(None, args.model_name_or_path.split("/"))).pop(),
-            str(args.max_seq_length),
-        ),
+    data_config = DataConfig(
+        **storage_config,
+        dataset_name="SQuAD1.1" if not args.version_2_with_negative else "SQuAD2.0",
+        additional={
+            "mode": "train" if not evaluate else "test",
+            "framework": "pytorch",
+            "version": 1.1 if not args.version_2_with_negative else 2.0,
+            "model_name": args.model_name_or_path,
+            "doc_stride": args.doc_stride,
+            "max_seq_length": args.max_seq_length,
+            "max_query_length": args.max_query_length,
+        },
+        attributes=train_attributes if not evaluate else eval_attributes,
     )
+    dataset = Dataset(config=data_config, clear=True)
 
-    # Init features and dataset from cache if it exists
-    if os.path.exists(cached_features_file) and not args.overwrite_cache:
-        logger.info("Loading features from cached file %s", cached_features_file)
-        features_and_dataset = torch.load(cached_features_file)
-        features, dataset, examples = (
-            features_and_dataset["features"],
-            features_and_dataset["dataset"],
-            features_and_dataset["examples"],
-        )
+    if not evaluate:
+        return dataset
     else:
-        logger.info("Creating features from dataset file at %s", input_dir)
-
-        if not args.data_dir and ((evaluate and not args.predict_file) or (not evaluate and not args.train_file)):
-            try:
-                import tensorflow_datasets as tfds
-            except ImportError:
-                raise ImportError("If not data_dir is specified, tensorflow_datasets needs to be installed.")
-
-            if args.version_2_with_negative:
-                logger.warn("tensorflow_datasets does not handle version 2 of SQuAD.")
-
-            tfds_examples = tfds.load("squad")
-            examples = SquadV1Processor().get_examples_from_dataset(tfds_examples, evaluate=evaluate)
-        else:
-            processor = SquadV2Processor() if args.version_2_with_negative else SquadV1Processor()
-            if evaluate:
-                examples = processor.get_dev_examples(args.data_dir, filename=args.predict_file)
-            else:
-                examples = processor.get_train_examples(args.data_dir, filename=args.train_file)
-
-        features, dataset = squad_convert_examples_to_features(
-            examples=examples,
-            tokenizer=tokenizer,
-            max_seq_length=args.max_seq_length,
-            doc_stride=args.doc_stride,
-            max_query_length=args.max_query_length,
-            is_training=not evaluate,
-            return_dataset="pt",
-            threads=args.threads,
-        )
-
-        if args.local_rank in [-1, 0]:
-            logger.info("Saving features into cached file %s", cached_features_file)
-            torch.save({"features": features, "dataset": dataset, "examples": examples}, cached_features_file)
-
-    if args.local_rank == 0 and not evaluate:
-        # Make sure only the first process in distributed training process the dataset, and the others will use the cache
-        torch.distributed.barrier()
-
-    if output_examples:
+        examples = torch.load(dataset.get_filetype_from_key('examples'))
+        features = torch.load(dataset.get_filetype_from_key('features'))
         return dataset, examples, features
-    return dataset
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -497,27 +503,6 @@ def main():
     )
 
     # Other parameters
-    parser.add_argument(
-        "--data_dir",
-        default=None,
-        type=str,
-        help="The input data dir. Should contain the .json files for the task."
-        + "If no data dir or train/predict files are specified, will run with tensorflow_datasets.",
-    )
-    parser.add_argument(
-        "--train_file",
-        default=None,
-        type=str,
-        help="The input training file. If a data dir is specified, will look for the file there"
-        + "If no data dir or train/predict files are specified, will run with tensorflow_datasets.",
-    )
-    parser.add_argument(
-        "--predict_file",
-        default=None,
-        type=str,
-        help="The input evaluation file. If a data dir is specified, will look for the file there"
-        + "If no data dir or train/predict files are specified, will run with tensorflow_datasets.",
-    )
     parser.add_argument(
         "--config_name", default="", type=str, help="Pretrained config name or path if not the same as model_name"
     )
@@ -567,7 +552,6 @@ def main():
         "be truncated to this length.",
     )
     parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
-    parser.add_argument("--do_eval", action="store_true", help="Whether to run eval on the dev set.")
     parser.add_argument(
         "--evaluate_during_training", action="store_true", help="Run evaluation during training at each logging step."
     )
@@ -625,8 +609,8 @@ def main():
         help="language id of input for language-specific xlm models (see tokenization_xlm.PRETRAINED_INIT_CONFIGURATION)",
     )
 
-    parser.add_argument("--logging_steps", type=int, default=500, help="Log every X updates steps.")
-    parser.add_argument("--save_steps", type=int, default=500, help="Save checkpoint every X updates steps.")
+    parser.add_argument("--logging_steps", type=int, default=100, help="Log every X updates steps.")
+    parser.add_argument("--save_steps", type=int, default=10000, help="Save checkpoint every X updates steps.")
     parser.add_argument(
         "--eval_all_checkpoints",
         action="store_true",
@@ -635,9 +619,6 @@ def main():
     parser.add_argument("--no_cuda", action="store_true", help="Whether not to use CUDA when available")
     parser.add_argument(
         "--overwrite_output_dir", action="store_true", help="Overwrite the content of the output directory"
-    )
-    parser.add_argument(
-        "--overwrite_cache", action="store_true", help="Overwrite the cached training and evaluation sets"
     )
     parser.add_argument("--seed", type=int, default=42, help="random seed for initialization")
 
@@ -657,7 +638,6 @@ def main():
     parser.add_argument("--server_ip", type=str, default="", help="Can be used for distant debugging.")
     parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
 
-    parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
     args = parser.parse_args()
 
     if args.doc_stride >= args.max_seq_length - args.max_query_length:
@@ -760,62 +740,9 @@ def main():
 
     # Training
     if args.do_train:
-        train_dataset = load_and_cache_examples(args, tokenizer, evaluate=False, output_examples=False)
+        train_dataset = load_from_matorage(args, evaluate=False)
         global_step, tr_loss = train(args, train_dataset, model, tokenizer)
         logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
-
-    # Save the trained model and the tokenizer
-    if args.do_train and (args.local_rank == -1 or torch.distributed.get_rank() == 0):
-        logger.info("Saving model checkpoint to %s", args.output_dir)
-        # Save a trained model, configuration and tokenizer using `save_pretrained()`.
-        # They can then be reloaded using `from_pretrained()`
-        # Take care of distributed/parallel training
-        model_to_save = model.module if hasattr(model, "module") else model
-        model_to_save.save_pretrained(args.output_dir)
-        tokenizer.save_pretrained(args.output_dir)
-
-        # Good practice: save your training arguments together with the trained model
-        torch.save(args, os.path.join(args.output_dir, "training_args.bin"))
-
-        # Load a trained model and vocabulary that you have fine-tuned
-        model = AutoModelForQuestionAnswering.from_pretrained(args.output_dir)  # , force_download=True)
-        tokenizer = AutoTokenizer.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case)
-        model.to(args.device)
-
-    # Evaluation - we can ask to evaluate all the checkpoints (sub-directories) in a directory
-    results = {}
-    if args.do_eval and args.local_rank in [-1, 0]:
-        if args.do_train:
-            logger.info("Loading checkpoints saved during training for evaluation")
-            checkpoints = [args.output_dir]
-            if args.eval_all_checkpoints:
-                checkpoints = list(
-                    os.path.dirname(c)
-                    for c in sorted(glob.glob(args.output_dir + "/**/" + WEIGHTS_NAME, recursive=True))
-                )
-                logging.getLogger("transformers.modeling_utils").setLevel(logging.WARN)  # Reduce model loading logs
-        else:
-            logger.info("Loading checkpoint %s for evaluation", args.model_name_or_path)
-            checkpoints = [args.model_name_or_path]
-
-        logger.info("Evaluate the following checkpoints: %s", checkpoints)
-
-        for checkpoint in checkpoints:
-            # Reload the model
-            global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
-            model = AutoModelForQuestionAnswering.from_pretrained(checkpoint)  # , force_download=True)
-            model.to(args.device)
-
-            # Evaluate
-            result = evaluate(args, model, tokenizer, prefix=global_step)
-
-            result = dict((k + ("_{}".format(global_step) if global_step else ""), v) for k, v in result.items())
-            results.update(result)
-
-    logger.info("Results: {}".format(results))
-
-    return results
-
 
 if __name__ == "__main__":
     main()
