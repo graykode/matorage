@@ -148,6 +148,8 @@ class Dataset(torch.utils.data.Dataset, MTRData):
 
         _driver, _driver_core_backing_store = self._set_driver()
         for _remote, _local in self._object_file_mapper.items():
+            if os.path.splitext(_local)[1] != '.h5':
+                continue
             _file = tables.open_file(
                 _local,
                 "r",
