@@ -67,7 +67,7 @@ class MTRData(object):
         self._check_bucket()
 
         # merge all metadatas and load in memory.
-        self.merged_indexer = self._merge_metadata()
+        self.merged_indexer, self.merged_filetype = self._merge_metadata()
         self.end_indices = list(self.merged_indexer.keys())
 
         self._clients = {}
@@ -170,7 +170,7 @@ class MTRData(object):
             num_worker_threads=self.num_worker_threads,
         )
 
-        _remote_files = list(self.merged_indexer.values()) + list(self.config.metadata.filetype)
+        _remote_files = list(self.merged_indexer.values()) + list(self.merged_filetype)
         for _remote_file in _remote_files:
             if not check_nas(self.config.endpoint):
                 _local_file = tempfile.mktemp(_remote_file)
@@ -186,7 +186,7 @@ class MTRData(object):
                     )
         _downloader.join_queue()
 
-        assert len(self._object_file_mapper) == (len(self.merged_indexer) + len(self.config.metadata.filetype))
+        assert len(self._object_file_mapper) == (len(self.merged_indexer) + len(self.merged_filetype))
 
         if not os.path.exists(self.cache_path):
             with open(self.cache_path, "w") as f:
@@ -213,6 +213,7 @@ class MTRData(object):
     def _merge_metadata(self):
         """
         merge splited metadatas to a one file.
+        +) merge dataset of filetype list
 
         Returns:
             :obj:`dict` : last end indexes with filename
@@ -227,12 +228,15 @@ class MTRData(object):
         objects = client.list_objects(self.config.bucket_name, prefix="metadata/")
 
         total_index = []
+        filetypes = []
         for obj in objects:
             metadata = client.get_object(
                 self.config.bucket_name, object_name=obj.object_name
             )
-            local_indexer = json.loads(metadata.read().decode("utf-8"))["indexer"]
+            metadata = json.loads(metadata.read().decode("utf-8"))
+            local_indexer = metadata["indexer"]
             total_index.extend(list(local_indexer.values()))
+            filetypes.extend(metadata["filetype"])
 
         reindexer = {}
         for _index in total_index:
@@ -243,7 +247,7 @@ class MTRData(object):
             )
             reindexer[key] = _index["name"]
 
-        return reindexer
+        return reindexer, filetypes
 
     def _set_attribute(self):
         """
@@ -273,7 +277,7 @@ class MTRData(object):
         Returns:
             :obj: `list`: list of key of filetype dataset in bucket of ``DataConfig``
         """
-        return self.config.metadata.filetype
+        return self.merged_filetype
 
     def get_filetype_from_key(self, filename):
         """
