@@ -51,7 +51,6 @@ class OptimizerManager(Manager):
     Examples::
 
         from matorage.torch import OptimizerManager
-
         optimizer_config = OptimizerConfig(
             endpoint='127.0.0.1:9000',
             access_key='minio',
@@ -63,7 +62,8 @@ class OptimizerManager(Manager):
         )
 
         optimizer_manager = OptimizerManager(config=optimizer_config)
-        model_manager.save(model, step=100)
+        optimizer = optim.Adam(Model().parameters(), lr=0.01)
+        optimizer_manager.save(optimizer, step=100)
 
     """
 
@@ -92,6 +92,12 @@ class OptimizerManager(Manager):
             }
         )
 
+    def _set_scheduler(self, metadata, scheduler, step):
+        assert isinstance(scheduler, dict)
+        metadata["scheduler"].update({
+            str(step): scheduler
+        })
+
     def _save_optimizer(self, step, optimizer):
         assert isinstance(optimizer, Optimizer)
         state = optimizer.state_dict()["state"]
@@ -105,7 +111,7 @@ class OptimizerManager(Manager):
                     step, group=param_name, name=param_dict_key, weight=param_dict_value
                 )
 
-    def _load_model(self, step, layers, optimizer):
+    def _load_optimizer(self, step, layers, optimizer):
         assert isinstance(optimizer, Optimizer)
 
         weight = OrderedDict()
@@ -136,7 +142,7 @@ class OptimizerManager(Manager):
 
         optimizer.load_state_dict(weight)
 
-    def save(self, optimizer):
+    def save(self, optimizer, scheduler=None):
         """
         save weight of optimizer
 
@@ -152,7 +158,9 @@ class OptimizerManager(Manager):
             >>> optimizer_manager.save(optimizer)
 
         """
-        super(OptimizerManager, self).save(optimizer)
+        if scheduler:
+            scheduler = scheduler.state_dict()
+        super(OptimizerManager, self).save(optimizer, scheduler=scheduler)
 
     def load(self, optimizer, step):
         """
@@ -164,11 +172,6 @@ class OptimizerManager(Manager):
             step (:obj:`integer`, **require**):
                 optimizer step.
 
-        Returns:
-            :obj:`None or OrderedDict`: If ``optimizer`` is pytorch optimizer type,
-            weight is loaded into the optimizer and return None.
-            however, If it is a string type with the name of the layer, it returns the weight of the ``OrderedDict`` type.
-
         Examples::
 
             >>> optimizer_manager = OptimizerManager(config=optimizer_config)
@@ -176,4 +179,36 @@ class OptimizerManager(Manager):
             >>> optimizer_manager.load(optimizer, step=938)
 
         """
-        return super(OptimizerManager, self).load(optimizer, step)
+        super(OptimizerManager, self).load(optimizer, step)
+
+    def load_with_scheduler(self, optimizer, scheduler, step):
+        """
+        load weight of optimizer and scheduler
+
+        Args:
+            optimizer (:obj:`torch.optim`, **require**):
+                Pytorch optimizer.
+            scheduler (:obj:`torch.optim.lr_scheduler`, **require**):
+                Pytorch scheduler.
+            step (:obj:`integer`, **require**):
+                optimizer step.
+
+        Examples::
+
+            >>> optimizer_manager = OptimizerManager(config=optimizer_config)
+            >>> optimizer = optim.Adam(model.parameters(), lr=0.01)
+            >>> scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
+            >>> optimizer_manager.load_with_scheduler(optimizer, scheduler, step=938)
+
+        """
+        super(OptimizerManager, self).load(optimizer, step)
+
+        step = str(step)
+        if step in self.config.metadata["scheduler"]:
+            scheduler.load_state_dict(self.config.metadata["scheduler"][step])
+        else:
+            raise KeyError(
+                "Available only in {}".format(
+                    list(self.config.metadata["scheduler"].keys())
+                )
+            )

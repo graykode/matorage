@@ -82,6 +82,7 @@ class OptimizerConfig(StorageConfig):
             "additional": self.additional,
             "compressor": self.compressor,
             "optimizer": {},
+            "scheduler": {},
         }
 
         self._check_all()
