@@ -53,9 +53,11 @@ For an example of tensorflow, refer to the detailed document.
 
 If you want to see the full code, see below
 
-- `Pytorch Mnist Example <https://github.com/graykode/matorage/tree/0.1.0/examples/pytorch>`_
+- `Pytorch Mnist Example <examples/pytorch/mnist>`_
 
-- `Tensorflow Mnist Example <https://github.com/graykode/matorage/tree/0.1.0/examples/tensorflow>`_
+- `Tensorflow Mnist Example <examples/tensorflow/mnist>`_
+
+- `SQuAD 1.1/2.0 Example <examples/pytorch/squad>`_
 
 0. Install matorage with pip
 ~~~~~~~~~~~~~~~~~~~~~

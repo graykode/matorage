@@ -35,8 +35,10 @@ Matorage is tensor(multidimensional matrix) object storage manager for deep lear
 For an example of tensorflow, refer to the detailed document.
 If you want to see the full code, see below
 
-- [Pytorch Mnist Example](https://github.com/graykode/matorage/tree/0.1.0/examples/pytorch)
-- [Tensorflow Mnist Example](https://github.com/graykode/matorage/tree/0.1.0/examples/tensorflow)
+- [Pytorch Mnist Example](examples/pytorch/mnist)
+- [Tensorflow Mnist Example](examples/tensorflow/mnist)
+- [SQuAD 1.1/2.0 Example](examples/pytorch/squad)
+
 - Content
     - [0. Install matorage with pip](https://github.com/graykode/matorage#0-install-matorage-with-pip)
     - [1. Set up Minio Server with docker](https://github.com/graykode/matorage#1-set-up-minio-server-with-docker)
@@ -214,7 +216,7 @@ optimizer_manager.load(optimizer, step=938)
 ### Unittest
 ```bash
 $ git clone https://github.com/graykode/matorage && cd matorage
-$ pytest tests/test_suite.py
+$ python -m tests.test_suite
 ```
 
 
