@@ -148,6 +148,8 @@ class Dataset(torch.utils.data.Dataset, MTRData):
 
         _driver, _driver_core_backing_store = self._set_driver()
         for _remote, _local in self._object_file_mapper.items():
+            if os.path.splitext(_local)[1] != '.h5':
+                continue
             _file = tables.open_file(
                 _local,
                 "r",
@@ -156,8 +158,12 @@ class Dataset(torch.utils.data.Dataset, MTRData):
             )
             self.open_files[_remote] = {
                 "file": _file,
-                "attr_names": list(_file.get_node("/")._v_children.keys()),
+                # "attr_names": list(_file.get_node("/")._v_children.keys()),
             }
+
+            # Critial Bug fixed:
+            # We must sort by attribute of metadata name
+            self.open_files[_remote]["attr_names"] = list(self.attribute.keys())
 
     def _set_driver(self):
         """

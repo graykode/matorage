@@ -96,7 +96,7 @@ class Manager(object):
             "/", self.type, obj=weight, filters=tables.Filters(**self.config.compressor)
         )
 
-        if group:
+        if group is not None:
             self._uploader.set_queue(
                 local_file=_file.get_file_image(), remote_file=f"{step}/{group}/{name}"
             )
@@ -106,7 +106,7 @@ class Manager(object):
             )
         _file.close()
 
-    def save(self, optimizer):
+    def save(self, optimizer, scheduler=None):
         if not self._client.bucket_exists(self.config.bucket_name):
             self._client.make_bucket(
                 self.config.bucket_name, location=self.config.region
@@ -134,6 +134,11 @@ class Manager(object):
             )
             self._save_with_clear(step, optimizer)
 
+        if scheduler:
+            self._set_scheduler(
+                metadata=self.config.metadata, scheduler=scheduler, step=step
+            )
+
         logger.info("optimizer with {} is saved".format(str(step)))
 
     def load(self, optimizer, step):
@@ -142,7 +147,7 @@ class Manager(object):
         )
 
         logger.info("optimizer with {} is loaded".format(str(step)))
-        return self._load_model(step, layers, optimizer)
+        self._load_optimizer(step, layers, optimizer)
 
     @property
     def get_metadata(self):

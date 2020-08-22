@@ -63,7 +63,7 @@ class OptimizerManager(Manager):
             )
 
             optimizer_manager = OptimizerManager(config=optimizer_config)
-            model_manager.save(model, step=100)
+            optimizer_manager.save(model.optimizer, step=100)
 
         """
 
@@ -91,6 +91,9 @@ class OptimizerManager(Manager):
             }
         )
 
+    def _set_scheduler(self, metadata, scheduler, step):
+        raise NotImplementedError()
+
     def _save_optimizer(self, step, optimizer):
         assert isinstance(optimizer, OptimizerV2)
         assert isinstance(self.config.metadata, dict)
@@ -106,7 +109,7 @@ class OptimizerManager(Manager):
                 param_name
             )
 
-    def _load_model(self, step, layers, optimizer):
+    def _load_optimizer(self, step, layers, optimizer):
         assert isinstance(optimizer, OptimizerV2)
         assert isinstance(self.config.metadata, dict)
 
@@ -151,9 +154,8 @@ class OptimizerManager(Manager):
         Examples::
 
             >>> model = Model()
-            >>> optimizer = optim.Adam(model.parameters(), lr=0.01)
             # model training...
-            >>> optimizer_manager.save(optimizer)
+            >>> optimizer_manager.save(model.optimizer)
 
         """
         super(OptimizerManager, self).save(optimizer)
@@ -168,16 +170,10 @@ class OptimizerManager(Manager):
             step (:obj:`integer`, **require**):
                 optimizer step.
 
-        Returns:
-            :obj:`None or OrderedDict`: If ``optimizer`` is tensorflow optimizer type,
-            weight is loaded into the optimizer and return None.
-            however, If it is a string type with the name of the layer, it returns the weight of the ``OrderedDict`` type.
-
         Examples::
 
-            >>> optimizer_manager = OptimizerManager(config=optimizer_config)
-            >>> optimizer = optim.Adam(model.parameters(), lr=0.01)
-            >>> optimizer_manager.load(optimizer, step=938)
+            >>> model = Model()
+            >>> optimizer_manager.load(model.optimizer, step=938)
 
         """
-        return super(OptimizerManager, self).load(optimizer, step)
+        super(OptimizerManager, self).load(optimizer, step)

@@ -86,32 +86,30 @@ class DataSaver(object):
 
     Examples::
 
-        .. code-block:: python
+        import numpy as np
+        from tqdm import tqdm
+        from matorage import DataConfig, DataSaver
 
-            import numpy as np
-            from tqdm import tqdm
-            from matorage import DataConfig, DataSaver
+        data_config = DataConfig(
+            endpoint='127.0.0.1:9000',
+            access_key='minio',
+            secret_key='miniosecretkey',
+            dataset_name='array_test',
+            attributes=[
+                ('array', 'uint8', (3, 224, 224)),
+            ]
+        )
 
-            data_config = DataConfig(
-                endpoint='127.0.0.1:9000',
-                access_key='minio',
-                secret_key='miniosecretkey',
-                dataset_name='array_test',
-                attributes=[
-                    ('array', 'uint8', (3, 224, 224)),
-                ]
-            )
+        data_saver = DataSaver(config=data_config)
+        row = 100
+        data = np.random.rand(64, 3, 224, 224)
 
-            data_saver = DataSaver(config=data_config)
-            row = 100
-            data = np.random.rand(64, 3, 224, 224)
+        for _ in tqdm(range(row)):
+            data_saver({
+                'array' : data
+            })
 
-            for _ in tqdm(range(row)):
-                data_saver({
-                    'array' : data
-                })
-
-            data_saver.disconnect()
+        data_saver.disconnect()
 
     """
 

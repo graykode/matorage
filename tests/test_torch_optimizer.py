@@ -126,6 +126,46 @@ class TorchOptimizerTest(OptimizerTest, unittest.TestCase):
 
         self.optimizer_manager.load(optimizer, step=938)
 
+    def test_optimizer_scheduler_saver(self):
+        from torch.optim.lr_scheduler import StepLR
+
+        model = Model().to(self.device)
+        optimizer = optim.Adam(model.parameters(), lr=1.0)
+        criterion = torch.nn.CrossEntropyLoss()
+        scheduler = StepLR(optimizer, step_size=134, gamma=0.99)
+
+        train_loader = DataLoader(self.train_dataset, batch_size=64, num_workers=4)
+
+        for batch_idx, (image, target) in enumerate(tqdm(train_loader)):
+            image, target = image.to(self.device), target.to(self.device)
+            optimizer.zero_grad()
+            output = model(image)
+            loss = criterion(output, target)
+            loss.backward()
+            optimizer.step()
+            scheduler.step()
+
+        self.optimizer_config = OptimizerConfig(
+            **self.storage_config,
+            optimizer_name="testoptimizerwithscheduler",
+            additional={"version": "1.0.1"}
+        )
+        self.optimizer_manager = OptimizerManager(config=self.optimizer_config)
+        self.optimizer_manager.save(optimizer, scheduler)
+
+        return scheduler
+
+    def test_optimizer_scheduler_loader(self):
+        from torch.optim.lr_scheduler import StepLR
+
+        _scheduler = self.test_optimizer_scheduler_saver()
+
+        model = Model()
+        optimizer = optim.Adam(model.parameters(), lr=0.01)
+        scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
+
+        self.optimizer_manager.load_with_scheduler(optimizer, scheduler, step=938)
+        self.assertEqual(_scheduler.state_dict(), scheduler.state_dict())
 
 def suite():
     return unittest.TestSuite(unittest.makeSuite(TorchOptimizerTest))
