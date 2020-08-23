@@ -12,20 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from setuptools import setup
 from sutils import find_name, get_setuptools, check_torch_tf_version
 
 project_name = "matorage"
-version = "0.1.0a"
+version = os.environ.get('MATORAGE_VERSION', '0.0.0')
 
 if __name__ == "__main__":
     check_torch_tf_version()
 
     project_name = find_name()
+
+    with open('README.md', 'r') as t:
+        README = t.read()
+
     setup(
         # Project Name, Version
         name=project_name,
         version=version,
+        long_description=README,
+        long_description_content_type='text/markdown',
         # Author
         license="Apache License, Version 2.0",
         author="TaeHwan-Jung",
