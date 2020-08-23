@@ -118,6 +118,7 @@ class DataConfig(StorageConfig):
 
     def __init__(self, **kwargs):
         super(DataConfig, self).__init__(**kwargs)
+        self.type = "dataset"
 
         self.dataset_name = kwargs.pop("dataset_name", None)
         self.additional = kwargs.pop("additional", {})
@@ -273,7 +274,7 @@ class DataConfig(StorageConfig):
             raise TypeError("additional is not dict type")
 
         key = self.dataset_name + json.dumps(self.additional, indent=4, sort_keys=True)
-        return hashlib.md5(key.encode("utf-8")).hexdigest()
+        return self.type + hashlib.md5(key.encode("utf-8")).hexdigest()
 
     def to_dict(self):
         """
