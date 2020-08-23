@@ -168,7 +168,7 @@ class OptimizerConfig(StorageConfig):
             + self.optimizer_name
             + json.dumps(self.additional, indent=4, sort_keys=True)
         )
-        return hashlib.md5(key.encode("utf-8")).hexdigest()
+        return self.type + hashlib.md5(key.encode("utf-8")).hexdigest()
 
     def to_dict(self):
         """
