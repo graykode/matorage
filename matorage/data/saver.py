@@ -253,9 +253,6 @@ class DataSaver(object):
         for name, array in self._datas.items():
             self._check_attr_name(name=name)
 
-            if isinstance(array, str):
-                raise TypeError("I suspect you need to set the filetype.")
-
             if is_tf_available() and not isinstance(array, np.ndarray):
                 array = array.numpy()
             if is_torch_available() and not isinstance(array, np.ndarray):
