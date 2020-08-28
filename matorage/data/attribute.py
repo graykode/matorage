@@ -64,6 +64,7 @@ class DataAttribute(Serialize):
     def __init__(self, name, type, shape, itemsize=0):
 
         self.name = name
+        self.itemsize = itemsize
 
         if not isinstance(type, str):
             raise TypeError("`type` is not str type")
@@ -100,4 +101,6 @@ class DataAttribute(Serialize):
         output = copy.deepcopy(self.__dict__)
         if hasattr(self.__class__, "type") or "type" in output:
             output["type"] = self.type.type
+        if hasattr(self.__class__, "itemsize") or "itemsize" in output:
+            output["itemsize"] = self.itemsize
         return output
