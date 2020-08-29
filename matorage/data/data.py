@@ -74,7 +74,10 @@ class MTRData(object):
 
         if not self.index:
             # cache object which is downloaded.
-            self._caching(cache_folder_path=cache_folder_path)
+            if not check_nas(self.config.endpoint):
+                self._caching(cache_folder_path=cache_folder_path)
+            else:
+                self._object_file_mapper = {}
 
             # download all object in /tmp folder
             self._init_download()
@@ -188,7 +191,7 @@ class MTRData(object):
 
         assert len(self._object_file_mapper) == (len(self.merged_indexer) + len(self.merged_filetype))
 
-        if not os.path.exists(self.cache_path):
+        if not check_nas(self.config.endpoint) and not os.path.exists(self.cache_path):
             with open(self.cache_path, "w") as f:
                 json.dump(self._object_file_mapper, f)
             logger.info(
