@@ -33,8 +33,7 @@ class NAS(object):
 
     def fput_object(self, bucket_name, object_name, file_path, part_size=None):
         _filename = os.path.join(self.path, bucket_name, object_name)
-        if not os.path.exists(os.path.dirname(_filename)):
-            os.makedirs(os.path.dirname(_filename))
+        os.makedirs(os.path.dirname(_filename), exist_ok=True)
         shutil.copyfile(src=file_path, dst=_filename)
 
     def get_object(self, bucket_name, object_name):
@@ -43,8 +42,7 @@ class NAS(object):
 
     def put_object(self, bucket_name, object_name, data, length, part_size=None):
         _filename = os.path.join(self.path, bucket_name, object_name)
-        if not os.path.exists(os.path.dirname(_filename)):
-            os.makedirs(os.path.dirname(_filename))
+        os.makedirs(os.path.dirname(_filename), exist_ok=True)
         data.seek(0)
         with open(_filename, "wb") as f:
             shutil.copyfileobj(data, f, length=length)
