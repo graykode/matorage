@@ -91,7 +91,7 @@ class TFModelTest(ModelTest, unittest.TestCase):
         model.fit(train_images, train_labels, epochs=5)
 
         self.model_config = ModelConfig(
-            endpoint="127.0.0.1:9000",
+            endpoint="127.0.0.1:9001",
             access_key="minio",
             secret_key="miniosecretkey",
             model_name="test_tf_mnist",
@@ -114,7 +114,7 @@ class TFModelTest(ModelTest, unittest.TestCase):
         _, correct = model.evaluate(test_images, test_labels, verbose=2)
 
         self.model_config = ModelConfig(
-            endpoint="127.0.0.1:9000",
+            endpoint="127.0.0.1:9001",
             access_key="minio",
             secret_key="miniosecretkey",
             model_name="test_tf_mnist",

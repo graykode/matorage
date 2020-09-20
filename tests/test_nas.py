@@ -22,7 +22,7 @@ from matorage.nas import NAS
 
 class DataSaverTest(StorageTest, unittest.TestCase):
     minio_config = Minio(
-        endpoint="127.0.0.1:9000",
+        endpoint="127.0.0.1:9001",
         access_key="minio",
         secret_key="miniosecretkey",
         secure=False,

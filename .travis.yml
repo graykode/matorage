@@ -15,9 +15,9 @@ services:
   - docker
 
 before_install:
-  - mkdir ~/shared
+  - mkdir ~/unittest
   - docker pull minio/minio
-  - docker run -it -d -p 9000:9000 --restart always -e "MINIO_ACCESS_KEY=minio" -e "MINIO_SECRET_KEY=miniosecretkey" -v ~/shared:/container/vol minio/minio gateway nas /container/vol
+  - docker run -it -d -p 9001:9000 --restart always -e "MINIO_ACCESS_KEY=minio" -e "MINIO_SECRET_KEY=miniosecretkey" -v ~/unittest:/container/vol minio/minio gateway nas /container/vol
 
 # command to install dependencies
 install:

@@ -26,7 +26,7 @@ class DataTest(unittest.TestCase):
     data_saver = None
     dataset = None
     storage_config = {
-        "endpoint": "127.0.0.1:9000",
+        "endpoint": "127.0.0.1:9001",
         "access_key": "minio",
         "secret_key": "miniosecretkey",
         "secure": False,
