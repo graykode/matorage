@@ -167,6 +167,40 @@ class TorchOptimizerTest(OptimizerTest, unittest.TestCase):
         self.optimizer_manager.load_with_scheduler(optimizer, scheduler, step=938)
         self.assertEqual(_scheduler.state_dict(), scheduler.state_dict())
 
+    def test_optimizer_saver_nas(self):
+
+        model = Model().to(self.device)
+        optimizer = optim.Adam(model.parameters(), lr=0.01)
+        criterion = torch.nn.CrossEntropyLoss()
+
+        train_loader = DataLoader(self.train_dataset, batch_size=64, num_workers=4)
+
+        for batch_idx, (image, target) in enumerate(tqdm(train_loader)):
+            image, target = image.to(self.device), target.to(self.device)
+            optimizer.zero_grad()
+            output = model(image)
+            loss = criterion(output, target)
+            loss.backward()
+            optimizer.step()
+
+        self.optimizer_config = OptimizerConfig(
+            **self.nas_config,
+            optimizer_name="testoptimizernas",
+            additional={"version": "1.0.1"}
+        )
+
+        self.optimizer_manager = OptimizerManager(config=self.optimizer_config)
+        self.optimizer_manager.save(optimizer)
+
+    def test_optimizer_loader_nas(self):
+
+        self.test_optimizer_saver_nas()
+
+        model = Model().to(self.device)
+        optimizer = optim.Adam(model.parameters(), lr=0.01)
+
+        self.optimizer_manager.load(optimizer, step=938)
+
 def suite():
     return unittest.TestSuite(unittest.makeSuite(TorchOptimizerTest))
 
