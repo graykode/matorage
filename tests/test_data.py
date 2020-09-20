@@ -31,6 +31,9 @@ class DataTest(unittest.TestCase):
         "secret_key": "miniosecretkey",
         "secure": False,
     }
+    nas_config = {
+        "endpoint": "/tmp",
+    }
 
     def check_nas(self, endpoint):
         _url_or_path = "//" + endpoint
@@ -59,7 +62,7 @@ class DataTest(unittest.TestCase):
                 if os.path.exists(_file):
                     os.remove(_file)
 
-        if self.dataset is not None:
+        if self.dataset is not None and not self.check_nas(self.dataset.config.endpoint):
             if os.path.exists(self.dataset.cache_path):
                 os.remove(self.dataset.cache_path)
 

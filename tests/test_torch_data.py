@@ -177,6 +177,38 @@ class TorchDataTest(DataTest, unittest.TestCase):
 
         self.assertEqual(_pre_file_mapper, _next_file_mapper)
 
+    def test_torch_saver_nas(self):
+        self.data_config = DataConfig(
+            **self.nas_config,
+            dataset_name="test_torch_saver_nas",
+            additional={"framework": "pytorch"},
+            attributes=[
+                DataAttribute("image", "uint8", (2, 2), itemsize=32),
+                DataAttribute("target", "uint8", (1), itemsize=32),
+            ]
+        )
+
+        self.data_saver = DataSaver(config=self.data_config)
+
+        self.data_saver(
+            {
+                "image": np.asarray([[[1, 2], [3, 4]], [[5, 6], [7, 8]]]),
+                "target": np.asarray([0, 1]),
+            }
+        )
+        self.data_saver.disconnect()
+
+    def test_torch_loader_nas(self):
+        from matorage.torch import Dataset
+
+        self.test_torch_saver_nas()
+
+        self.dataset = Dataset(config=self.data_config)
+        loader = DataLoader(self.dataset, batch_size=64, num_workers=8, shuffle=True)
+
+        for batch_idx, (image, target) in enumerate(tqdm(loader)):
+            pass
+
 def suite():
     return unittest.TestSuite(unittest.makeSuite(TorchDataTest))
 
