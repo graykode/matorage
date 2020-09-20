@@ -32,7 +32,7 @@ class DataTest(unittest.TestCase):
         "secure": False,
     }
     nas_config = {
-        "endpoint": "/tmp",
+        "endpoint": "/tmp/unittest",
     }
 
     def check_nas(self, endpoint):

@@ -27,7 +27,7 @@ class DataSaverTest(StorageTest, unittest.TestCase):
         secret_key="miniosecretkey",
         secure=False,
     )
-    nas_config = NAS(path="/tmp")
+    nas_config = NAS(path="/tmp/unittest")
 
     def _create_bucket(self):
         self.minio_config.make_bucket('testminio')
