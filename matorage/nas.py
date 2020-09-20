@@ -53,8 +53,10 @@ class NAS(object):
         _query = os.path.join(self.path, bucket_name, prefix)
         objects = []
 
-        if prefix:
-            assert '/' in prefix, "prefix should have slash."
+        if '/' in _query:
+            _query = _query.rsplit('/', 1)[0] + '/'
+        else:
+            _query = _base
 
         for f in iglob(f"{_query}/**", recursive=recursive):
             if os.path.isdir(f):
