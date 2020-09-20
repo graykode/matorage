@@ -20,6 +20,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
+from unittest.case import SkipTest
 
 from tests.test_model import ModelTest
 
@@ -50,6 +51,7 @@ class TorchModelTest(ModelTest, unittest.TestCase):
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
     )
+    flag = False
 
     def test_torchmodel_saver(self, model_config=None, save_to_json_file=False):
         if model_config is None:
@@ -115,8 +117,10 @@ class TorchModelTest(ModelTest, unittest.TestCase):
 
         self.model_manager.load("f.weight", step=0)
 
-    @unittest.skip("skip")
-    def test_mnist_eval(self, model, device):
+    def test_mnist_eval(self, model=None, device=None):
+        if not self.flag:
+            raise SkipTest
+
         test_dataset = datasets.MNIST(
             "/tmp/data", train=False, transform=self.transform
         )
@@ -137,6 +141,8 @@ class TorchModelTest(ModelTest, unittest.TestCase):
         return correct
 
     def test_mnist_reloaded(self):
+        self.flag = True
+
         import torch.optim as optim
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -177,6 +183,8 @@ class TorchModelTest(ModelTest, unittest.TestCase):
         assert correct < pretrained_correct
 
     def test_mnist_reloaded_nas(self):
+        self.flag = True
+
         import torch.optim as optim
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

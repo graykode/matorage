@@ -16,7 +16,7 @@ import gc
 import unittest
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import layers, Sequential
+from unittest.case import SkipTest
 
 from tests.test_model import ModelTest
 
@@ -27,6 +27,8 @@ from matorage.testing_utils import require_tf
 
 @require_tf
 class TFModelTest(ModelTest, unittest.TestCase):
+    flag = False
+
     def create_model(self):
         model = tf.keras.models.Sequential(
             [
@@ -76,8 +78,10 @@ class TFModelTest(ModelTest, unittest.TestCase):
 
         self.model_manager.save(self.model, step=0)
 
-    @unittest.skip("skip")
     def test_mnist_train_process(self):
+        if not self.flag:
+            raise SkipTest
+
         (train_images, train_labels), _ = tf.keras.datasets.mnist.load_data()
 
         train_labels = train_labels[:1000]
@@ -97,8 +101,10 @@ class TFModelTest(ModelTest, unittest.TestCase):
 
         self.model_manager.save(model, epoch=1)
 
-    @unittest.skip("skip")
     def test_mnist_eval_process(self):
+        if not self.flag:
+            raise SkipTest
+
         _, (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
 
         test_labels = test_labels[:1000]
@@ -122,6 +128,7 @@ class TFModelTest(ModelTest, unittest.TestCase):
         assert correct < pretrained_correct
 
     def test_mnist_reloaded(self):
+        self.flag = True
 
         import multiprocessing
 
@@ -133,8 +140,10 @@ class TFModelTest(ModelTest, unittest.TestCase):
         process_eval.start()
         process_eval.join()
 
-    @unittest.skip("skip")
     def test_mnist_train_process_nas(self):
+        if not self.flag:
+            raise SkipTest
+
         (train_images, train_labels), _ = tf.keras.datasets.mnist.load_data()
 
         train_labels = train_labels[:1000]
@@ -152,8 +161,10 @@ class TFModelTest(ModelTest, unittest.TestCase):
 
         self.model_manager.save(model, epoch=1)
 
-    @unittest.skip("skip")
     def test_mnist_eval_process_nas(self):
+        if not self.flag:
+            raise SkipTest
+
         _, (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
 
         test_labels = test_labels[:1000]
@@ -175,6 +186,7 @@ class TFModelTest(ModelTest, unittest.TestCase):
         assert correct < pretrained_correct
 
     def test_mnist_reloaded_nas(self):
+        self.flag = True
 
         import multiprocessing
 
