@@ -176,6 +176,46 @@ class TorchModelTest(ModelTest, unittest.TestCase):
 
         assert correct < pretrained_correct
 
+    def test_mnist_reloaded_nas(self):
+        import torch.optim as optim
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        train_dataset = datasets.MNIST(
+            "/tmp/data", train=True, download=True, transform=self.transform
+        )
+
+        model = Model().to(device)
+        optimizer = optim.Adam(model.parameters(), lr=0.01)
+        criterion = torch.nn.CrossEntropyLoss()
+
+        train_loader = DataLoader(train_dataset, batch_size=64, num_workers=4)
+
+        for batch_idx, (image, target) in enumerate(tqdm(train_loader)):
+            image, target = image.to(device), target.to(device)
+            optimizer.zero_grad()
+            output = model(image)
+            loss = criterion(output, target)
+            loss.backward()
+            optimizer.step()
+
+        self.model_config = ModelConfig(
+            **self.nas_config,
+            model_name="test_torch_mnist_nas",
+            additional={"version": "1.0.1"}
+        )
+        self.model_manager = ModelManager(config=self.model_config)
+
+        self.model_manager.save(model, epoch=1)
+
+        pretrained_model = Model().to(device)
+        correct = self.test_mnist_eval(model=pretrained_model, device=device)
+
+        self.model_manager.load(pretrained_model, epoch=1)
+        pretrained_correct = self.test_mnist_eval(model=pretrained_model, device=device)
+
+        assert correct < pretrained_correct
+
 
 def suite():
     return unittest.TestSuite(unittest.makeSuite(TorchModelTest))

@@ -30,6 +30,9 @@ class ModelTest(unittest.TestCase):
         "secret_key": "miniosecretkey",
         "secure": False,
     }
+    nas_config = {
+        "endpoint": "/tmp",
+    }
 
     def check_nas(self, endpoint):
         _url_or_path = "//" + endpoint

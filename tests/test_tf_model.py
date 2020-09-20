@@ -133,6 +133,59 @@ class TFModelTest(ModelTest, unittest.TestCase):
         process_eval.start()
         process_eval.join()
 
+    @unittest.skip("skip")
+    def test_mnist_train_process_nas(self):
+        (train_images, train_labels), _ = tf.keras.datasets.mnist.load_data()
+
+        train_labels = train_labels[:1000]
+        train_images = train_images[:1000].reshape(-1, 28 * 28) / 255.0
+
+        model = self.create_model()
+        model.fit(train_images, train_labels, epochs=5)
+
+        self.model_config = ModelConfig(
+            **self.nas_config,
+            model_name="test_tf_mnist_nas",
+            additional={"version": "1.0.1"},
+        )
+        self.model_manager = ModelManager(config=self.model_config)
+
+        self.model_manager.save(model, epoch=1)
+
+    @unittest.skip("skip")
+    def test_mnist_eval_process_nas(self):
+        _, (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
+
+        test_labels = test_labels[:1000]
+        test_images = test_images[:1000].reshape(-1, 28 * 28) / 255.0
+
+        model = self.create_model()
+        _, correct = model.evaluate(test_images, test_labels, verbose=2)
+
+        self.model_config = ModelConfig(
+            **self.nas_config,
+            model_name="test_tf_mnist_nas",
+            additional={"version": "1.0.1"},
+        )
+        self.model_manager = ModelManager(config=self.model_config)
+
+        self.model_manager.load(model, epoch=1)
+        _, pretrained_correct = model.evaluate(test_images, test_labels, verbose=2)
+
+        assert correct < pretrained_correct
+
+    def test_mnist_reloaded_nas(self):
+
+        import multiprocessing
+
+        process_train = multiprocessing.Process(target=self.test_mnist_train_process_nas)
+        process_train.start()
+        process_train.join()
+
+        process_eval = multiprocessing.Process(target=self.test_mnist_eval_process_nas)
+        process_eval.start()
+        process_eval.join()
+
 
 def suite():
     return unittest.TestSuite(unittest.makeSuite(TFModelTest))
