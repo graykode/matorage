@@ -77,4 +77,8 @@ class NAS(object):
         shutil.rmtree(os.path.join(self.path, bucket_name))
 
     def remove_object(self, bucket_name, object_name):
-        os.remove(os.path.join(self.path, bucket_name, object_name))
+        _path = os.path.join(self.path, bucket_name, object_name)
+        if os.path.isdir(_path):
+            shutil.rmtree(_path)
+        else:
+            os.remove(_path)
