@@ -96,7 +96,7 @@ class Manager(object):
             "/", self.type, obj=weight, filters=tables.Filters(**self.config.compressor)
         )
 
-        if group is not None:
+        if group:
             self._uploader.set_queue(
                 local_file=_file.get_file_image(), remote_file=f"{step}/{group}/{name}"
             )
