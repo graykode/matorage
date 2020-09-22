@@ -102,6 +102,44 @@ class TFOptimizerTest(OptimizerTest, unittest.TestCase):
         for i in range(1, len(after_optim_weight)):
             assert not np.array_equal(after_optim_weight, before_optim_weight)
 
+    def test_optimizer_saver_nas(self):
+
+        (train_images, train_labels), _ = tf.keras.datasets.mnist.load_data()
+        train_labels = train_labels[:1000]
+        train_images = train_images[:1000].reshape(-1, 28 * 28) / 255.0
+
+        self.model = self.create_model()
+        self.model.fit(train_images, train_labels, epochs=1)
+
+        self.optimizer_config = OptimizerConfig(
+            **self.nas_config,
+            optimizer_name="test_optimizer_saver_nas",
+            additional={"framework": "tensorflow"}
+        )
+
+        self.optimizer_manager = OptimizerManager(config=self.optimizer_config)
+
+        self.optimizer_manager.save(self.model.optimizer)
+
+    def test_optimizer_loader_nas(self):
+
+        (train_images, train_labels), _ = tf.keras.datasets.mnist.load_data()
+        train_labels = train_labels[:1000]
+        train_images = train_images[:1000].reshape(-1, 28 * 28) / 255.0
+
+        self.model = self.create_model()
+        self.model.fit(train_images, train_labels, epochs=1)
+        before_optim_weight = copy.deepcopy(self.model.optimizer.get_weights())
+
+        self.test_optimizer_saver_nas()
+
+        self.optimizer_manager.load(self.model.optimizer, step=32)
+        after_optim_weight = self.model.optimizer.get_weights()
+
+        assert len(before_optim_weight) == len(after_optim_weight)
+        for i in range(1, len(after_optim_weight)):
+            assert not np.array_equal(after_optim_weight, before_optim_weight)
+
 
 def suite():
     return unittest.TestSuite(unittest.makeSuite(TFOptimizerTest))

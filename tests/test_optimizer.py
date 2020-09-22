@@ -25,10 +25,13 @@ class OptimizerTest(unittest.TestCase):
     optimizer_config_file = None
     optimizer_manager = None
     storage_config = {
-        "endpoint": "127.0.0.1:9000",
+        "endpoint": "127.0.0.1:9001",
         "access_key": "minio",
         "secret_key": "miniosecretkey",
         "secure": False,
+    }
+    nas_config = {
+        "endpoint": "/tmp/unittest",
     }
 
     def check_nas(self, endpoint):

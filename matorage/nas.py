@@ -14,6 +14,7 @@
 
 import os
 import shutil
+from glob import iglob
 
 
 class Obj(object):
@@ -29,7 +30,7 @@ class NAS(object):
         return os.path.exists(os.path.join(self.path, bucket_name))
 
     def fget_object(self, bucket_name, object_name, file_path):
-        pass
+        raise NotImplementedError
 
     def fput_object(self, bucket_name, object_name, file_path, part_size=None):
         _filename = os.path.join(self.path, bucket_name, object_name)
@@ -48,22 +49,36 @@ class NAS(object):
             shutil.copyfileobj(data, f, length=length)
 
     def list_objects(self, bucket_name, prefix="", recursive=False):
-        _foldername = os.path.join(self.path, bucket_name, prefix)
-        if not recursive:
-            objects = [
-                os.path.join(prefix, f) for f in os.listdir(_foldername)
-            ]
+        _base = os.path.join(self.path, bucket_name)
+        _query = os.path.join(self.path, bucket_name, prefix)
+        objects = []
+
+        if '/' in _query:
+            _query = _query.rsplit('/', 1)[0] + '/'
         else:
-            objects = [
-                os.path.join(dp, f) for dp, dn, fn in os.walk(_foldername) for f in fn
-            ]
+            _query = _base
+
+        for f in iglob(f"{_query}/**", recursive=recursive):
+            if os.path.isdir(f):
+                f = f.replace(f"{_base}/", '')
+                if f and not recursive:
+                    objects.append(f"{f}/")
+            else:
+                f = f.replace(f"{_base}/", '')
+                if f:
+                    objects.append(f)
+
         return [Obj(o) for o in objects if o.startswith(prefix)]
 
-    def make_bucket(self, bucket_name, location):
+    def make_bucket(self, bucket_name, location='us-east-1'):
         os.makedirs(os.path.join(self.path, bucket_name))
 
     def remove_bucket(self, bucket_name):
         shutil.rmtree(os.path.join(self.path, bucket_name))
 
     def remove_object(self, bucket_name, object_name):
-        os.remove(os.path.join(self.path, bucket_name, object_name))
+        _path = os.path.join(self.path, bucket_name, object_name)
+        if os.path.isdir(_path):
+            shutil.rmtree(_path)
+        else:
+            os.remove(_path)

@@ -20,18 +20,14 @@ from urllib.parse import urlsplit
 from matorage.nas import NAS
 
 
-class ModelTest(unittest.TestCase):
-    model_config = None
-    model_config_file = None
-    model_manager = None
+class StorageTest(unittest.TestCase):
+    minio_config = None
+    nas_config = None
     storage_config = {
         "endpoint": "127.0.0.1:9001",
         "access_key": "minio",
         "secret_key": "miniosecretkey",
         "secure": False,
-    }
-    nas_config = {
-        "endpoint": "/tmp/unittest",
     }
 
     def check_nas(self, endpoint):
@@ -44,18 +40,17 @@ class ModelTest(unittest.TestCase):
         raise ValueError("This endpoint is not suitable.")
 
     def tearDown(self):
-        if self.model_manager is not None:
-            # delete bucket
-            client = (
-                Minio(**self.storage_config)
-                if not self.check_nas(self.model_config.endpoint)
-                else NAS(self.model_config.endpoint)
-            )
-            objects = client.list_objects(self.model_config.bucket_name, recursive=True)
+        if self.minio_config:
+            objects = self.minio_config.list_objects('testminio', recursive=True)
             for obj in objects:
-                client.remove_object(self.model_config.bucket_name, obj.object_name)
-            client.remove_bucket(self.model_config.bucket_name)
+                self.minio_config.remove_object('testminio', obj.object_name)
+            self.minio_config.remove_bucket('testminio')
 
-        if self.model_config_file is not None:
-            if os.path.exists(self.model_config_file):
-                os.remove(self.model_config_file)
+        if self.nas_config:
+            objects = self.nas_config.list_objects('testnas', recursive=True)
+            for obj in objects:
+                self.nas_config.remove_object('testnas', obj.object_name)
+            self.nas_config.remove_bucket('testnas')
+
+        if os.path.exists('test'):
+            os.remove('test')

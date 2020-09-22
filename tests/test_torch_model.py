@@ -20,6 +20,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
+from unittest.case import SkipTest
 
 from tests.test_model import ModelTest
 
@@ -50,6 +51,7 @@ class TorchModelTest(ModelTest, unittest.TestCase):
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
     )
+    flag = False
 
     def test_torchmodel_saver(self, model_config=None, save_to_json_file=False):
         if model_config is None:
@@ -115,8 +117,10 @@ class TorchModelTest(ModelTest, unittest.TestCase):
 
         self.model_manager.load("f.weight", step=0)
 
-    @unittest.skip("skip")
-    def test_mnist_eval(self, model, device):
+    def test_mnist_eval(self, model=None, device=None):
+        if not self.flag:
+            raise SkipTest
+
         test_dataset = datasets.MNIST(
             "/tmp/data", train=False, transform=self.transform
         )
@@ -137,6 +141,8 @@ class TorchModelTest(ModelTest, unittest.TestCase):
         return correct
 
     def test_mnist_reloaded(self):
+        self.flag = True
+
         import torch.optim as optim
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -162,6 +168,48 @@ class TorchModelTest(ModelTest, unittest.TestCase):
         self.model_config = ModelConfig(
             **self.storage_config,
             model_name="testmodel",
+            additional={"version": "1.0.1"}
+        )
+        self.model_manager = ModelManager(config=self.model_config)
+
+        self.model_manager.save(model, epoch=1)
+
+        pretrained_model = Model().to(device)
+        correct = self.test_mnist_eval(model=pretrained_model, device=device)
+
+        self.model_manager.load(pretrained_model, epoch=1)
+        pretrained_correct = self.test_mnist_eval(model=pretrained_model, device=device)
+
+        assert correct < pretrained_correct
+
+    def test_mnist_reloaded_nas(self):
+        self.flag = True
+
+        import torch.optim as optim
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        train_dataset = datasets.MNIST(
+            "/tmp/data", train=True, download=True, transform=self.transform
+        )
+
+        model = Model().to(device)
+        optimizer = optim.Adam(model.parameters(), lr=0.01)
+        criterion = torch.nn.CrossEntropyLoss()
+
+        train_loader = DataLoader(train_dataset, batch_size=64, num_workers=4)
+
+        for batch_idx, (image, target) in enumerate(tqdm(train_loader)):
+            image, target = image.to(device), target.to(device)
+            optimizer.zero_grad()
+            output = model(image)
+            loss = criterion(output, target)
+            loss.backward()
+            optimizer.step()
+
+        self.model_config = ModelConfig(
+            **self.nas_config,
+            model_name="test_torch_mnist_nas",
             additional={"version": "1.0.1"}
         )
         self.model_manager = ModelManager(config=self.model_config)

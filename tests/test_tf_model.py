@@ -16,7 +16,7 @@ import gc
 import unittest
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import layers, Sequential
+from unittest.case import SkipTest
 
 from tests.test_model import ModelTest
 
@@ -27,6 +27,8 @@ from matorage.testing_utils import require_tf
 
 @require_tf
 class TFModelTest(ModelTest, unittest.TestCase):
+    flag = False
+
     def create_model(self):
         model = tf.keras.models.Sequential(
             [
@@ -75,64 +77,6 @@ class TFModelTest(ModelTest, unittest.TestCase):
         self.model_manager = ModelManager(config=self.model_config)
 
         self.model_manager.save(self.model, step=0)
-
-    @unittest.skip("skip")
-    def test_mnist_train_process(self):
-        (train_images, train_labels), _ = tf.keras.datasets.mnist.load_data()
-
-        train_labels = train_labels[:1000]
-        train_images = train_images[:1000].reshape(-1, 28 * 28) / 255.0
-
-        model = self.create_model()
-        model.fit(train_images, train_labels, epochs=5)
-
-        self.model_config = ModelConfig(
-            endpoint="127.0.0.1:9000",
-            access_key="minio",
-            secret_key="miniosecretkey",
-            model_name="test_tf_mnist",
-            additional={"version": "1.0.1"},
-        )
-        self.model_manager = ModelManager(config=self.model_config)
-
-        self.model_manager.save(model, epoch=1)
-
-    @unittest.skip("skip")
-    def test_mnist_eval_process(self):
-        _, (test_images, test_labels) = tf.keras.datasets.mnist.load_data()
-
-        test_labels = test_labels[:1000]
-        test_images = test_images[:1000].reshape(-1, 28 * 28) / 255.0
-
-        model = self.create_model()
-        _, correct = model.evaluate(test_images, test_labels, verbose=2)
-
-        self.model_config = ModelConfig(
-            endpoint="127.0.0.1:9000",
-            access_key="minio",
-            secret_key="miniosecretkey",
-            model_name="test_tf_mnist",
-            additional={"version": "1.0.1"},
-        )
-        self.model_manager = ModelManager(config=self.model_config)
-
-        self.model_manager.load(model, epoch=1)
-        _, pretrained_correct = model.evaluate(test_images, test_labels, verbose=2)
-
-        assert correct < pretrained_correct
-
-    def test_mnist_reloaded(self):
-
-        import multiprocessing
-
-        process_train = multiprocessing.Process(target=self.test_mnist_train_process)
-        process_train.start()
-        process_train.join()
-
-        process_eval = multiprocessing.Process(target=self.test_mnist_eval_process)
-        process_eval.start()
-        process_eval.join()
-
 
 def suite():
     return unittest.TestSuite(unittest.makeSuite(TFModelTest))

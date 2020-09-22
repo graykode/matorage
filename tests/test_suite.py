@@ -12,6 +12,7 @@ from matorage.utils import is_torch_available, is_tf_available
 def suite():
     test_modules = [
         "tests.test_datasaver",
+        "tests.test_nas",
     ]
     if is_torch_available():
         test_modules.extend([

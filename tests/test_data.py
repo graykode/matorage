@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import shutil
 import unittest
 from minio import Minio
 from urllib.parse import urlsplit
@@ -26,11 +27,15 @@ class DataTest(unittest.TestCase):
     data_saver = None
     dataset = None
     storage_config = {
-        "endpoint": "127.0.0.1:9000",
+        "endpoint": "127.0.0.1:9001",
         "access_key": "minio",
         "secret_key": "miniosecretkey",
         "secure": False,
     }
+    nas_config = {
+        "endpoint": "/tmp/unittest",
+    }
+    cache_folder_path = "/tmp/unittest_cache"
 
     def check_nas(self, endpoint):
         _url_or_path = "//" + endpoint
@@ -40,6 +45,10 @@ class DataTest(unittest.TestCase):
         if u.netloc:
             return False
         raise ValueError("This endpoint is not suitable.")
+
+    def setUp(self):
+        if os.path.exists(self.cache_folder_path):
+            shutil.rmtree(self.cache_folder_path)
 
     def tearDown(self):
         if self.data_saver is not None:
@@ -59,9 +68,9 @@ class DataTest(unittest.TestCase):
                 if os.path.exists(_file):
                     os.remove(_file)
 
-        if self.dataset is not None:
-            if os.path.exists(self.dataset.cache_path):
-                os.remove(self.dataset.cache_path)
+        if self.dataset is not None and not self.check_nas(self.dataset.config.endpoint):
+            if os.path.exists(self.cache_folder_path):
+                shutil.rmtree(self.cache_folder_path)
 
         if self.data_config_file is not None:
             if os.path.exists(self.data_config_file):
