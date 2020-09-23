@@ -87,6 +87,7 @@ class Manager(object):
         self._uploader_closing()
 
     def _save_param(self, step, group, name, weight):
+        group = str(group)
         _local_file = tempfile.mktemp(f"{name}.h5")
 
         _file = tables.open_file(
