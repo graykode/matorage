@@ -424,6 +424,18 @@ class DataSaverTest(DataTest, unittest.TestCase):
         with open(_local_filepath, 'r') as f:
             self.assertEqual(f.read(), 'this is test')
 
+    def test_datasaver_context_manager(self):
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name="test_datasaver_context_manager",
+            attributes=[DataAttribute("x", "float64", (2), itemsize=32)],
+        )
+
+        x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        with DataSaver(config=self.data_config) as self.data_saver:
+            self.assertEqual(x.shape, (3, 2))
+            self.data_saver({"x": x})
+
 
 @unittest.skipIf(
     'access_key' not in os.environ or 'secret_key' not in os.environ, 'S3 Skip'

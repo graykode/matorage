@@ -161,6 +161,12 @@ class DataSaver(object):
 
         atexit.register(self._exit)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.disconnect()
+
     def _append_file(self):
         """
         upload file to key called `<bucket_name>/key`.
