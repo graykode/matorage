@@ -46,4 +46,4 @@ def test(verbose=False):
         return 1
 
 if __name__ == '__main__':
-    test()
+    unittest.main(defaultTest='test')
