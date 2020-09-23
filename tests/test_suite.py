@@ -37,13 +37,5 @@ def suite():
         alltests.addTest(test_suite())
     return alltests
 
-
-def test(verbose=False):
-    result = unittest.TextTestRunner(verbosity=1 + int(verbose)).run(suite())
-    if result.wasSuccessful():
-        return 0
-    else:
-        return 1
-
 if __name__ == '__main__':
-    unittest.main(defaultTest='test')
+    unittest.main(defaultTest="suite", warnings=False)
