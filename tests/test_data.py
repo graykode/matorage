@@ -46,9 +46,9 @@ class DataTest(unittest.TestCase):
             return False
         raise ValueError("This endpoint is not suitable.")
 
-    def setUp(self):
-        if os.path.exists(self.cache_folder_path):
-            shutil.rmtree(self.cache_folder_path)
+    # def setUp(self):
+    #     if os.path.exists(self.cache_folder_path):
+    #         shutil.rmtree(self.cache_folder_path)
 
     def tearDown(self):
         if self.data_saver is not None:
