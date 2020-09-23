@@ -177,6 +177,34 @@ class TorchDataTest(DataTest, unittest.TestCase):
 
         self.assertEqual(_pre_file_mapper, _next_file_mapper)
 
+    def test_datasaver_filetype(self):
+        from matorage.torch import Dataset
+
+        self.data_config = DataConfig(
+            **self.storage_config,
+            dataset_name="test_datasaver_filetype",
+            attributes=[DataAttribute("x", "float64", (2), itemsize=32)],
+        )
+        self.data_saver = DataSaver(config=self.data_config)
+        x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        self.assertEqual(x.shape, (3, 2))
+        self.data_saver({"x": x})
+
+        _file = open("test.txt", "w")
+        _file.write('this is test')
+        self.data_saver({"file": "test.txt"}, filetype=True)
+        _file.close()
+
+        self.data_saver.disconnect()
+
+        self.dataset = Dataset(config=self.data_config, cache_folder_path=self.cache_folder_path)
+        self.assertEqual(
+            self.dataset.get_filetype_list, ["file"]
+        )
+        _local_filepath = self.dataset.get_filetype_from_key("file")
+        with open(_local_filepath, 'r') as f:
+            self.assertEqual(f.read(), 'this is test')
+
     def test_torch_saver_nas(self):
         self.data_config = DataConfig(
             **self.nas_config,
