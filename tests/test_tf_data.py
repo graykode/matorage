@@ -62,7 +62,7 @@ class TFDataTest(DataTest, unittest.TestCase):
 
         self.test_tf_saver()
 
-        self.dataset = Dataset(config=self.data_config)
+        self.dataset = Dataset(config=self.data_config, cache_folder_path=self.cache_folder_path)
 
         for batch_idx, (image, target) in enumerate(
             tqdm(self.dataset.dataloader, total=2)
@@ -85,7 +85,7 @@ class TFDataTest(DataTest, unittest.TestCase):
 
         self.test_tf_saver(data_config=data_config)
 
-        self.dataset = Dataset(config=data_config)
+        self.dataset = Dataset(config=data_config, cache_folder_path=self.cache_folder_path)
 
         for batch_idx, (image, target) in enumerate(
             tqdm(self.dataset.dataloader, total=2)
@@ -97,7 +97,7 @@ class TFDataTest(DataTest, unittest.TestCase):
 
         self.test_tf_loader()
 
-        dataset = Dataset(config=self.data_config, index=True)
+        dataset = Dataset(config=self.data_config, index=True, cache_folder_path=self.cache_folder_path)
 
         assert tf.reduce_all(
             tf.equal(dataset[0][0], tf.constant([[1, 2], [3, 4]], dtype=tf.uint8))
@@ -120,7 +120,7 @@ class TFDataTest(DataTest, unittest.TestCase):
 
         self.test_tf_saver(data_config=data_config)
 
-        dataset = Dataset(config=self.data_config, index=True)
+        dataset = Dataset(config=self.data_config, index=True, cache_folder_path=self.cache_folder_path)
 
         assert tf.reduce_all(
             tf.equal(dataset[0][0], tf.constant([[1, 2], [3, 4]], dtype=tf.uint8))
@@ -155,7 +155,7 @@ class TFDataTest(DataTest, unittest.TestCase):
 
         self.data_config = DataConfig.from_json_file(self.data_config_file)
 
-        self.dataset = Dataset(config=self.data_config)
+        self.dataset = Dataset(config=self.data_config, cache_folder_path=self.cache_folder_path)
 
         for batch_idx, (image, target) in enumerate(
             tqdm(self.dataset.dataloader, total=2)
@@ -171,7 +171,7 @@ class TFDataTest(DataTest, unittest.TestCase):
             with open(self.dataset.cache_path) as f:
                 _pre_file_mapper = json.load(f)
 
-        self.dataset = Dataset(config=self.data_config, clear=False)
+        self.dataset = Dataset(config=self.data_config, clear=False, cache_folder_path=self.cache_folder_path)
 
         if os.path.exists(self.dataset.cache_path):
             with open(self.dataset.cache_path) as f:
@@ -205,7 +205,7 @@ class TFDataTest(DataTest, unittest.TestCase):
 
         self.test_tf_saver_nas()
 
-        self.dataset = Dataset(config=self.data_config)
+        self.dataset = Dataset(config=self.data_config, cache_folder_path=self.cache_folder_path)
 
         for batch_idx, (image, target) in enumerate(
             tqdm(self.dataset.dataloader, total=2)

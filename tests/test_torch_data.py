@@ -63,7 +63,7 @@ class TorchDataTest(DataTest, unittest.TestCase):
 
         self.test_torch_saver()
 
-        self.dataset = Dataset(config=self.data_config)
+        self.dataset = Dataset(config=self.data_config, cache_folder_path=self.cache_folder_path)
         loader = DataLoader(self.dataset, batch_size=64, num_workers=8, shuffle=True)
 
         for batch_idx, (image, target) in enumerate(tqdm(loader)):
@@ -85,7 +85,7 @@ class TorchDataTest(DataTest, unittest.TestCase):
 
         self.test_torch_saver(data_config=data_config)
 
-        self.dataset = Dataset(config=data_config)
+        self.dataset = Dataset(config=data_config, cache_folder_path=self.cache_folder_path)
         loader = DataLoader(self.dataset, batch_size=64, num_workers=8, shuffle=True)
 
         for batch_idx, (image, target) in enumerate(tqdm(loader)):
@@ -96,7 +96,7 @@ class TorchDataTest(DataTest, unittest.TestCase):
 
         self.test_torch_saver()
 
-        dataset = Dataset(config=self.data_config, index=True)
+        dataset = Dataset(config=self.data_config, index=True, cache_folder_path=self.cache_folder_path)
 
         assert torch.equal(
             dataset[0][0], torch.tensor([[1, 2], [3, 4]], dtype=torch.uint8)
@@ -119,7 +119,7 @@ class TorchDataTest(DataTest, unittest.TestCase):
 
         self.test_torch_saver(data_config=data_config)
 
-        dataset = Dataset(config=self.data_config, index=True)
+        dataset = Dataset(config=self.data_config, index=True, cache_folder_path=self.cache_folder_path)
 
         assert torch.equal(
             dataset[0][0], torch.tensor([[1, 2], [3, 4]], dtype=torch.uint8)
@@ -154,7 +154,7 @@ class TorchDataTest(DataTest, unittest.TestCase):
 
         self.data_config = DataConfig.from_json_file(self.data_config_file)
 
-        self.dataset = Dataset(config=self.data_config)
+        self.dataset = Dataset(config=self.data_config, cache_folder_path=self.cache_folder_path)
         loader = DataLoader(self.dataset, batch_size=64, num_workers=8, shuffle=True)
 
         for batch_idx, (image, target) in enumerate(tqdm(loader)):
@@ -169,7 +169,7 @@ class TorchDataTest(DataTest, unittest.TestCase):
             with open(self.dataset.cache_path) as f:
                 _pre_file_mapper = json.load(f)
 
-        self.dataset = Dataset(config=self.data_config, clear=False)
+        self.dataset = Dataset(config=self.data_config, clear=False, cache_folder_path=self.cache_folder_path)
 
         if os.path.exists(self.dataset.cache_path):
             with open(self.dataset.cache_path) as f:
@@ -203,7 +203,7 @@ class TorchDataTest(DataTest, unittest.TestCase):
 
         self.test_torch_saver_nas()
 
-        self.dataset = Dataset(config=self.data_config)
+        self.dataset = Dataset(config=self.data_config, cache_folder_path=self.cache_folder_path)
         loader = DataLoader(self.dataset, batch_size=64, num_workers=8, shuffle=True)
 
         for batch_idx, (image, target) in enumerate(tqdm(loader)):

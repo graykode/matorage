@@ -416,7 +416,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
 
         self.data_saver.disconnect()
 
-        self.dataset = Dataset(config=self.data_config)
+        self.dataset = Dataset(config=self.data_config, cache_folder_path=self.cache_folder_path)
         self.assertEqual(
             self.dataset.get_filetype_list, ["file"]
         )
@@ -489,7 +489,7 @@ class DataS3SaverTest(DataS3Test, unittest.TestCase):
 
         self.data_saver.disconnect()
 
-        self.dataset = Dataset(config=self.data_config)
+        self.dataset = Dataset(config=self.data_config, cache_folder_path=self.cache_folder_path)
         self.assertEqual(
             self.dataset.get_filetype_list, ["file"]
         )
