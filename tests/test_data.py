@@ -81,6 +81,7 @@ class DataTest(unittest.TestCase):
     'access_key' not in os.environ or 'secret_key' not in os.environ, 'S3 Skip'
 )
 class DataS3Test(unittest.TestCase):
+    cache_folder_path = "/tmp/unittest_cache"
 
     data_config = None
     data_config_file = None
