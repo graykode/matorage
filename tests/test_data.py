@@ -46,9 +46,9 @@ class DataTest(unittest.TestCase):
             return False
         raise ValueError("This endpoint is not suitable.")
 
-    def setUp(self):
-        if os.path.exists(self.cache_folder_path):
-            shutil.rmtree(self.cache_folder_path)
+    # def setUp(self):
+    #     if os.path.exists(self.cache_folder_path):
+    #         shutil.rmtree(self.cache_folder_path)
 
     def tearDown(self):
         if self.data_saver is not None:
@@ -81,6 +81,7 @@ class DataTest(unittest.TestCase):
     'access_key' not in os.environ or 'secret_key' not in os.environ, 'S3 Skip'
 )
 class DataS3Test(unittest.TestCase):
+    cache_folder_path = "/tmp/unittest_cache"
 
     data_config = None
     data_config_file = None

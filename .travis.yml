@@ -16,6 +16,7 @@ services:
 
 before_install:
   - mkdir /tmp/unittest
+  - sudo chown -R $USER /tmp/unittest
   - docker pull minio/minio
   - docker run -it -d -p 9001:9000 --restart always -e "MINIO_ACCESS_KEY=minio" -e "MINIO_SECRET_KEY=miniosecretkey" -v /tmp/unittest:/container/vol minio/minio gateway nas /container/vol
 
