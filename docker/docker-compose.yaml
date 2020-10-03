@@ -1,0 +1,13 @@
+version: '3.3'
+services:
+    postgres:
+      container_name: postgres
+      image: postgres:latest
+      ports:
+        - "5432:5432"
+      environment:
+        POSTGRES_USER: ${POSTGRES_USERNAME}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_DB: "matorage"
+      volumes:
+      - "./scripts/:/docker-entrypoint-initdb.d/"
