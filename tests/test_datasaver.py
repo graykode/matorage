@@ -468,6 +468,28 @@ class DataS3SaverTest(DataS3Test, unittest.TestCase):
         with open(_local_filepath, 'r') as f:
             self.assertEqual(f.read(), 'this is test')
 
+    def test_datasaver_s3_sagemaker(self):
+        self.storage_config = {
+            'endpoint': 's3.us-east-1.amazonaws.com',
+            'access_key': os.environ['access_key'],
+            'secret_key': os.environ['secret_key'],
+            'region': 'us-east-1',
+            'secure': False,
+        }
+
+        self.data_config = DataConfig(
+            **self.storage_config,
+            sagemaker=True,
+            dataset_name="test_datasaver_s3_sagemaker",
+            attributes=[DataAttribute("x", "float64", (2), itemsize=32)],
+        )
+        self.data_saver = DataSaver(config=self.data_config)
+        x = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        self.assertEqual(x.shape, (3, 2))
+        self.data_saver({"x": x})
+        self.data_saver.disconnect()
+
+        assert 'sagemaker' in self.data_config.bucket_name
 
 def suite():
     suties = unittest.TestSuite()

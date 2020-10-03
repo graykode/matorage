@@ -64,6 +64,9 @@ class DataConfig(StorageConfig):
         max_object_size (:obj:`integer`, optional, defaults to `10MB`):
             One object file is divided into `max_object_size` and stored.
 
+        sagemaker (:obj:`boolean`, optional, defaults to `False`):
+            Bucket naming option for AWS sagemaker.
+
     Examples::
 
         from matorage import DataConfig, DataAttribute
@@ -125,6 +128,9 @@ class DataConfig(StorageConfig):
         self.attributes = kwargs.pop("attributes", None)
         self.compressor = kwargs.pop("compressor", {"complevel": 0, "complib": "zlib"})
         self.max_object_size = kwargs.pop("max_object_size", 10 * _MB)
+        self.sagemaker = kwargs.pop("sagemaker", False)
+        if self.sagemaker:
+            self.type = "dataset-sagemaker"
 
         self.bucket_name = self._hashmap_transfer()
 
