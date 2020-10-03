@@ -21,4 +21,4 @@ services:
         MINIO_SECRET_KEY: ${MATORAGE_SECRET_KEY}
       command: gateway nas /container/vol
       volumes:
-        - "./shared:/container/vol"
+        - "${MATORAGE_NAS_FOLDER}:/container/vol"
