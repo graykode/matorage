@@ -45,6 +45,7 @@ class DataMetadata(Serialize):
         self.attributes = kwargs.pop("attributes", None)
         self.compressor = kwargs.pop("compressor", {"complevel": 0, "complib": "zlib"})
 
+        self.sagemaker = kwargs.pop("sagemaker", False)
         self.indexer = {}
         self.filetype = []
 

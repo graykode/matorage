@@ -294,6 +294,7 @@ class DataConfig(StorageConfig):
         output["additional"] = self.metadata.additional
         output["attributes"] = [_attribute.to_dict() for _attribute in self.attributes]
         output["compressor"] = self.metadata.compressor
+        output["sagemaker"] = self.metadata.sagemaker
         return output
 
     @classmethod
