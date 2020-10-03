@@ -141,3 +141,7 @@ cython_debug/
 *cy.c
 test.py
 *.h5
+
+# docker
+!docker/**/.gitkeep
+!docker/**/.env
