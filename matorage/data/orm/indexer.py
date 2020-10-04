@@ -22,7 +22,7 @@ Base = declarative_base()
 class Indexer(Base):
     __tablename__ = 'indexer'
     id = Column(Integer, primary_key=True, nullable=False)
-    start = Column(BigInteger, nullable=False)
+    end = Column(BigInteger, nullable=False)
     length = Column(Integer, nullable=False)
     name = Column(String(255), nullable=False)
     bucket_id = Column(String(255), ForeignKeyConstraint(Bucket.id))
@@ -30,7 +30,7 @@ class Indexer(Base):
     def __repr__(self):
         return "<Indexer(" \
                    "id='%d', " \
-                   "start='%d', " \
+                   "end='%d', " \
                    "length='%d'" \
                    "name='%s'" \
                    "bucket_id='%s'" \

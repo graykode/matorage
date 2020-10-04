@@ -25,7 +25,7 @@ CREATE TABLE attributes (
 
 CREATE TABLE indexer (
   id integer primary key not null,
-  start bigint not null,
+  end bigint not null,
   length integer not null,
   name varchar(255) not null,
   bucket_id varchar(255),
