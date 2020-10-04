@@ -45,6 +45,7 @@ class DataSaverTest(unittest.TestCase):
 
             self.session.commit()
             self.session.close()
+
         if self.database:
             self.database.dispose()
 
@@ -61,6 +62,7 @@ class DataSaverTest(unittest.TestCase):
                 "complib": "zlib"
             }),
             filetype=str(['test1.h5', 'test2.h5']),
+            sagemaker=True
         )
 
         attribute1 = Attributes(

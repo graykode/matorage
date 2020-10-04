@@ -10,7 +10,8 @@ CREATE TABLE bucket (
   dataset_name varchar(255) not null,
   endpoint varchar(255) not null,
   compressor varchar(255) not null,
-  filetype text not null
+  filetype text not null,
+  sagemaker boolean not null default false
 );
 
 CREATE TABLE attributes (

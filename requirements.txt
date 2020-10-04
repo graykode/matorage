@@ -3,3 +3,5 @@ minio==5.0.10
 h5py
 pytest
 tqdm
+sqlalchemy
+environs

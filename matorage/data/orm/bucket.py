@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Text, ForeignKeyConstraint
+from sqlalchemy import Column, String, Text, Boolean
 
 Base = declarative_base()
 
@@ -25,6 +25,7 @@ class Bucket(Base):
     endpoint = Column(String(255), nullable=False)
     compressor = Column(String(255), nullable=False)
     filetype = Column(Text, nullable=False)
+    sagemaker = Column(Boolean, default=False)
 
     def __repr__(self):
         return "<Bucket(" \
@@ -34,7 +35,9 @@ class Bucket(Base):
                    "endpoint='%s'" \
                    "compressor='%s'" \
                    "filetype='%s'" \
+                   "sagemaker='%s'" \
                ")>" % (
             self.id, self.additional, self.dataset_name,
-            self.endpoint, self.compressor, self.filetype
+            self.endpoint, self.compressor, self.filetype,
+            str(self.sagemaker)
         )
