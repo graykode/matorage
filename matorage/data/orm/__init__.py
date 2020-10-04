@@ -15,9 +15,11 @@
 from matorage.data.orm.attributes import Attributes
 from matorage.data.orm.bucket import Bucket
 from matorage.data.orm.indexer import Indexer
+from matorage.data.orm.files import Files
 
 __all__ = [
     "Attributes",
     "Bucket",
     "Indexer",
+    "Files"
 ]

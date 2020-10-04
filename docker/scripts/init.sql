@@ -14,6 +14,13 @@ CREATE TABLE bucket (
   sagemaker boolean not null default false
 );
 
+CREATE TABLE files(
+  id serial primary key not null,
+  name varchar(255) not null,
+  bucket_id varchar(255),
+  constraint bucket_id foreign key (bucket_id) references bucket(id)
+);
+
 CREATE TABLE attributes (
   id serial primary key not null,
   name varchar(255) not null,
