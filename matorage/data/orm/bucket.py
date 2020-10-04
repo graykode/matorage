@@ -24,7 +24,6 @@ class Bucket(Base):
     dataset_name = Column(String(255), nullable=False)
     endpoint = Column(String(255), nullable=False)
     compressor = Column(String(255), nullable=False)
-    filetype = Column(Text, nullable=False)
     sagemaker = Column(Boolean, default=False)
 
     def __repr__(self):
@@ -34,10 +33,9 @@ class Bucket(Base):
                    "dataset_name='%s'" \
                    "endpoint='%s'" \
                    "compressor='%s'" \
-                   "filetype='%s'" \
                    "sagemaker='%s'" \
                ")>" % (
             self.id, self.additional, self.dataset_name,
-            self.endpoint, self.compressor, self.filetype,
+            self.endpoint, self.compressor,
             str(self.sagemaker)
         )
