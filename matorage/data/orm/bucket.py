@@ -34,8 +34,7 @@ class Bucket(Base):
                    "endpoint='%s'" \
                    "compressor='%s'" \
                    "filetype='%s'" \
-                   "compressor_id='%d'" \
                ")>" % (
             self.id, self.additional, self.dataset_name,
-            self.endpoint, self.compressor, self.filetype, self.compressor_id
+            self.endpoint, self.compressor, self.filetype
         )

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKeyConstraint, BigInteger
+from sqlalchemy import Column, Integer, String, ForeignKey, BigInteger
 
 from matorage.data.orm.bucket import Bucket
 
@@ -21,20 +21,20 @@ Base = declarative_base()
 
 class Indexer(Base):
     __tablename__ = 'indexer'
-    id = Column(Integer, primary_key=True, nullable=False)
-    end = Column(BigInteger, nullable=False)
+    id = Column(Integer, primary_key=True)
+    indexer_end = Column(BigInteger, nullable=False)
     length = Column(Integer, nullable=False)
     name = Column(String(255), nullable=False)
-    bucket_id = Column(String(255), ForeignKeyConstraint(Bucket.id))
+    bucket_id = Column(String(255), ForeignKey(Bucket.id))
 
     def __repr__(self):
         return "<Indexer(" \
                    "id='%d', " \
-                   "end='%d', " \
+                   "indexer_end='%d', " \
                    "length='%d'" \
                    "name='%s'" \
                    "bucket_id='%s'" \
                ")>" % (
-            self.id, self.start, self.length,
+            self.id, self.indexer_end, self.length,
             self.name, self.bucket_id
         )

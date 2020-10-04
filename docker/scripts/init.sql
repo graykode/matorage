@@ -14,7 +14,7 @@ CREATE TABLE bucket (
 );
 
 CREATE TABLE attributes (
-  id integer primary key not null,
+  id serial primary key not null,
   name varchar(255) not null,
   type varchar(255) not null,
   shape varchar(255) not null,
@@ -24,8 +24,8 @@ CREATE TABLE attributes (
 );
 
 CREATE TABLE indexer (
-  id integer primary key not null,
-  end bigint not null,
+  id serial primary key not null,
+  indexer_end bigint not null,
   length integer not null,
   name varchar(255) not null,
   bucket_id varchar(255),

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKeyConstraint
+from sqlalchemy import Column, Integer, String, ForeignKey
 
 from matorage.data.orm.bucket import Bucket
 
@@ -21,12 +21,12 @@ Base = declarative_base()
 
 class Attributes(Base):
     __tablename__ = 'attributes'
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False)
     type = Column(String(255), nullable=False)
     shape = Column(String(255), nullable=False)
     itemsize = Column(Integer, nullable=False)
-    bucket_id = Column(String(255), ForeignKeyConstraint(Bucket.id))
+    bucket_id = Column(String(255), ForeignKey(Bucket.id))
 
     def __repr__(self):
         return "<Attributes(" \
