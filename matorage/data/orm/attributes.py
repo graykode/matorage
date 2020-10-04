@@ -15,6 +15,8 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKeyConstraint
 
+from matorage.data.orm.bucket import Bucket
+
 Base = declarative_base()
 
 class Attributes(Base):
@@ -27,7 +29,7 @@ class Attributes(Base):
     bucket_id = Column(String(255))
 
     ForeignKeyConstraint(
-        ["bucket_id"], ["bucket.id"],
+        [bucket_id], [Bucket.id],
         name="bucket_id"
     )
 

@@ -15,6 +15,8 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKeyConstraint, BigInteger
 
+from matorage.data.orm.bucket import Bucket
+
 Base = declarative_base()
 
 class Indexer(Base):
@@ -26,7 +28,7 @@ class Indexer(Base):
     bucket_id = Column(String(255))
 
     ForeignKeyConstraint(
-        ["bucket_id"], ["bucket.id"],
+        [bucket_id], [Bucket.id],
         name="bucket_id"
     )
 
