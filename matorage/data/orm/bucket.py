@@ -15,18 +15,16 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Text, ForeignKeyConstraint
 
-from matorage.data.orm.compressor import Compressor
-
 Base = declarative_base()
 
 class Bucket(Base):
     __tablename__ = 'bucket'
     id = Column(String(255), primary_key=True, nullable=False)
-    additional = Column(Text)
+    additional = Column(Text, nullable=False)
     dataset_name = Column(String(255), nullable=False)
     endpoint = Column(String(255), nullable=False)
-    filetype = Column(Text)
-    compressor_id = Column(Integer, ForeignKeyConstraint(Compressor.id))
+    compressor = Column(String(255), nullable=False)
+    filetype = Column(Text, nullable=False)
 
     def __repr__(self):
         return "<Bucket(" \

@@ -1,23 +1,16 @@
 -- SET character_set_client = utf8mb4 ;
---DROP TABLE IF EXISTS compressor CASCADE;
 --DROP TABLE IF EXISTS bucket CASCADE;
 --DROP TABLE IF EXISTS attributes CASCADE;
 --DROP TABLE IF EXISTS indexer CASCADE;
 
-CREATE TABLE compressor (
-  id integer primary key not null,
-  complevel integer not null,
-  complib varchar(255) not null
-);
 
 CREATE TABLE bucket (
   id varchar(255) primary key not null,
-  additional text,
+  additional text not null,
   dataset_name varchar(255) not null,
   endpoint varchar(255) not null,
-  filetype text,
-  compressor_id integer,
-  constraint compressor_id foreign key(compressor_id) references compressor(id)
+  compressor varchar(255) not null,
+  filetype text not null
 );
 
 CREATE TABLE attributes (
