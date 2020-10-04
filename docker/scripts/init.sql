@@ -5,7 +5,7 @@
 --DROP TABLE IF EXISTS indexer CASCADE;
 
 CREATE TABLE compressor (
-  id integer primary key,
+  id integer primary key not null,
   complevel integer not null,
   complib varchar(255) not null
 );
@@ -22,9 +22,9 @@ CREATE TABLE bucket (
 
 CREATE TABLE attributes (
   id integer primary key not null,
-  name varchar(255),
-  type varchar(255),
-  shape varchar(255),
+  name varchar(255) not null,
+  type varchar(255) not null,
+  shape varchar(255) not null,
   itemsize integer not null,
   bucket_id varchar(255),
   constraint bucket_id foreign key (bucket_id) references bucket(id)
