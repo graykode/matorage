@@ -1,0 +1,24 @@
+version: '3.3'
+services:
+    postgres:
+      container_name: postgres
+      image: postgres:latest
+      ports:
+        - "5433:5432"
+      environment:
+        POSTGRES_USER: ${MATORAGE_ACCESS_KEY}
+        POSTGRES_PASSWORD: ${MATORAGE_SECRET_KEY}
+        POSTGRES_DB: "matorage"
+      volumes:
+      - "../docker/scripts/:/docker-entrypoint-initdb.d/"
+    minio:
+      container_name: minio
+      image: minio/minio
+      ports:
+        - "9001:9000"
+      environment:
+        MINIO_ACCESS_KEY: ${MATORAGE_ACCESS_KEY}
+        MINIO_SECRET_KEY: ${MATORAGE_SECRET_KEY}
+      command: gateway nas /container/vol
+      volumes:
+        - "${MATORAGE_NAS_FOLDER}:/container/vol"

@@ -42,7 +42,7 @@ class DataSaverTest(unittest.TestCase):
         if self.session:
             self.session.query(Attributes).filter_by(bucket_id='test_bucket').delete()
             self.session.query(Indexer).filter_by(bucket_id='test_bucket').delete()
-            self.session.query(Files).filter_by(id='test_bucket').delete()
+            self.session.query(Files).filter_by(bucket_id='test_bucket').delete()
 
             self.session.query(Bucket).filter_by(id='test_bucket').delete()
 

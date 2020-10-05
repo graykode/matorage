@@ -16,10 +16,31 @@ import os
 import shutil
 import unittest
 from minio import Minio
+from environs import Env
 from urllib.parse import urlsplit
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from matorage.nas import NAS
+from matorage.data.orm import *
 
+
+def delete_database(bucket_name):
+    database = create_engine(
+        f'postgresql://minio:miniosecretkey@127.0.0.1:5433/matorage'
+    )
+    Session = sessionmaker(bind=database)
+    session = Session()
+
+    session.query(Attributes).filter_by(bucket_id=bucket_name).delete()
+    session.query(Indexer).filter_by(bucket_id=bucket_name).delete()
+    session.query(Files).filter_by(bucket_id=bucket_name).delete()
+    session.query(Bucket).filter_by(id=bucket_name).delete()
+
+    session.commit()
+
+    session.close()
+    database.dispose()
 
 class DataTest(unittest.TestCase):
     data_config = None
@@ -28,12 +49,16 @@ class DataTest(unittest.TestCase):
     dataset = None
     storage_config = {
         "endpoint": "127.0.0.1:9001",
+        "database" : "127.0.0.1:5433",
         "access_key": "minio",
         "secret_key": "miniosecretkey",
         "secure": False,
     }
     nas_config = {
         "endpoint": "/tmp/unittest",
+        "database": "127.0.0.1:5433",
+        "access_key": "minio",
+        "secret_key": "miniosecretkey",
     }
     cache_folder_path = "/tmp/unittest_cache"
 
@@ -54,7 +79,12 @@ class DataTest(unittest.TestCase):
         if self.data_saver is not None:
             # delete bucket
             client = (
-                Minio(**self.storage_config)
+                Minio(
+                    endpoint=self.storage_config['endpoint'],
+                    access_key=self.storage_config['access_key'],
+                    secret_key=self.storage_config['secret_key'],
+                    secure=self.storage_config['secure']
+                )
                 if not self.check_nas(self.data_config.endpoint)
                 else NAS(self.data_config.endpoint)
             )
@@ -67,6 +97,9 @@ class DataTest(unittest.TestCase):
             for _file in self.data_saver.get_downloaded_dataset:
                 if os.path.exists(_file):
                     os.remove(_file)
+
+            # remove database
+            delete_database(bucket_name=self.data_config.bucket_name)
 
         if self.dataset is not None and not self.check_nas(self.dataset.config.endpoint):
             if os.path.exists(self.cache_folder_path):
@@ -92,7 +125,12 @@ class DataS3Test(unittest.TestCase):
     def tearDown(self):
         if self.data_saver is not None:
             # delete bucket
-            client = Minio(**self.storage_config)
+            client = Minio(
+                endpoint=self.storage_config['endpoint'],
+                access_key=self.storage_config['access_key'],
+                secret_key=self.storage_config['secret_key'],
+                secure=self.storage_config['secure']
+            )
             objects = client.list_objects(self.data_config.bucket_name, recursive=True)
             for obj in objects:
                 client.remove_object(self.data_config.bucket_name, obj.object_name)
@@ -102,3 +140,6 @@ class DataS3Test(unittest.TestCase):
             for _file in self.data_saver.get_downloaded_dataset:
                 if os.path.exists(_file):
                     os.remove(_file)
+
+            # remove database
+            delete_database(bucket_name=self.data_config.bucket_name)

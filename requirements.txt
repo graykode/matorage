@@ -5,3 +5,4 @@ pytest
 tqdm
 sqlalchemy
 environs
+psycopg2-binary

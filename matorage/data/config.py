@@ -107,6 +107,9 @@ class DataConfig(StorageConfig):
         # NAS example
         data_config = DataConfig(
             endpoint='~/shared',
+            access_key='minio',
+            secret_key='miniosecretkey',
+            database='127.0.0.1:5432',
             dataset_name='mnist',
             additional={
                 "framework" : "pytorch",
@@ -140,6 +143,12 @@ class DataConfig(StorageConfig):
         self.database = kwargs.pop("database", None)
 
         self.bucket_name = self._hashmap_transfer()
+
+        # requirement arguments
+        assert self.endpoint is not None
+        assert self.access_key is not None
+        assert self.secret_key is not None
+        assert self.database is not None
 
         self._check_all()
 
@@ -323,6 +332,7 @@ class DataConfig(StorageConfig):
         output["attributes"] = [_attribute.to_dict() for _attribute in self.attributes]
         output["compressor"] = self.metadata.compressor
         output["sagemaker"] = self.metadata.sagemaker
+        output["database"] = self.metadata.database
         return output
 
     @classmethod

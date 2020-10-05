@@ -371,7 +371,7 @@ class DataSaverTest(DataTest, unittest.TestCase):
     def test_datasaver_nas(self):
 
         self.data_config = DataConfig(
-            endpoint="/tmp/unittest",
+            **self.nas_config,
             dataset_name="test_datasaver_nas",
             attributes=[DataAttribute("x", "float64", (2), itemsize=32)],
         )

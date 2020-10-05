@@ -238,10 +238,10 @@ class DataSaver(object):
                 self._client.remove_object(self.config.bucket_name, obj.object_name)
 
             # Also refresh database which bucket_id is same.
-            self.session.query(Attributes).filter_by(bucket_id=self.config.bucket_name).delete()
-            self.session.query(Indexer).filter_by(bucket_id=self.config.bucket_name).delete()
-            self.session.query(Bucket).filter_by(id=self.config.bucket_name).delete()
-            self.session.commit()
+            self._session.query(Attributes).filter_by(bucket_id=self.config.bucket_name).delete()
+            self._session.query(Indexer).filter_by(bucket_id=self.config.bucket_name).delete()
+            self._session.query(Bucket).filter_by(id=self.config.bucket_name).delete()
+            self._session.commit()
 
     def _check_attr_name(self, name):
         """
@@ -507,15 +507,20 @@ class DataSaver(object):
 
         attributes = []
         for attr in self.config.attributes:
-            attributes.append(
-                Attributes(
-                    name=attr.name,
-                    type=str(attr.type.type),
-                    shape=str(attr.shape),
-                    itemsize=int(attr.itemsize),
-                    bucket_id=self.config.bucket_name
+
+            if not self._session.query(Attributes).filter_by(
+                    bucket_id=self.config.bucket_name,
+                    name=attr.name
+            ).scalar():
+                attributes.append(
+                    Attributes(
+                        name=attr.name,
+                        type=str(attr.type.type),
+                        shape=str(attr.shape),
+                        itemsize=int(attr.itemsize),
+                        bucket_id=self.config.bucket_name
+                    )
                 )
-            )
 
         files = [
             Files(name=str(file), bucket_id=self.config.bucket_name)
