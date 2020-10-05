@@ -20,10 +20,13 @@ import bisect
 import tempfile
 from minio import Minio
 from os.path import expanduser
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from matorage.nas import NAS
 from matorage.utils import logger, check_nas
 from matorage.downloader import Downloader
+from matorage.data.orm import *
 
 
 class MTRData(object):
@@ -64,7 +67,7 @@ class MTRData(object):
         self.clear = clear
         self.index = index
 
-        self._check_bucket()
+        self._check_bucket_and_database()
 
         # merge all metadatas and load in memory.
         self.merged_indexer, self.merged_filetype = self._merge_metadata()
@@ -98,14 +101,31 @@ class MTRData(object):
         else:
             self._object_file_mapper = {}
 
-    def _check_bucket(self):
+    def _check_bucket_and_database(self):
         _client = self._create_client()
         if not _client.bucket_exists(self.config.bucket_name):
             raise ValueError(
-                "dataset {} with {} is not exist".format(
+                "MinIO:dataset {} with {} is not exist".format(
                     self.config.dataset_name, str(self.config.additional)
                 )
             )
+
+        database = create_engine(
+            f'postgresql://{self.config.access_key}:{self.config.secret_key}@{self.config.database}/matorage'
+        )
+        Session = sessionmaker(bind=database)
+        session = Session()
+
+        bucket = session.query(Bucket).filter_by(id=self.config.bucket_name).scalar()
+        if not bucket:
+            raise ValueError(
+                "Database:dataset {} with {} is not exist".format(
+                    self.config.dataset_name, str(self.config.additional)
+                )
+            )
+
+        session.close()
+        database.dispose()
 
     def _create_client(self):
         return (
@@ -221,25 +241,46 @@ class MTRData(object):
         Returns:
             :obj:`dict` : last end indexes with filename
             {
-                3335: 'tmpajivq0tw0923909106de4222.h5',
-                6670: 'tmp1g5zxyl0576b788d259844d1.h5',
-                10005: 'tmpqnkklb9u27395376c94d4c14.h5'
+                "3335": {
+                    "length": 3335,
+                    "name": "tmpuoetuutie1ec9bdf4cb142e8.h5"
+                },
+                "6670": {
+                    "length": 3335,
+                    "name": "tmpzzv9w4r94aac98a99ee74d52.h5"
+                },
+                "10000": {
+                    "length": 3330,
+                    "name": "tmp3qvp1bbtbf74db88d9a0499c.h5"
+                }
             }
 
         """
-        client = self._create_client()
-        objects = client.list_objects(self.config.bucket_name, prefix="metadata/")
 
         total_index = []
         filetypes = []
-        for obj in objects:
-            metadata = client.get_object(
-                self.config.bucket_name, object_name=obj.object_name
-            )
-            metadata = json.loads(metadata.read().decode("utf-8"))
-            local_indexer = metadata["indexer"]
-            total_index.extend(list(local_indexer.values()))
-            filetypes.extend(metadata["filetype"])
+
+        database = create_engine(
+            f'postgresql://{self.config.access_key}:{self.config.secret_key}@{self.config.database}/matorage'
+        )
+        Session = sessionmaker(bind=database)
+        session = Session()
+
+        for file in session.query(Files).filter_by(
+                bucket_id=self.config.bucket_name
+        ):
+            filetypes.append(file.name)
+
+        for local_indexer in session.query(Indexer).filter_by(
+                bucket_id=self.config.bucket_name
+        ):
+            total_index.append({
+                "length" : int(local_indexer.length),
+                "name" : local_indexer.name,
+            })
+
+        session.close()
+        database.dispose()
 
         reindexer = {}
         for _index in total_index:

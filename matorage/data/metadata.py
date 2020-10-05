@@ -30,10 +30,18 @@ class DataMetadata(Serialize):
             we manages index to dict type as total data length as key and file names as value.
             Examples:
                 "indexer": {
-                    "15960": "tmpjopm9_qr118171adec9d410d.h5",
-                    "31920": "tmpnzdga4zfc952613ed2bf4fad.h5",
-                    "47880": "tmpy3fwohhx178eb7c1d17d4a78.h5",
-                    "60000": "tmpidco3y8u794f8adde1e5479a.h5"
+                    "3335": {
+                        "length": 3335,
+                        "name": "tmpuoetuutie1ec9bdf4cb142e8.h5"
+                    },
+                    "6670": {
+                        "length": 3335,
+                        "name": "tmpzzv9w4r94aac98a99ee74d52.h5"
+                    },
+                    "10000": {
+                        "length": 3330,
+                        "name": "tmp3qvp1bbtbf74db88d9a0499c.h5"
+                    }
                 }
     """
 
@@ -46,6 +54,7 @@ class DataMetadata(Serialize):
         self.compressor = kwargs.pop("compressor", {"complevel": 0, "complib": "zlib"})
 
         self.sagemaker = kwargs.pop("sagemaker", False)
+        self.database = kwargs.pop("database", None)
         self.indexer = {}
         self.filetype = []
 

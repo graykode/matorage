@@ -18,6 +18,7 @@ _KB = 1024
 _MB = 1024 * _KB
 """The size of a Megabyte in bytes"""
 
+import ast
 import copy
 import json
 import tables
@@ -25,13 +26,15 @@ import hashlib
 import tempfile
 from minio import Minio
 from functools import reduce
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from matorage.nas import NAS
 from matorage.utils import check_nas, logger
 from matorage.config import StorageConfig
 from matorage.data.metadata import DataMetadata
 from matorage.data.attribute import DataAttribute
-
+from matorage.data.orm import *
 
 class DataConfig(StorageConfig):
     """
@@ -53,6 +56,9 @@ class DataConfig(StorageConfig):
             dataset name.
         attributes (:obj:`list`, **require**):
             DataAttribute type of list for data attributes
+        database (:obj:`string`, **require**):
+            Database endpoint for sqlalchemy connection to save metadata.
+            For Examples: `postgresql://user:password@hostname/database_name`
         additional (:obj:`dict`, optional, defaults to ``{}``):
             Parameters for additional description of datasets. The key and value of the dictionay can be specified very freely.
         compressor (:obj:`dict`, optional, defaults to :code:`{"complevel" : 0, "complib" : "zlib"}`):
@@ -63,7 +69,6 @@ class DataConfig(StorageConfig):
             - complib (:obj:`string`, defaults to 'zlib') : compressor library. choose in zlib, lzo, bzip2, blosc
         max_object_size (:obj:`integer`, optional, defaults to `10MB`):
             One object file is divided into `max_object_size` and stored.
-
         sagemaker (:obj:`boolean`, optional, defaults to `False`):
             Bucket naming option for AWS sagemaker.
 
@@ -72,6 +77,7 @@ class DataConfig(StorageConfig):
         from matorage import DataConfig, DataAttribute
         data_config = DataConfig(
             endpoint='127.0.0.1:9000',
+            database='127.0.0.1:5432',
             access_key='minio',
             secret_key='miniosecretkey',
             dataset_name='mnist',
@@ -131,6 +137,7 @@ class DataConfig(StorageConfig):
         self.sagemaker = kwargs.pop("sagemaker", False)
         if self.sagemaker:
             self.type = "dataset-sagemaker"
+        self.database = kwargs.pop("database", None)
 
         self.bucket_name = self._hashmap_transfer()
 
@@ -143,7 +150,7 @@ class DataConfig(StorageConfig):
         Check all class variable is fine.
 
         """
-        self._check_bucket()
+        self._check_bucket_and_database()
 
         if self.attributes is None:
             raise ValueError("attributes is empty")
@@ -186,9 +193,9 @@ class DataConfig(StorageConfig):
                 "zlib, lzo, bzip2, blosc".format(self.compressor["lib"])
             )
 
-    def _check_bucket(self):
+    def _check_bucket_and_database(self):
         """
-        Check bucket name is exist. If not exist, create new bucket
+        Check bucket and data in database is exist. If not exist, create new bucket
         If bucket and metadata sub folder exist, get metadata(attributes, compressor) from there.
 
         """
@@ -234,32 +241,53 @@ class DataConfig(StorageConfig):
             if not check_nas(self.endpoint)
             else NAS(self.endpoint)
         )
+
+        _database = create_engine(
+            f'postgresql://{self.access_key}:{self.secret_key}@{self.database}/matorage'
+        )
+        try:
+            _connect = _database.connect()
+            _connect.close()
+        except:
+            raise AssertionError(f"Can't connect to {self.database}.")
+        Session = sessionmaker(bind=_database)
+        _session = Session()
+
         if _client.bucket_exists(self.bucket_name):
-            objects = _client.list_objects(self.bucket_name, prefix="metadata/")
-            _metadata = None
-            for obj in objects:
-                _metadata = _client.get_object(self.bucket_name, obj.object_name)
-                break
-            if not _metadata:
-                return
-
-            metadata_dict = json.loads(_metadata.read().decode("utf-8"))
-            if self.endpoint != metadata_dict["endpoint"]:
-                raise ValueError(
-                    "Already created endpoint({}) doesn't current endpoint str({})"
-                    " It may occurs permission denied error".format(
-                        metadata_dict["endpoint"], self.endpoint
+            bucket = _session.query(Bucket).filter_by(id=self.bucket_name).scalar()
+            if bucket:
+                if self.endpoint != bucket.endpoint:
+                    raise ValueError(
+                        "Already created endpoint({}) doesn't current endpoint str({})"
+                        " It may occurs permission denied error".format(
+                            bucket.endpoint, self.endpoint
+                        )
                     )
+                self.compressor = dict(
+                    json.loads(bucket.compressor.replace("'", "\""))
                 )
-
-            self.compressor = metadata_dict["compressor"]
-            self.attributes = [
-                DataAttribute(**item) for item in metadata_dict["attributes"]
-            ]
+                self.attributes = []
+                for attribute in _session.query(Attributes).filter_by(bucket_id=self.bucket_name):
+                    self.attributes.append(
+                        DataAttribute(
+                            name=attribute.name,
+                            type=attribute.type,
+                            shape=ast.literal_eval(attribute.shape),
+                            itemsize=int(attribute.itemsize)
+                        )
+                    )
+            else:
+                raise NotImplementedError(
+                    "There is a bucket in the minio, but there is no data associated with it in the database."
+                    "\n If you saved data to a version prior to 0.4.0, use the previous version."
+                )
         else:
             logger.info(
                 "{} {} is not exist!".format(self.dataset_name, str(self.additional))
             )
+
+        _session.close()
+        _database.dispose()
 
     def _convert_type_flatten(self):
         for attribute in self.flatten_attributes:

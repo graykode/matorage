@@ -21,6 +21,7 @@ import os
 import logging
 from packaging import version
 from urllib.parse import urlsplit
+from sqlalchemy.orm import sessionmaker
 
 # from https://github.com/huggingface/transformers/blob/master/examples/distillation/utils.py
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -93,3 +94,22 @@ def check_nas(endpoint):
     if u.netloc:
         return False
     raise ValueError("This endpoint is not suitable.")
+
+def transaction(session, bucket, attributes, indexers, files):
+
+    if bucket:
+        session.add(bucket)
+        session.flush()
+
+    for attribute in attributes:
+        session.add(attribute)
+    for index in indexers:
+        session.add(index)
+    for file in files:
+        session.add(file)
+
+    try:
+        session.commit()
+    except:
+        session.rollback()
+        logger.warn("session.rollback")

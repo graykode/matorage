@@ -21,10 +21,14 @@ import tables as tb
 import numpy as np
 from functools import reduce
 from minio import Minio
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from matorage.utils import transaction
 
 from matorage.nas import NAS
 from matorage.utils import is_tf_available, is_torch_available, check_nas
 from matorage.uploader import Uploader
+from matorage.data.orm import *
 
 _KB = 1024
 """The size of a Kilobyte in bytes"""
@@ -92,6 +96,7 @@ class DataSaver(object):
 
         data_config = DataConfig(
             endpoint='127.0.0.1:9000',
+            database='127.0.0.1:5432',
             access_key='minio',
             secret_key='miniosecretkey',
             dataset_name='array_test',
@@ -149,6 +154,12 @@ class DataSaver(object):
             if not check_nas(self.config.endpoint)
             else NAS(self.config.endpoint)
         )
+        self._database = create_engine(
+            f'postgresql://{self.config.access_key}:{self.config.secret_key}@{self.config.database}/matorage'
+        )
+        Session = sessionmaker(bind=self._database)
+        self._session = Session()
+
         self._check_and_create_bucket(refresh=refresh)
 
         self._uploader = Uploader(
@@ -225,6 +236,12 @@ class DataSaver(object):
             objects = self._client.list_objects(self.config.bucket_name, recursive=True)
             for obj in objects:
                 self._client.remove_object(self.config.bucket_name, obj.object_name)
+
+            # Also refresh database which bucket_id is same.
+            self.session.query(Attributes).filter_by(bucket_id=self.config.bucket_name).delete()
+            self.session.query(Indexer).filter_by(bucket_id=self.config.bucket_name).delete()
+            self.session.query(Bucket).filter_by(id=self.config.bucket_name).delete()
+            self.session.commit()
 
     def _check_attr_name(self, name):
         """
@@ -357,6 +374,11 @@ class DataSaver(object):
         self._file.close()
         self._disconnected = True
 
+        if self._session:
+            self._session.close()
+        if self._database:
+            self._database.dispose()
+
     def _get_array_size(self):
         """
         Get size of all array .
@@ -464,14 +486,54 @@ class DataSaver(object):
         self._file_closing()
         self._uploader.join_queue()
 
-        # metadata set
-        key = uuid.uuid4().hex[:16]
-        _metadata_file = tempfile.mktemp(f"{key}.json")
-        self.config.metadata.to_json_file(_metadata_file)
-        self._client.fput_object(
-            self.config.bucket_name, f"metadata/{key}.json", _metadata_file
+        bucket = Bucket(
+            id=self.config.bucket_name,
+            additional=str(self.config.additional),
+            dataset_name=self.config.dataset_name,
+            endpoint=self.config.endpoint,
+            compressor=str(self.config.compressor),
         )
-        os.remove(_metadata_file)
+
+        indexers = []
+        for k, v in self.config.metadata.indexer.items():
+            indexers.append(
+                Indexer(
+                    indexer_end=int(k),
+                    length=int(v["length"]),
+                    name=v["name"],
+                    bucket_id=self.config.bucket_name
+                )
+            )
+
+        attributes = []
+        for attr in self.config.attributes:
+            attributes.append(
+                Attributes(
+                    name=attr.name,
+                    type=str(attr.type.type),
+                    shape=str(attr.shape),
+                    itemsize=int(attr.itemsize),
+                    bucket_id=self.config.bucket_name
+                )
+            )
+
+        files = [
+            Files(name=str(file), bucket_id=self.config.bucket_name)
+            for file in self.config.metadata.filetype
+        ]
+
+        # Append more data after first saving is finished.
+        if self._session.query(Bucket).filter_by(id=self.config.bucket_name).scalar():
+            bucket = None
+
+        # commits
+        transaction(
+            session=self._session,
+            bucket=bucket,
+            attributes=attributes,
+            indexers=indexers,
+            files=files
+        )
 
     @property
     def get_disconnected(self):
