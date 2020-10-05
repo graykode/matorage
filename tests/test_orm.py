@@ -18,8 +18,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from matorage.data.orm import *
+from matorage.utils import transaction
 
-database = '127.0.0.1:5432'
+database = 'localhost:5432'
 
 class DataSaverTest(unittest.TestCase):
     session = None
@@ -41,6 +42,8 @@ class DataSaverTest(unittest.TestCase):
         if self.session:
             self.session.query(Attributes).filter_by(bucket_id='test_bucket').delete()
             self.session.query(Indexer).filter_by(bucket_id='test_bucket').delete()
+            self.session.query(Files).filter_by(id='test_bucket').delete()
+
             self.session.query(Bucket).filter_by(id='test_bucket').delete()
 
             self.session.commit()
@@ -61,46 +64,52 @@ class DataSaverTest(unittest.TestCase):
                 "complevel": 4,
                 "complib": "zlib"
             }),
-            filetype=str(['test1.h5', 'test2.h5']),
             sagemaker=True
         )
 
-        attribute1 = Attributes(
-            name='test_attributes',
-            type='float64',
-            shape=str((1, 2,)),
-            itemsize=32,
-            bucket_id='test_bucket'
-        )
+        attributes = [
+            Attributes(
+                name='test_attributes',
+                type='float64',
+                shape=str((1, 2,)),
+                itemsize=32,
+                bucket_id='test_bucket'
+            ),
+            Attributes(
+                name='test_attributes',
+                type='float64',
+                shape=str((1, 2,)),
+                itemsize=32,
+                bucket_id='test_bucket'
+            )
+        ]
 
-        attribute2 = Attributes(
-            name='test_attributes',
-            type='float64',
-            shape=str((1, 2,)),
-            itemsize=32,
-            bucket_id='test_bucket'
-        )
+        indexers = [
+            Indexer(
+                indexer_end=100,
+                length=100,
+                name='test1.h5',
+                bucket_id='test_bucket'
+            ),
+            Indexer(
+                indexer_end=200,
+                length=200,
+                name='test2.h5',
+                bucket_id='test_bucket'
+            )
+        ]
 
-        indexer1 = Indexer(
-            indexer_end=100,
-            length=100,
-            name='test1.h5',
-            bucket_id='test_bucket'
-        )
-
-        indexer2 = Indexer(
-            indexer_end=200,
-            length=200,
-            name='test2.h5',
-            bucket_id='test_bucket'
-        )
+        files = [
+            Files(name='test1.h5', bucket_id='test_bucket'),
+            Files(name='test2.h5', bucket_id='test_bucket')
+        ]
 
         Session = sessionmaker(bind=self.database)
         self.session = Session()
-        self.session.add(bucket)
-        self.session.add(attribute1)
-        self.session.add(attribute2)
-        self.session.add(indexer1)
-        self.session.add(indexer2)
-
-        self.session.commit()
+        transaction(
+            session=self.session,
+            bucket=bucket,
+            attributes=attributes,
+            indexers=indexers,
+            files=files
+        )
