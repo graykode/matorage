@@ -38,6 +38,7 @@ if __name__ == "__main__":
 
     data_config = DataConfig(
         endpoint="127.0.0.1:9000",
+        database="127.0.0.1:5432",
         access_key="minio",
         secret_key="miniosecretkey",
         dataset_name="multi_process_array_test2",

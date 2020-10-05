@@ -77,6 +77,7 @@ if __name__ == "__main__":
 
     storage_config = {
         "endpoint": "127.0.0.1:9000",
+        "database": "127.0.0.1:5432",
         "access_key": "minio",
         "secret_key": "miniosecretkey",
         "secure": False,

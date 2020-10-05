@@ -56,6 +56,7 @@ def data_save(args, tokenizer, evaluate=False):
 
     data_config = DataConfig(
         endpoint="127.0.0.1:9000",
+        database="127.0.0.1:5432",
         access_key="minio",
         secret_key="miniosecretkey",
         dataset_name="SQuAD1.1" if not args.version_2_with_negative else "SQuAD2.0",

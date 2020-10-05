@@ -180,6 +180,7 @@ class Manager(object):
                 'additional': {'version': '1.0.1'},
                 'compressor': {'complevel': 0, 'complib': 'zlib'},
                 'endpoint': '127.0.0.1:9000',
+                'database': '127.0.0.1:5432',
                 'model':
                 {
                     'ad44168f1343bc77b4d9ad6f1fef50b6': {'step': 100},
