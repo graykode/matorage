@@ -15,11 +15,12 @@ services:
   - docker
 
 before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  - sudo chmod +x /usr/local/bin/docker-compose
   - mkdir /tmp/unittest
   - sudo chown -R $USER /tmp/unittest
-  - docker pull minio/minio
-  - docker run -it -d -p 9001:9000 --restart always -e "MINIO_ACCESS_KEY=minio" -e "MINIO_SECRET_KEY=miniosecretkey" -v /tmp/unittest:/container/vol minio/minio gateway nas /container/vol
-
+  - cd tests && docker-compose up -d && cd ..
 # command to install dependencies
 install:
   - pip install -U pip
