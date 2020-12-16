@@ -42,7 +42,7 @@ script:
       python -c "import tensorflow_io as tfio; print('Tensorflow IO Version:', tfio.__version__)";
     fi
   - python setup.py install;
-  - pytest --cov=./;
+  - pytest --cov=tests.test_suite;
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
