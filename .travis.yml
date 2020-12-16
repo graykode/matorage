@@ -1,6 +1,4 @@
 language: python
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
 python:
   - "3.6"
 env:
@@ -45,3 +43,6 @@ script:
     fi
   - python setup.py install;
   - pytest --cov=./;
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
