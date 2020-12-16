@@ -1,4 +1,6 @@
 language: python
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 python:
   - "3.6"
 env:
@@ -22,6 +24,7 @@ before_install:
 # command to install dependencies
 install:
   - pip install -U pip
+  - pip install pytest-cov
   - pip install -r requirements.txt
   - python setup.py install
   - if [[ $TORCH ]]; then
@@ -41,4 +44,4 @@ script:
       python -c "import tensorflow_io as tfio; print('Tensorflow IO Version:', tfio.__version__)";
     fi
   - python setup.py install;
-  - python -m tests.test_suite;
+  - pytest --cov=./;
